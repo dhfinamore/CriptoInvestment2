@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Confirmar Email</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
+        <link rel="stylesheet" href="~/css/animate.css" />
+        <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="~/css/animate.css" />
+        <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    </environment>
+</head>
+<body class="gray-bg">
+<div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="jumbotron text-center">
+        <h1>GHR INVESTMENTS & TRADING</h1>
+        <h3>¡Verifica tu correo electrónico para completar tu registro!</h3>
+        <p> Para activar tu cuenta y comenzar a disfrutar de nuestros servicios, por favor sigue estos pasos: <br/>
+            Revisa tu bandeja de entrada: Hemos enviado un correo de verificación a <strong>@ViewBag.Email</strong>.</p>
+
+        <p> Puedes solicitar un nuevo enlace de verificación haciendo clic en el siguiente botón:</p>
+        <p>
+            <a href="" role="button" class="btn btn-primary btn-lg">Reenviar</a>
+        </p>
+    </div>
+</div>
+
+
+</body>
+</html>
