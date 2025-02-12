@@ -25,6 +25,11 @@ public class CustomerRepository : ICustomerRepository
         return await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
     }
 
+    public async Task<Customer?> GetCustomerByIdAsync(int idCustomer)
+    {
+        return await _context.Customers.FirstOrDefaultAsync(c => c.IdCustomer == idCustomer);
+    }
+
     public async Task<bool> HasSecurityQuestionsAsync(int idCustomer)
     {
         return await _context.CustomerQuestions.AnyAsync(sq => sq.IdCustomer == idCustomer);

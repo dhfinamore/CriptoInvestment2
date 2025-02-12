@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CryptoInvestment.Application.Authentication.Commands.RegisterCommand;
+using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Queries.LoginQuery;
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.ViewModels.Authentication;
@@ -111,6 +112,12 @@ public class AuthenticationController : Controller
     {
         if (!ModelState.IsValid)
             return View(registerViewModel);
+
+        if (!registerViewModel.TermsAndConditions)
+        {
+            ModelState.AddModelError("TermsAndConditions", "Debe aceptar los términos y condiciones.");
+            return View(registerViewModel);
+        }
         
         var command = new RegisterCommand(
             registerViewModel.Email, 
@@ -156,30 +163,81 @@ public class AuthenticationController : Controller
             }
         );
     }
-    #endregion
     
     public IActionResult ConfirmEmail(string email)
     {
         ViewBag.Email = email;
         return View();
     }
+    #endregion
     
-    public IActionResult VerifyEmail(string token)
+    # region SetPasswordRegion
+    [HttpPost]
+    public IActionResult SetPassword(SetPasswordViewModel setPasswordViewModel)
     {
-        string email = _encryptionService.DecryptEmail(token);
-        return RedirectToAction("Dashboard", "Crypto");
+        if (!ModelState.IsValid)
+            return View(setPasswordViewModel);
+        
+        var command = new SetPasswordCommand(
+            setPasswordViewModel.Email, 
+            setPasswordViewModel.Password);
+        
+        var setPasswordResult = _mediator.Send(command).Result;
+        
+        return setPasswordResult.Match<IActionResult>(
+            customer => RedirectToAction(
+                "SecurityQuestions", 
+                "Authentication", 
+                new
+                {
+                    token = _encryptionService.EncryptId(customer.IdCustomer.ToString())
+                }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View(setPasswordViewModel);
+            }
+        );
     }
     
-    public IActionResult SecurityQuestions()
+    public IActionResult SetPassword(string token, string date)
     {
+        var sentDate = _encryptionService.DecryptDate(date);
+        
+        if (sentDate == null || sentDate.Value.AddMinutes(30) < DateTime.UtcNow)
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+
+        string decryptedEmail = _encryptionService.DecryptEmail(token);
+        
+        var model = new SetPasswordViewModel
+        {
+            Email = decryptedEmail
+        };
+
+        return View(model);
+    }
+    # endregion
+    
+    
+    public IActionResult SecurityQuestions(string token)
+    {
+        Console.WriteLine(token);
         return View();
     }
 
     private async Task<string> CreateVerificationEmail(string email)
     {
         string token = _encryptionService.EncryptEmail(email);
-        string verificationLink = Url.Action("VerifyEmail", "Authentication", new { token }, Request.Scheme)!;
-                
+        string encryptedDate = _encryptionService.EncryptDate(DateTime.UtcNow);
+        
+        string verificationLink = Url.Action(
+            "SetPassword", 
+            "Authentication", 
+            new { token, date = encryptedDate }, 
+            Request.Scheme)!;
+
         string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "VerifyEmailTemplate.html");
 
         string bodyTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
@@ -187,7 +245,7 @@ public class AuthenticationController : Controller
         string body = bodyTemplate
             .Replace("{Name}", email)
             .Replace("{VerificationLink}", verificationLink);
-        
+
         return body;
     }
 }

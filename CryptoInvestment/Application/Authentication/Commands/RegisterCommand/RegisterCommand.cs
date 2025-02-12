@@ -8,7 +8,7 @@ public record RegisterCommand(
     string Email,
     string Name,
     string FirstFamilyName,
-    string SecondFamilyName,
+    string? SecondFamilyName,
     string Phone,
     bool TermsAndConditions,
     bool AcceptPromotions) : IRequest<ErrorOr<Customer>>;
