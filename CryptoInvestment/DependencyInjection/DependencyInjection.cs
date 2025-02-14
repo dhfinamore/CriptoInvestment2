@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddSessionAuthentication(configuration);
         services.AddPersistance(configuration);
         services.AddSingleton<IEncryptionService, EncryptionService>();
+        services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
         services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
         services.AddScoped<IEmailService, EmailService>();
         

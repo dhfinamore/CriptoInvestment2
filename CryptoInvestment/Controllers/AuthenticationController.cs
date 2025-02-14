@@ -8,12 +8,14 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
+using CryptoInvestment.Services.ConfigurationModels;
 using CryptoInvestment.ViewModels.Authentication;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace CryptoInvestment.Controllers;
 
@@ -23,17 +25,20 @@ public class AuthenticationController : Controller
     private readonly ICustomerAuthenticationService _customerAuthenticationService;
     private readonly IEmailService _emailService;
     private readonly IEncryptionService _encryptionService;
+    private readonly AppSettings _appSettings;
 
     public AuthenticationController(
         ISender mediator, 
         ICustomerAuthenticationService customerAuthenticationService, 
         IEmailService emailService, 
-        IEncryptionService encryptionService)
+        IEncryptionService encryptionService,
+        IOptions<AppSettings> appSettings)
     {
         _mediator = mediator;
         _customerAuthenticationService = customerAuthenticationService;
         _emailService = emailService;
         _encryptionService = encryptionService;
+        _appSettings = appSettings.Value;
     }
 
     # region LoginRegion
@@ -74,7 +79,7 @@ public class AuthenticationController : Controller
                 {
                     var body = await CreateVerificationEmail(loginViewModel.Email);
                     var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync(loginViewModel.Email, "Verifica tu correo", body);
-                    return await Task.FromResult<IActionResult>(RedirectToAction("ConfirmEmail", "Authentication", new { email = loginViewModel.Email }));
+                    return await Task.FromResult<IActionResult>(RedirectToAction("ConfirmEmail", "Authentication", new { email = _encryptionService.EncryptEmail(loginViewModel.Email) }));
                 }
                 else if (errors.Any(e => e.Code == "Authentication.SecurityQuestionsNotConfigured"))
                 {
@@ -174,7 +179,10 @@ public class AuthenticationController : Controller
                 var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync(customer.Email, "Verifica tu correo", body);
 
                 return sendVerificationEmailResult.Match<IActionResult>(
-                    _ => RedirectToAction("ConfirmEmail", "Authentication", new { email = customer.Email }),
+                    _ => RedirectToAction(
+                        "ConfirmEmail", 
+                        "Authentication", 
+                        new { email = _encryptionService.EncryptEmail(customer.Email) }),
                     errors =>
                     {
                         ModelState.AddModelError("", errors.First().Description);
@@ -204,7 +212,9 @@ public class AuthenticationController : Controller
     
     public IActionResult ConfirmEmail(string email)
     {
-        ViewBag.Email = email;
+        ViewBag.Email = _encryptionService.DecryptEmail(email);
+        ViewBag.MailSoporte = _appSettings.MailSoporte;
+        ViewBag.TelSoporte = _appSettings.TelSoporte;
         return View();
     }
     #endregion
@@ -295,7 +305,23 @@ public class AuthenticationController : Controller
         var setSecurityQuestionResult = await _mediator.Send(command);
         
         return setSecurityQuestionResult.Match<IActionResult>(
-            customer => RedirectToAction("Login", "Authentication"),
+            customer =>
+            {
+                HttpContext.Session.SetString("UserId", customer.IdCustomer.ToString());
+                var identity = _customerAuthenticationService.CreateClaimsIdentityAsync(customer).Result;
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
+                };
+
+                HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity),
+                    authProperties).Wait();
+
+                return RedirectToAction("Dashboard", "Crypto");
+            },
             errors =>
             {
                 ModelState.AddModelError("", errors.First().Description);

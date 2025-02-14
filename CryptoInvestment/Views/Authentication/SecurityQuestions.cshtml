@@ -7,18 +7,18 @@
                 <div class="ibox-content">
                     <form id="securityQuestionsForm" asp-action="SecurityQuestions" asp-controller="Authentication" method="post" class="wizard-big">
                         <input type="hidden" asp-for="CustomerId" />
+
                         <h1>Primera Pregunta</h1>
                         <fieldset>
                             <h2 class="m-b-md">Primera Pregunta de Seguridad</h2>
                             <div class="form-group">
-                                <select asp-for="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                <select asp-for="FirstQuestionId" id="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
                                     <option value="">Seleccione una pregunta</option>
-                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
-                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
-                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
-                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    @foreach (var item in Model.SecurityQuestions)
                                     {
-                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.FirstQuestionId ? "selected" : "")>
+                                        @item.Question
+                                    </option>
                                     }
                                 </select>
                                 <span class="text-danger" asp-validation-for="FirstQuestionId"></span>
@@ -33,14 +33,13 @@
                         <fieldset>
                             <h2 class="m-b-md">Segunda Pregunta de Seguridad</h2>
                             <div class="form-group">
-                                <select asp-for="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                <select asp-for="SecondQuestionId" id="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
                                     <option value="">Seleccione una pregunta</option>
-                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
-                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
-                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
-                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    @foreach (var item in Model.SecurityQuestions)
                                     {
-                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    <option value="@item.IdSecurityQuestion" selected="@(item.IdSecurityQuestion == Model.FirstQuestionId ? "selected" : "")">
+                                        @item.Question
+                                    </option>
                                     }
                                 </select>
                                 <span class="text-danger" asp-validation-for="SecondQuestionId"></span>
@@ -55,14 +54,13 @@
                         <fieldset>
                             <h2 class="m-b-md">Tercera Pregunta de Seguridad</h2>
                             <div class="form-group">
-                                <select asp-for="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                <select asp-for="ThirdQuestionId" id="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
                                     <option value="">Seleccione una pregunta</option>
-                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
-                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
-                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
-                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    @foreach (var item in Model.SecurityQuestions)
                                     {
-                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.ThirdQuestionId ? "selected" : "")>
+                                        @item.Question
+                                    </option>
                                     }
                                 </select>
                                 <span class="text-danger" asp-validation-for="ThirdQuestionId"></span>
@@ -101,6 +99,7 @@
     </environment>
     <script type="text/javascript">
         $(document).ready(function () {
+            // Inicializar el wizard
             $("#securityQuestionsForm").steps({
                 headerTag: "h1",
                 bodyTag: "fieldset",
@@ -135,6 +134,38 @@
                     error.insertBefore(element);
                 }
             });
+
+            // Función para actualizar dinámicamente los selects
+            function updateSelectOptions() {
+                // Obtenemos los valores seleccionados en los tres selects
+                var firstVal = $('#FirstQuestionId').val();
+                var secondVal = $('#SecondQuestionId').val();
+
+                // Para el segundo select: Ocultar opción que coincide con el primer select
+                $('#SecondQuestionId option').each(function () {
+                    var optionVal = $(this).val();
+                    if (optionVal !== "" && optionVal === firstVal) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+
+                // Para el tercer select: Ocultar opciones que coinciden con el primer o segundo select
+                $('#ThirdQuestionId option').each(function () {
+                    var optionVal = $(this).val();
+                    if (optionVal !== "" && (optionVal === firstVal || optionVal === secondVal)) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            }
+
+            // Actualizar selects cuando cambie alguno de ellos
+            $('#FirstQuestionId, #SecondQuestionId').on('change', updateSelectOptions);
+            // Llamada inicial
+            updateSelectOptions();
         });
     </script>
 }

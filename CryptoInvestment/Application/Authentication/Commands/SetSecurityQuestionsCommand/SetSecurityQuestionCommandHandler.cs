@@ -5,7 +5,7 @@ using MediatR;
 
 namespace CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
 
-public class SetSecurityQuestionCommandHandler : IRequestHandler<SetSecurityQuestionCommand, ErrorOr<Success>>
+public class SetSecurityQuestionCommandHandler : IRequestHandler<SetSecurityQuestionCommand, ErrorOr<Customer>>
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -16,7 +16,7 @@ public class SetSecurityQuestionCommandHandler : IRequestHandler<SetSecurityQues
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ErrorOr<Success>> Handle(SetSecurityQuestionCommand command, CancellationToken cancellationToken)
+    public async Task<ErrorOr<Customer>> Handle(SetSecurityQuestionCommand command, CancellationToken cancellationToken)
     {
         var customer = await _customerRepository.GetCustomerByIdAsync(command.CustomerId);
 
@@ -35,13 +35,12 @@ public class SetSecurityQuestionCommandHandler : IRequestHandler<SetSecurityQues
                 Order = i + 1
             };
             
-            Console.WriteLine(customerQuestion.IdCustomer + " " + customerQuestion.IdQuestion + " " + customerQuestion.Response + " " + customerQuestion.Order);
             customerQuestions.Add(customerQuestion);
         }
 
         await _customerRepository.AddSecurityQuestions(customerQuestions);
         await _unitOfWork.CommitChangesAsync();
 
-        return Result.Success;
+        return customer;
     }
 }

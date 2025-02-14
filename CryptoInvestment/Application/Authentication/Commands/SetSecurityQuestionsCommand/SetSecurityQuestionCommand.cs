@@ -1,3 +1,4 @@
+using CryptoInvestment.Domain.Customers;
 using ErrorOr;
 using MediatR;
 
@@ -5,4 +6,4 @@ namespace CryptoInvestment.Application.Authentication.Commands.SetSecurityQuesti
 
 public record SetSecurityQuestionCommand(
     int CustomerId,
-    List<(int, string)> CustomerSecurityQuestions) : IRequest<ErrorOr<Success>>;
+    List<(int, string)> CustomerSecurityQuestions) : IRequest<ErrorOr<Customer>>;
