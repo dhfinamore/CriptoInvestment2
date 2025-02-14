@@ -17,5 +17,5 @@ public class LoginQueryErrors
     public static Error AccountLocked =>
         Error.Validation(
             code: "Authentication.AccountLocked",
-            description: "Cuenta bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 2 minutos.");
+            description: "Cuenta bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 15 minutos.");
 }

@@ -110,7 +110,7 @@ public class AuthenticationController : Controller
                 }
                 else if (errors.Any(e => e.Code == "Authentication.AccountLocked"))
                 {
-                    ModelState.AddModelError("Password", "Su cuenta ha sido bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 2 minutos.");
+                    ModelState.AddModelError("Password", "Su cuenta ha sido bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 15 minutos.");
                     return await Task.FromResult<IActionResult>(View(loginViewModel));
                 }
                 else
