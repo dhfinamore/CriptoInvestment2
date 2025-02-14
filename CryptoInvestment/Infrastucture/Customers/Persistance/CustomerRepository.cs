@@ -1,5 +1,6 @@
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.Infrastucture.Common;
 
 using Microsoft.EntityFrameworkCore;
@@ -49,5 +50,10 @@ public class CustomerRepository : ICustomerRepository
     public Task<bool> ExistPhoneAsync(string phone)
     {
         return _context.Customers.AnyAsync(c => c.Phone == phone);
+    }
+
+    public async Task AddSecurityQuestions(List<CustomerQuestion> securityQuestions)
+    {
+        await _context.CustomerQuestions.AddRangeAsync(securityQuestions);
     }
 }

@@ -1,8 +1,13 @@
 using System.Security.Claims;
 using CryptoInvestment.Application.Authentication.Commands.RegisterCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
+using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
 using CryptoInvestment.Application.Authentication.Queries.LoginQuery;
 using CryptoInvestment.Application.Common.Interface;
+using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
+using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.Authentication;
 using ErrorOr;
 using MediatR;
@@ -73,8 +78,20 @@ public class AuthenticationController : Controller
                 }
                 else if (errors.Any(e => e.Code == "Authentication.SecurityQuestionsNotConfigured"))
                 {
-                    // TODO: Implementar lógica para encriptar el id del cliente y redirigir a la vista de preguntas de seguridad
-                    return await Task.FromResult<IActionResult>(RedirectToAction("SecurityQuestions", "Authentication"));
+                    var customerQuery = new GetCustomerByEmailQuery(loginViewModel.Email);
+                    var getCustomerResult = await _mediator.Send(customerQuery);
+                    var customer = getCustomerResult.Match<Customer>(
+                        customer => customer,
+                        _ => null!
+                    );
+                    
+                    return await Task.FromResult<IActionResult>(RedirectToAction(
+                        "SecurityQuestions", 
+                        "Authentication", 
+                        new
+                        {
+                            token = _encryptionService.EncryptId(customer.IdCustomer.ToString())
+                        }));
                 }
                 else if (errors.Any(e => e.Type == ErrorType.NotFound))
                 {
@@ -102,10 +119,30 @@ public class AuthenticationController : Controller
     # endregion
 
     #region RegisterRegion
-    public IActionResult Register()
+    public IActionResult Register(string? token)
     {
-        return View();
+        var model = new RegisterViewModel();
+        
+        if (!string.IsNullOrEmpty(token))
+        {
+            try
+            {
+                string decryptedValue = _encryptionService.DecryptId(token);
+                
+                if (int.TryParse(decryptedValue, out int referralId))
+                {
+                    model.ParentId = referralId;
+                }
+            }
+            catch (Exception ex)
+            {
+                model.ParentId = null;
+            }
+        }
+        
+        return View(model);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
@@ -120,6 +157,7 @@ public class AuthenticationController : Controller
         }
         
         var command = new RegisterCommand(
+            registerViewModel.ParentId,
             registerViewModel.Email, 
             registerViewModel.Name, 
             registerViewModel.FirstFamilyName, 
@@ -172,6 +210,25 @@ public class AuthenticationController : Controller
     #endregion
     
     # region SetPasswordRegion
+    public IActionResult SetPassword(string token, string date)
+    {
+        var sentDate = _encryptionService.DecryptDate(date);
+        
+        if (sentDate == null || sentDate.Value.AddMinutes(30) < DateTime.UtcNow)
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+
+        string decryptedEmail = _encryptionService.DecryptEmail(token);
+        
+        var model = new SetPasswordViewModel
+        {
+            Email = decryptedEmail
+        };
+
+        return View(model);
+    }
+    
     [HttpPost]
     public IActionResult SetPassword(SetPasswordViewModel setPasswordViewModel)
     {
@@ -199,34 +256,80 @@ public class AuthenticationController : Controller
             }
         );
     }
-    
-    public IActionResult SetPassword(string token, string date)
-    {
-        var sentDate = _encryptionService.DecryptDate(date);
-        
-        if (sentDate == null || sentDate.Value.AddMinutes(30) < DateTime.UtcNow)
-        {
-            return RedirectToAction("Login", "Authentication");
-        }
-
-        string decryptedEmail = _encryptionService.DecryptEmail(token);
-        
-        var model = new SetPasswordViewModel
-        {
-            Email = decryptedEmail
-        };
-
-        return View(model);
-    }
     # endregion
     
-    
-    public IActionResult SecurityQuestions(string token)
+    # region SecurityQuestionsRegion
+    [HttpPost]
+    public async Task<IActionResult> SecurityQuestions(SecurityQuestionsViewModel securityQuestionsViewModel)
     {
-        Console.WriteLine(token);
-        return View();
-    }
+        if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+            
+            var model = new SecurityQuestionsViewModel()
+            {
+                CustomerId = securityQuestionsViewModel.CustomerId,
+                SecurityQuestions = questions
+            };
+            
+            return (View(model));
+        }
 
+        List<(int, string)> securityQuestions =
+        [
+            (securityQuestionsViewModel.FirstQuestionId, 
+                BCrypt.Net.BCrypt.HashPassword(securityQuestionsViewModel.FirstQuestionAnswer)),
+            (securityQuestionsViewModel.SecondQuestionId, 
+                BCrypt.Net.BCrypt.HashPassword(securityQuestionsViewModel.SecondQuestionAnswer)),
+            (securityQuestionsViewModel.ThirdQuestionId, 
+                BCrypt.Net.BCrypt.HashPassword(securityQuestionsViewModel.ThirdQuestionAnswer))
+        ];
+        
+        var command = new SetSecurityQuestionCommand(securityQuestionsViewModel.CustomerId, securityQuestions);
+        var setSecurityQuestionResult = await _mediator.Send(command);
+        
+        return setSecurityQuestionResult.Match<IActionResult>(
+            customer => RedirectToAction("Login", "Authentication"),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View(securityQuestionsViewModel);
+            }
+        );
+    }
+    
+    public async Task<IActionResult> SecurityQuestions(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+            return RedirectToAction("Login", "Authentication");
+                
+        string decryptedValue = _encryptionService.DecryptId(token);
+        
+        var query = new ListSecurityQuestionsQuery();
+        var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+        var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+            questions => questions,
+            _ => null!
+        );
+        
+        var model = new SecurityQuestionsViewModel()
+        {
+            CustomerId = int.Parse(decryptedValue),
+            SecurityQuestions = questions
+        };
+        
+        return View(model);
+    }
+    #endregion
+
+    #region HelpersRegion
     private async Task<string> CreateVerificationEmail(string email)
     {
         string token = _encryptionService.EncryptEmail(email);
@@ -248,4 +351,32 @@ public class AuthenticationController : Controller
 
         return body;
     }
+    
+    /* TODO Implementar lógica para generar el link de referido
+    public async Task<IActionResult> GenerateReferralLink(string email)
+    {
+        var query = new GetCustomerByEmailQuery(email);
+        var getCustomerResult = await _mediator.Send(query);
+
+        var customer = getCustomerResult.Match<Customer>(
+            customer => customer,
+            _ => null!
+        );
+
+        string referralToken = _encryptionService.EncryptId(customer.IdCustomer.ToString());
+        string referralUrl = Url.Action("Register", "Authentication", new { token = referralToken }, Request.Scheme)!;
+
+        var command = new GenerateReferralLinkCommand(customer.IdCustomer, referralUrl);
+        var generateReferralLinkResult = await _mediator.Send(command);
+
+        return generateReferralLinkResult.Match<IActionResult>(
+            _ => RedirectToAction("ConfirmEmail", "Authentication", new { email }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return RedirectToAction("Login", "Authentication");
+            }
+        );
+    }*/
+    #endregion
 }

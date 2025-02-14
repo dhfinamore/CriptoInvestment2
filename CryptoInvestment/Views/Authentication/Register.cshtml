@@ -38,6 +38,7 @@
         </div>
         <h3 class="text-center">Registrarse en GHR</h3>
         <form class="m-t" asp-action="Register" asp-controller="Authentication" method="post">
+            <input type="hidden" asp-for="ParentId" />
             <div class="form-group">
                 <input asp-for="Email" class="form-control" placeholder="Correo electrónico" required />
                 <span class="text-danger">@Html.ValidationMessageFor(model => model.Email)</span>

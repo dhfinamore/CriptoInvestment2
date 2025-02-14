@@ -26,6 +26,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<C
 
         var customer = new Customer()
         {
+            IdParent = command.IdParent,
             Email = command.Email,
             Nombre = command.Name,
             ApellidoPaterno = command.FirstFamilyName,
@@ -36,6 +37,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<C
 
         await _customerRepository.CreateCustomerAsync(customer);
         await _unitOfWork.CommitChangesAsync();
+
 
         return customer;
     }

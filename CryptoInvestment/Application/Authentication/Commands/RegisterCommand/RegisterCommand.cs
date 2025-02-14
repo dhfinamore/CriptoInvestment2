@@ -5,6 +5,7 @@ using MediatR;
 namespace CryptoInvestment.Application.Authentication.Commands.RegisterCommand;
 
 public record RegisterCommand(
+    int? IdParent,
     string Email,
     string Name,
     string FirstFamilyName,

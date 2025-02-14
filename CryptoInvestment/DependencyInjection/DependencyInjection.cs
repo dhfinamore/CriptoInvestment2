@@ -2,6 +2,7 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Infrastucture.Authentication;
 using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.Infrastucture.Customers.Persistance;
+using CryptoInvestment.Infrastucture.SecurityQuestions.Persistance;
 using CryptoInvestment.Services;
 using CryptoInvestment.Services.ConfigurationModels;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -34,7 +35,7 @@ public static class ServiceCollectionExtensions
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
-                options.LoginPath = "/Account/Login";
+                options.LoginPath = "/Authentication/Login";
                 options.AccessDeniedPath = "/Account/AccessDenied";
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
                 options.SlidingExpiration = true;
@@ -61,6 +62,7 @@ public static class ServiceCollectionExtensions
         );
 
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ISecurityQuestionRepository, SecurityQuestionRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<CryptoInvestmentDbContext>());
         
         return services;

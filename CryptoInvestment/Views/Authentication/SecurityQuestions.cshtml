@@ -1,64 +1,84 @@
+@model CryptoInvestment.ViewModels.Authentication.SecurityQuestionsViewModel
+
 <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox">
                 <div class="ibox-content">
-                    <form id="form" action="#" class="wizard-big">
+                    <form id="securityQuestionsForm" asp-action="SecurityQuestions" asp-controller="Authentication" method="post" class="wizard-big">
+                        <input type="hidden" asp-for="CustomerId" />
                         <h1>Primera Pregunta</h1>
-                        <fieldset class="col-lg-12">
+                        <fieldset>
                             <h2 class="m-b-md">Primera Pregunta de Seguridad</h2>
-                            <div class="col-lg-12 m-b-md">
-                                <select class="form-control m-b-md" name="account" style="border-radius: 6px; height: 40px">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                    <option>option 6</option>
+                            <div class="form-group">
+                                <select asp-for="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                    <option value="">Seleccione una pregunta</option>
+                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
+                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
+                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
+                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    {
+                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    }
                                 </select>
+                                <span class="text-danger" asp-validation-for="FirstQuestionId"></span>
                             </div>
-
-                            <div class="form-group" style="padding: 0 15px 0 15px">
-                                <input type="text" class="form-control" placeholder="Respuesta de la pregunta 1" required="">
+                            <div class="form-group">
+                                <input asp-for="FirstQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 1" required />
+                                <span class="text-danger" asp-validation-for="FirstQuestionAnswer"></span>
                             </div>
                         </fieldset>
+
                         <h1>Segunda Pregunta</h1>
                         <fieldset>
-                            <h2>Segunda Pregunta de Seguridad</h2>
-                            <div class="col-lg-12 m-b-md">
-                                <select class="form-control m-b-md" name="account" style="border-radius: 6px; height: 40px">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                    <option>option 6</option>
+                            <h2 class="m-b-md">Segunda Pregunta de Seguridad</h2>
+                            <div class="form-group">
+                                <select asp-for="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                    <option value="">Seleccione una pregunta</option>
+                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
+                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
+                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
+                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    {
+                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    }
                                 </select>
+                                <span class="text-danger" asp-validation-for="SecondQuestionId"></span>
                             </div>
-
-                            <div class="form-group" style="padding: 0 15px 0 15px">
-                                <input type="text" class="form-control" placeholder="Respuesta de la pregunta 2" required="">
+                            <div class="form-group">
+                                <input asp-for="SecondQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 2" required />
+                                <span class="text-danger" asp-validation-for="SecondQuestionAnswer"></span>
                             </div>
                         </fieldset>
+
                         <h1>Tercera Pregunta</h1>
                         <fieldset>
-                            <h2>Tercera Pregunta de Seguridad</h2>
-                            <div class="col-lg-12 m-b-md">
-                                <select class="form-control m-b-md" name="account" style="border-radius: 6px; height: 40px">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                    <option>option 6</option>
+                            <h2 class="m-b-md">Tercera Pregunta de Seguridad</h2>
+                            <div class="form-group">
+                                <select asp-for="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                    <option value="">Seleccione una pregunta</option>
+                                    @foreach (var item in Model.SecurityQuestions.Where(q =>
+                                                  q.IdSecurityQuestion != Model.FirstQuestionId &&
+                                                  q.IdSecurityQuestion != Model.SecondQuestionId &&
+                                                  q.IdSecurityQuestion != Model.ThirdQuestionId))
+                                    {
+                                        <option value="@item.IdSecurityQuestion">@item.Question</option>
+                                    }
                                 </select>
+                                <span class="text-danger" asp-validation-for="ThirdQuestionId"></span>
                             </div>
-
-                            <div class="form-group" style="padding: 0 15px 0 15px">
-                                <input type="text" class="form-control" placeholder="Respuesta de la pregunta 3" required="">
+                            <div class="form-group">
+                                <input asp-for="ThirdQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 3" required />
+                                <span class="text-danger" asp-validation-for="ThirdQuestionAnswer"></span>
                             </div>
                         </fieldset>
                     </form>
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -66,74 +86,55 @@
 </div>
 
 @section Styles {
-<environment names="Development,Staging,Production">
-    <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
-    <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
-</environment>
+    <environment names="Development,Staging,Production">
+        <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
+        <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
+    </environment>
 }
 
 @section Scripts {
     <environment names="Development,Staging,Production">
-        <script src="~/lib/iCheck/icheck.min.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/lib/steps/jquery.steps.min.js"></script>
-        <script src="~/lib/validate/jquery.validate.min.js"></script>
     </environment>
-
-
     <script type="text/javascript">
-    $(document).ready(function () {
-
-        $("#wizard").steps();
-        $("#form").steps({
-            bodyTag: "fieldset",
-            onStepChanging: function (event, currentIndex, newIndex) {
-                // Always allow going backward even if the current step contains invalid fields!
-                if (currentIndex > newIndex) {
-                    return true;
+        $(document).ready(function () {
+            $("#securityQuestionsForm").steps({
+                headerTag: "h1",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                autoFocus: true,
+                labels: {
+                    cancel: "Cancelar",
+                    current: "Actual",
+                    finish: "Finalizar",
+                    next: "Siguiente",
+                    previous: "Anterior",
+                    loading: "Cargando..."
+                },
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    if (currentIndex > newIndex) {
+                        return true;
+                    }
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    $(this).submit();
                 }
-
-                var form = $(this);
-
-                // Clean up if user went backward before
-                if (currentIndex < newIndex) {
-                    // To remove error styles
-                    $(".body:eq(" + newIndex + ") label.error", form).remove();
-                    $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+            }).validate({
+                errorPlacement: function (error, element) {
+                    error.insertBefore(element);
                 }
-
-                // Disable validation on fields that are disabled or hidden.
-                form.validate().settings.ignore = ":disabled,:hidden";
-
-                // Start validation; Prevent going forward if false
-                return form.valid();
-            },
-            onFinishing: function (event, currentIndex) {
-                var form = $(this);
-
-                // Disable validation on fields that are disabled.
-                // At this point it's recommended to do an overall check (mean ignoring only disabled fields)
-                form.validate().settings.ignore = ":disabled";
-
-                // Start validation; Prevent form submission if false
-                return form.valid();
-            },
-            onFinished: function (event, currentIndex) {
-                var form = $(this);
-
-                // Submit form input
-                form.submit();
-            }
-        }).validate({
-            errorPlacement: function (error, element) {
-                element.before(error);
-            },
-            rules: {
-                confirm: {
-                    equalTo: "#password"
-                }
-            }
+            });
         });
-
-    });
-</script>
+    </script>
 }
