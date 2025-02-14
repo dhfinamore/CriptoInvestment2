@@ -1,8 +1,6 @@
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.Customers;
-
 using ErrorOr;
-
 using MediatR;
 
 namespace CryptoInvestment.Application.Authentication.Queries.LoginQuery;
@@ -30,11 +28,6 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
         if (customer.EmailValidated != true)
             return LoginQueryErrors.EmailNotVerified;
         
-        if (!await _customerRepository.HasSecurityQuestionsAsync(customer.IdCustomer))
-        {
-            return LoginQueryErrors.SecurityQuestionsNotConfigured;
-        }
-
         if (!_passwordHasher.VerifyHashedPassword(customer.PasswdLogin, request.Password))
         {
             customer.FailedLoginAttempts++;
@@ -44,6 +37,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
             {
                 customer.LockedUp = DateTime.Now;
                 await _customerRepository.UpdateCustomerAsync(customer);
+                await _unitOfWork.CommitChangesAsync();
                 return LoginQueryErrors.AccountLocked;
             }
             
@@ -61,6 +55,11 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
             customer.FailedLoginAttempts = 0;
             await _customerRepository.UpdateCustomerAsync(customer);
             await _unitOfWork.CommitChangesAsync();
+        }
+        
+        if (!await _customerRepository.HasSecurityQuestionsAsync(customer.IdCustomer))
+        {
+            return LoginQueryErrors.SecurityQuestionsNotConfigured;
         }
         
         return customer;

@@ -10,4 +10,9 @@ public class CryptoController : Controller
     {
         return View();
     }
+    
+    public IActionResult CustomerConfiguration()
+    {
+        return View();
+    }
 }
