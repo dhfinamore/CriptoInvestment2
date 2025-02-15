@@ -1,5 +1,4 @@
 using CryptoInvestment.Domain.Customers;
-using CryptoInvestment.Domain.SecurityQuestions;
 
 namespace CryptoInvestment.Application.Common.Interface;
 
@@ -14,4 +13,5 @@ public interface ICustomerRepository
     public Task<bool> ExistPhoneAsync(string phone);
     public Task AddSecurityQuestions(List<CustomerQuestion> securityQuestions);
     public Task UpdateSecurityQuestions(int customerId, List<CustomerQuestion> securityQuestions);
+    public Task<List<CustomerQuestion>> GetSecurityQuestions(int customerId); 
 }

@@ -1,5 +1,7 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
+using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using ErrorOr;
 using MediatR;
@@ -25,7 +27,19 @@ public class CustomerConfigurationController : Controller
         RemoveValidationForResetPassword(ModelState);
 
         if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+            
+            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
 
         var email = HttpContext.Session.GetString("UserEmail");
         
@@ -60,9 +74,21 @@ public class CustomerConfigurationController : Controller
     public async Task<IActionResult> ChangeSecurityQuestions(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
         RemoveValidationForChangeSecurityQuestions(ModelState);
-        
+
         if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+                
+            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
         
         List<(int, string)> securityQuestions =
         [

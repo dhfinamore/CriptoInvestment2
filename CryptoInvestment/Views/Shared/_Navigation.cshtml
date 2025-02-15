@@ -27,10 +27,7 @@
                 </div>
             </li>
             <li class="@Html.IsSelected(controller: "Crypto", action: "Dashboard")">
-                <a href="@Url.Action("Dashboard", "Crypto")"><i class="fa fa-diamond"></i> <span class="nav-label">Resumen</span></a>
-            </li>
-            <li class="@Html.IsSelected(controller: "Crypto", action: "Actives")">
-                <a href="@Url.Action("Actives", "Crypto")"><i class="fa fa-bitcoin"></i> <span class="nav-label">Activos</span></a>
+                <a href="@Url.Action("Dashboard", "Crypto")"><i class="fa fa-briefcase"></i> <span class="nav-label">Activos</span></a>
             </li>
             <li class="@Html.IsSelected(controller: "Crypto", action: "Deposit")">
                 <a href="@Url.Action("Deposit", "Crypto")"><i class="fa fa-bank"></i> <span class="nav-label">Depositos</span></a>
@@ -40,6 +37,9 @@
             </li>
             <li class="@Html.IsSelected(controller: "Crypto", action: "Referral")">
                 <a href="@Url.Action("Referral", "Crypto")"><i class="fa fa-users"></i> <span class="nav-label">Referidos</span></a>
+            </li>
+            <li class="@Html.IsSelected(controller: "Crypto", action: "Actives")">
+                <a href="@Url.Action("Movement", "Crypto")"><i class="fa fa-exchange"></i> <span class="nav-label">Movimientos</span></a>
             </li>
         </ul>
     </div>

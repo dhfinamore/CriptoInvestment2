@@ -99,7 +99,7 @@
                                                 <option value="">Seleccione una pregunta</option>
                                                 @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
                                                 {
-                                                <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.SetSecurityQuestion.FirstQuestionId ? "selected" : "")>
+                                                <option value="@item.IdSecurityQuestion">
                                                     @item.Question
                                                 </option>
                                                 }
@@ -120,7 +120,7 @@
                                                 <option value="">Seleccione una pregunta</option>
                                                 @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
                                                 {
-                                                <option value="@item.IdSecurityQuestion" selected="@(item.IdSecurityQuestion == Model.SetSecurityQuestion.FirstQuestionId ? "selected" : "")">
+                                                <option value="@item.IdSecurityQuestion">
                                                     @item.Question
                                                 </option>
                                                 }
@@ -141,7 +141,7 @@
                                                 <option value="">Seleccione una pregunta</option>
                                                 @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
                                                 {
-                                                <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.SetSecurityQuestion.ThirdQuestionId ? "selected" : "")>
+                                                <option value="@item.IdSecurityQuestion">
                                                     @item.Question
                                                 </option>
                                                 }
@@ -206,6 +206,24 @@
                     next: "Siguiente",
                     previous: "Anterior",
                     loading: "Cargando..."
+                },
+                onStepChanged: function (event, currentIndex, priorIndex) {
+                    if (currentIndex === 1) {
+                        var firstVal = $('#FirstQuestionId').val();
+                        var secondVal = $('#SecondQuestionId').val();
+                        
+                        if (firstVal !== "" && secondVal === firstVal) {
+                            $('#SecondQuestionId').val("");
+                        }
+                    } else if (currentIndex === 2) {
+                        var firstVal = $('#FirstQuestionId').val();
+                        var secondVal = $('#SecondQuestionId').val();
+                        var thirdVal = $('#ThirdQuestionId').val();
+                        
+                        if ((firstVal !== "" && thirdVal === firstVal) || (secondVal !== "" && thirdVal === secondVal)) {
+                            $('#ThirdQuestionId').val("");
+                        }
+                    }
                 },
                 onStepChanging: function (event, currentIndex, newIndex) {
                     if (currentIndex > newIndex) {

@@ -1,7 +1,8 @@
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
+using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
-
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +32,7 @@ public class CryptoController : Controller
         if (HttpContext.User.Identity!.IsAuthenticated)
         {
             model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+            Console.WriteLine(model.CustomerId);
         }
         
         var query = new ListSecurityQuestionsQuery();
@@ -41,8 +43,39 @@ public class CryptoController : Controller
             _ => null!
         );
         
+        var query2 = new GetCustomerSecurityQuestionsQuery(model.CustomerId);
+        var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+        var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+            customerQuestions => customerQuestions,
+            _ => null!
+        );
+        
         model.SetSecurityQuestion.SecurityQuestions = questions;
+        model.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+        model.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+        model.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
         
         return View(model);
+    }
+    
+    public IActionResult Deposit()
+    {
+        return View();
+    }
+    
+    public IActionResult Withdraw()
+    {
+        return View();
+    }
+    
+    public IActionResult Movement()
+    {
+        return View();
+    }
+
+    public IActionResult Referral()
+    {
+        return View();
     }
 }
