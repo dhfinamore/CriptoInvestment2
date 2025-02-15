@@ -24,6 +24,9 @@ public class SetPasswordCommandHandler : IRequestHandler<SetPasswordCommand, Err
         if (customer is null)
             return Error.NotFound(description: "No existe un usuario con ese email.");
         
+        if (customer.PasswdLogin is not null && !BCrypt.Net.BCrypt.Verify(command.CurrentPassword, customer.PasswdLogin))
+            return Error.Forbidden(description: "La contraseña actual no es correcta.");
+        
         customer.PasswdLogin = BCrypt.Net.BCrypt.HashPassword(command.Password);
         customer.EmailValidated = true;
         

@@ -7,4 +7,5 @@ namespace CryptoInvestment.Application.Authentication.Commands.SetPasswordComman
 
 public record SetPasswordCommand(
     string Email,
-    string Password) : IRequest<ErrorOr<Customer>>;
+    string Password,
+    string CurrentPassword = "") : IRequest<ErrorOr<Customer>>;

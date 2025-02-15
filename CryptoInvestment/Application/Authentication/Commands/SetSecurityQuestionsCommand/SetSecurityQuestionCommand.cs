@@ -6,4 +6,5 @@ namespace CryptoInvestment.Application.Authentication.Commands.SetSecurityQuesti
 
 public record SetSecurityQuestionCommand(
     int CustomerId,
-    List<(int, string)> CustomerSecurityQuestions) : IRequest<ErrorOr<Customer>>;
+    List<(int, string)> CustomerSecurityQuestions,
+    bool IsUpdate = false) : IRequest<ErrorOr<Customer>>;

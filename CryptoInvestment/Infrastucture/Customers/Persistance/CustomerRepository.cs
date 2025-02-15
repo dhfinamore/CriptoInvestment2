@@ -56,4 +56,20 @@ public class CustomerRepository : ICustomerRepository
     {
         await _context.CustomerQuestions.AddRangeAsync(securityQuestions);
     }
+
+    public Task UpdateSecurityQuestions(int customerId, List<CustomerQuestion> securityQuestions)
+    {
+        var customerQuestions = _context.CustomerQuestions
+            .Where(cq => cq.IdCustomer == customerId)
+            .OrderBy(cq => cq.Order).ToList();
+        
+        for (int i = 0; i < securityQuestions.Count; i++)
+        {
+            customerQuestions[i].IdQuestion = securityQuestions[i].IdQuestion;
+            customerQuestions[i].Response = securityQuestions[i].Response;
+        }
+        
+        _context.UpdateRange(customerQuestions);
+        return Task.CompletedTask;
+    }
 }

@@ -37,8 +37,14 @@ public class SetSecurityQuestionCommandHandler : IRequestHandler<SetSecurityQues
             
             customerQuestions.Add(customerQuestion);
         }
-
-        await _customerRepository.AddSecurityQuestions(customerQuestions);
+        
+        if (command.IsUpdate)
+            await _customerRepository.UpdateSecurityQuestions(customer.IdCustomer, customerQuestions);
+        else
+        {
+            await _customerRepository.AddSecurityQuestions(customerQuestions);
+        }
+        
         await _unitOfWork.CommitChangesAsync();
 
         return customer;

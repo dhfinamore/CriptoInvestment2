@@ -1,3 +1,6 @@
+@using CryptoInvestment.Domain.SecurityQuestions
+@model CryptoInvestment.ViewModels.CustomerConfiguration.CustomerConfigurationViewModel
+
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
     ViewBag.Title = "Dashboard";
@@ -9,6 +12,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil del Usuario</title>
+    
+    @section Styles {
+        <environment names="Development,Staging,Production">
+            <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
+            <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
+        </environment>
+    }
 </head>
 <body>
 <div class="container page-container">
@@ -35,11 +45,120 @@
     <div class="tab-content">
         <!-- Change Password Tab: Se marca activo y visible -->
         <div class="tab-pane fade show active" id="change-password" role="tabpanel">
-            <h5>Cambiar Contraseña</h5>
+            <div class="d-flex align-items-center justify-content-center flex-column" style="height: 50vh;">
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-content">
+                            <form class="m-t" asp-action="ResetPassword" asp-controller="CustomerConfiguration" method="post">
+                                <input type="hidden" asp-for="CustomerId"/>
+                                <div class="row" id="pwd-container1">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="password2">Confirmar Contraseña</label>
+                                            <input asp-for="ResetPassword.CurrentPassword" type="password" class="form-control" id="password" placeholder="Contraseña Actual">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.CurrentPassword)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password1">Nueva Contraseña</label>
+                                            <input asp-for="ResetPassword.Password" type="password" class="form-control example1" id="password1" placeholder="Contraseña">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.Password)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password2">Confirmar Contraseña</label>
+                                            <input asp-for="ResetPassword.ConfirmPassword" type="password" class="form-control" id="password2" placeholder="Confirmar Contraseña">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.ConfirmPassword)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="pwstrength_viewport_progress"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary block full-width m-b">Actualizar Contraseña</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- Security Questions Tab -->
         <div class="tab-pane fade" id="security-questions" role="tabpanel">
-            <h5>Preguntas de Seguridad</h5>
+            <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-content">
+                                <form id="securityQuestionsForm" asp-action="ChangeSecurityQuestions" asp-controller="CustomerConfiguration" method="post" class="wizard-big">
+                                    <input type="hidden" asp-for="CustomerId" />
+
+                                    <h1>Primera Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Primera Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.FirstQuestionId" id="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.SetSecurityQuestion.FirstQuestionId ? "selected" : "")>
+                                                    @item.Question
+                                                </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.FirstQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 1" required />
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+
+                                    <h1>Segunda Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Segunda Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.SecondQuestionId" id="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                <option value="@item.IdSecurityQuestion" selected="@(item.IdSecurityQuestion == Model.SetSecurityQuestion.FirstQuestionId ? "selected" : "")">
+                                                    @item.Question
+                                                </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.SecondQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 2" required />
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+
+                                    <h1>Tercera Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Tercera Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.ThirdQuestionId" id="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                <option value="@item.IdSecurityQuestion" selected=@(item.IdSecurityQuestion == Model.SetSecurityQuestion.ThirdQuestionId ? "selected" : "")>
+                                                    @item.Question
+                                                </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.ThirdQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 3" required />
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- Document Tab -->
         <div class="tab-pane fade" id="subir-documentos" role="tabpanel">
@@ -52,7 +171,94 @@
     </div>
 </div>
 
-<!-- Incluir Bootstrap Bundle JS que incluye Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+@section Scripts {
+    <environment names="Development,Staging,Production">
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+        <script src="~/lib/steps/jquery.steps.min.js"></script>
+        <script src="~/lib/pwstrength/pwstrength-bootstrap.min.js"></script>
+        <script src="~/lib/pwstrength/zxcvbn.js"></script>
+    </environment>
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var options1 = {
+                ui: {
+                    container: "#pwd-container1",
+                    showVerdictsInsideProgressBar: true,
+                    viewports: { progress: ".pwstrength_viewport_progress" }
+                },
+                common: { debug: false }
+            };
+            $('.example1').pwstrength(options1);
+
+            $("#securityQuestionsForm").steps({
+                headerTag: "h1",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                autoFocus: true,
+                labels: {
+                    cancel: "Cancelar",
+                    current: "Actual",
+                    finish: "Finalizar",
+                    next: "Siguiente",
+                    previous: "Anterior",
+                    loading: "Cargando..."
+                },
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    if (currentIndex > newIndex) {
+                        return true;
+                    }
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    $(this).submit();
+                }
+            }).validate({
+                errorPlacement: function (error, element) {
+                    error.insertBefore(element);
+                }
+            });
+
+            function updateSelectOptions() {
+                var firstVal = $('#FirstQuestionId').val();
+                var secondVal = $('#SecondQuestionId').val();
+
+                $('#SecondQuestionId option').each(function () {
+                    var optionVal = $(this).val();
+                    if (optionVal !== "" && optionVal === firstVal) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+
+                $('#ThirdQuestionId option').each(function () {
+                    var optionVal = $(this).val();
+                    if (optionVal !== "" && (optionVal === firstVal || optionVal === secondVal)) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            }
+
+            $('#FirstQuestionId, #SecondQuestionId').on('change', updateSelectOptions);
+            updateSelectOptions();
+        });
+    </script>
+}
+
+
+
 </body>
 </html>

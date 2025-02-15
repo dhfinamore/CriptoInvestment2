@@ -60,6 +60,7 @@ public class AuthenticationController : Controller
             customer =>
             {
                 HttpContext.Session.SetString("UserId", customer.IdCustomer.ToString());
+                HttpContext.Session.SetString("UserEmail", customer.Email);
                 var identity = _customerAuthenticationService.CreateClaimsIdentityAsync(customer).Result;
                 var authProperties = new AuthenticationProperties
                 {
