@@ -1,9 +1,14 @@
-@using CryptoInvestment.Domain.SecurityQuestions
 @model CryptoInvestment.ViewModels.CustomerConfiguration.CustomerConfigurationViewModel
 
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
     ViewBag.Title = "Dashboard";
+    
+    var activeTab = Context.Request.Query["activeTab"].ToString();
+    if (string.IsNullOrEmpty(activeTab))
+    {
+        activeTab = "change-password";
+    }
 }
 
 <!DOCTYPE html>
@@ -17,6 +22,9 @@
         <environment names="Development,Staging,Production">
             <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
             <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
+            <link rel="stylesheet" href="~/css/intlTelInput.css">
+            <link rel="stylesheet" href="~/lib/sweetalert/dist/sweetalert.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
         </environment>
     }
 </head>
@@ -27,24 +35,36 @@
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
-            <!-- Se marca el primer tab como active -->
-            <a class="nav-link active" id="change-password-tab" data-bs-toggle="tab" href="#change-password" role="tab">Cambiar Contraseña</a>
+            <a class="nav-link @(activeTab == "change-password" ? "active" : "")" id="change-password-tab" data-bs-toggle="tab" href="#change-password" role="tab">
+                Cambiar Contraseña
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="security-questions-tab" data-bs-toggle="tab" href="#security-questions" role="tab">Preguntas de Seguridad</a>
+            <a class="nav-link @(activeTab == "security-questions" ? "active" : "")" id="security-questions-tab" data-bs-toggle="tab" href="#security-questions" role="tab">
+                Preguntas de Seguridad
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">Documentos</a>
+            <a class="nav-link @(activeTab == "subir-documentos" ? "active" : "")" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">
+                Documentos
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="kyc-tab" data-bs-toggle="tab" href="#kyc" role="tab">KYC</a>
+            <a class="nav-link @(activeTab == "kyc" ? "active" : "")" id="kyc-tab" data-bs-toggle="tab" href="#kyc" role="tab">
+                KYC
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "ben" ? "active" : "")" id="ben-tab" data-bs-toggle="tab" href="#ben" role="tab">
+                Beneficiarios
+            </a>
         </li>
     </ul>
 
     <!-- Tab content -->
     <div class="tab-content">
         <!-- Change Password Tab: Se marca activo y visible -->
-        <div class="tab-pane fade show active" id="change-password" role="tabpanel">
+        <div class="tab-pane fade @(activeTab == "change-password" ? "show active" : "")" id="change-password" role="tabpanel">
             <div class="d-flex align-items-center justify-content-center flex-column" style="height: 50vh;">
                 <div class="col-md-6">
                     <div class="ibox ">
@@ -82,7 +102,7 @@
             </div>
         </div>
         <!-- Security Questions Tab -->
-        <div class="tab-pane fade" id="security-questions" role="tabpanel">
+        <div class="tab-pane fade @(activeTab == "security-questions" ? "show active" : "")" id="security-questions" role="tabpanel">
             <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
                 <div class="row">
                     <div class="col-lg-12">
@@ -161,12 +181,174 @@
             </div>
         </div>
         <!-- Document Tab -->
-        <div class="tab-pane fade" id="subir-documentos" role="tabpanel">
+        <div class="tab-pane fade @(activeTab == "subir-documentos" ? "show active" : "")" id="subir-documentos" role="tabpanel">
             <h5>Documentos</h5>
         </div>
         <!-- KYC Tab -->
-        <div class="tab-pane fade" id="kyc" role="tabpanel">
+        <div class="tab-pane fade @(activeTab == "kyc" ? "show active" : "")" id="kyc" role="tabpanel">
             <h5>KYC</h5>
+        </div>
+        <!-- Beneficiarios -->
+        <div class="tab-pane fade @(activeTab == "ben" ? "show active" : "")" id="ben" role="tabpanel">
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-title">
+                                <h5>Lista de Beneficiarios</h5>
+                                <div class="ibox-tools">
+                                    <button type="button" id="addBeneficiary" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal4">Agregar Beneficiario</button>
+                                    <div class="modal inmodal" id="myModal4" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content animated fadeIn">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                                    </button>
+                                                    <h4 class="modal-title" id="modalTitle">Nuevo Beneficiario</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="beneficiaryForm" class="m-t" asp-action="CreateBeneficiary" asp-controller="CustomerConfiguration" method="post">
+                                                        <input type="hidden" asp-for="CustomerId"/>
+                                                        <input type="hidden" id="beneficiaryId" asp-for="CustomerBeneficiary.Id"/>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.Name" id="name" class="form-control" placeholder="Nombre" required/>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.Name)</span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.ApePaternal" id="apePaternal" class="form-control" placeholder="Apellido Paterno" required/>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.ApePaternal)</span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.ApeMaternal" id="apeMaternal" class="form-control" placeholder="Apellido Materno"/>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.Relationship" id="relationship" class="form-control" placeholder="Parentezco" required/>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.Relationship)</span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input type="tel" asp-for="CustomerBeneficiary.PhoneNumber" id="phone" class="form-control"/>
+                                                            <span id="phone-error" class="validation-error" style="display: none; color: red;">
+                                                                Ingrese un número de teléfono válido.
+                                                            </span>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.PhoneNumber)</span>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" id="saveChangesButton">Guardar</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal5">Asignación de porcentaje a beneficiarios</button>
+                                    <div class="modal inmodal" id="myModal5" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content animated fadeIn">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                    <h4 class="modal-title">Asignación de porcentaje</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="beneficiaryPercentForm" class="m-t" asp-action="AssignBeneficiaryPercent" asp-controller="CustomerConfiguration" method="post">
+                                                        <input type="hidden" asp-for="CustomerId"/>
+
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover issue-tracker">
+                                                                <tbody id="beneficiaryTableBody">
+                                                                @for (var i = 0; i < Model.CustomerBeneficiary.CustomerBeneficiaries.Count; i++)
+                                                                {
+                                                                <tr>
+                                                                    <td>
+                                                                        <h4 class="mb-0">
+                                                                            @Model.CustomerBeneficiary.CustomerBeneficiaries[i].Nombre @Model.CustomerBeneficiary.CustomerBeneficiaries[i].ApePat
+                                                                        </h4>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomerBeneficiary"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomer"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Relationship"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
+                                                                    </td>
+                                                                    <td class="text-right mb-0">
+                                                                        <div class="form-group">
+                                                                            <input asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Porcent" class="form-control m-t" placeholder="@Model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent" required/>
+                                                                            <span class="text-danger">
+                                                                                        @Html.ValidationMessageFor(model => model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent)
+                                                                                    </span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                }
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="m-t m-b">
+                                    <strong><span id="beneficiaryCount">@Model.CustomerBeneficiary.CustomerBeneficiaries.Count</span> Beneficiarios.</strong>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover issue-tracker">
+                                        <tbody>
+                                        @foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
+                                        {
+                                            <tr>
+                                                <td>@beneficiary.Nombre @beneficiary.ApePat</td>
+                                                <td>@beneficiary.Tel</td>
+                                                <td>@beneficiary.Relationship</td>
+                                                <td>
+                                                    <span class="percentage-pie" data-value="@beneficiary.Porcent"></span>
+                                                    @beneficiary.Porcent
+                                                </td>
+                                                <td class="text-right">
+                                                    <button type="button" class="btn btn-sm btn-white edit-btn"
+                                                            data-id="@beneficiary.IdCustomerBeneficiary"
+                                                            data-name="@beneficiary.Nombre"
+                                                            data-ape-pat="@beneficiary.ApePat"
+                                                            data-ape-mat="@beneficiary.ApeMat"
+                                                            data-relationship="@beneficiary.Relationship"
+                                                            data-phone="@beneficiary.Tel"
+                                                            data-toggle="modal" data-target="#myModal4">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger delete-btn demo4"
+                                                            data-customer-id="@Model.CustomerId"
+                                                            data-beneficiary-id="@beneficiary.IdCustomerBeneficiary"
+                                                            data-percent="@beneficiary.Porcent">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -180,6 +362,10 @@
         <script src="~/lib/steps/jquery.steps.min.js"></script>
         <script src="~/lib/pwstrength/pwstrength-bootstrap.min.js"></script>
         <script src="~/lib/pwstrength/zxcvbn.js"></script>
+        <script src="~/lib/peity/jquery.peity.min.js"></script>
+        <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"></script>
     </environment>
     
     <script type="text/javascript">
@@ -272,6 +458,158 @@
 
             $('#FirstQuestionId, #SecondQuestionId').on('change', updateSelectOptions);
             updateSelectOptions();
+
+            function initializePeity() {
+                $(".percentage-pie").each(function () {
+                    var value = parseFloat($(this).data("value")) / 100;
+                    $(this).peity("pie", {
+                        fill: ["#1c84c6", "#f3f3f4"],
+                        radius: 10
+                    }).text(value + ", " + (1 - value)).change();
+                });
+            }
+            initializePeity();
+
+            const input = document.querySelector("#phone");
+
+            const phoneInput = window.intlTelInput(input, {
+                separateDialCode: true,
+                initialCountry: "auto",
+                geoIpLookup: function (callback) {
+                    fetch("https://ipapi.co/json/")
+                        .then((res) => res.json())
+                        .then((data) => {
+                            callback(data.country_code.toLowerCase());
+                        })
+                        .catch(() => {
+                            callback("mx");
+                        });
+                },
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"
+            });
+
+            input.addEventListener("blur", function () {
+                if (!phoneInput.isValidNumber()) {
+                    $("#phone-error").show();
+                } else {
+                    $("#phone-error").hide();
+                }
+            });
+
+            $("#beneficiaryForm").submit(function (event) {
+                if (!phoneInput.isValidNumber()) {
+                    $("#phone-error").show();
+                    event.preventDefault();
+                } else {
+                    $("#phone-error").hide();
+                    input.value = phoneInput.getNumber();
+                }
+            });
+
+            $("#beneficiaryPercentForm").on("submit", function(event) {
+                var sum = 0;
+                $("#beneficiaryTableBody input[name*='.Porcent']").each(function() {
+                    var val = parseFloat($(this).val());
+                    if (!isNaN(val)) {
+                        sum += val;
+                    }
+                });
+
+                if (sum !== 100) {
+                    event.preventDefault();
+                    alert("La suma de los porcentajes debe ser igual a 100. Actualmente suma: " + sum);
+                }
+            });
+
+            $('.demo4').click(function () {
+                var button = $(this);
+                // Obtener los datos del botón
+                var percent = parseFloat(button.data('percent'));
+                var customerId = button.data('customer-id');
+                var beneficiaryId = button.data('beneficiary-id');
+
+                // Si el porcentaje es mayor que 0, no se permite eliminar
+                if (percent > 0) {
+                    swal("No se puede eliminar", "El beneficiario tiene un porcentaje asignado.", "error");
+                    return;
+                }
+
+                // Mostrar SweetAlert para confirmación
+                swal({
+                        title: "¿Estás seguro?",
+                        text: "No seras capaz de recuperar este beneficiario!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Eliminar",
+                        cancelButtonText: "Cancelar",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            // Realizar la petición HTTP para eliminar el beneficiario.
+                            $.ajax({
+                                url: "/CustomerConfiguration/DeleteBeneficiary", // Asegúrate de que la URL sea correcta
+                                type: "POST",
+                                data: {
+                                    customerId: customerId,
+                                    beneficiaryId: beneficiaryId
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        swal({
+                                            title: "¡Eliminado!",
+                                            text: "El beneficiario ha sido eliminado.",
+                                            type: "success",
+                                            confirmButtonText: "OK"
+                                        }, function () {
+                                            window.location.href = "/Crypto/CustomerConfiguration?activeTab=ben";
+                                        });
+                                    } else {
+                                        swal("Error", response.message || "No se pudo eliminar el beneficiario.", "error");
+                                    }
+                                },
+                                error: function () {
+                                    swal("Error", "No se pudo eliminar el beneficiario.", "error");
+                                }
+                            });
+                        }
+                    });
+            });
+
+            $("#addBeneficiary").click(function () {
+                $("#modalTitle").text("Nuevo Beneficiario");
+                $("#beneficiaryForm").attr("action", "/CustomerConfiguration/CreateBeneficiary");
+                $("#beneficiaryId").val("");
+                $("#name").val("");
+                $("#apePaternal").val("");
+                $("#apeMaternal").val("");
+                $("#relationship").val("");
+                $("#phone").val("");
+                $("#saveChangesButton").text("Guardar");
+            });
+
+            // Capturar el botón de editar beneficiario
+            $(document).on("click", ".edit-btn", function () {
+                var beneficiaryId = $(this).data("id");
+                var name = $(this).data("name");
+                var apePaternal = $(this).data("ape-pat");
+                var apeMaternal = $(this).data("ape-mat");
+                var relationship = $(this).data("relationship");
+                var phone = $(this).data("phone");
+
+                $("#modalTitle").text("Editar Beneficiario");
+                $("#beneficiaryForm").attr("action", "/CustomerConfiguration/UpdateBeneficiary");
+                $("#beneficiaryId").val(beneficiaryId);
+                $("#name").val(name);
+                $("#apePaternal").val(apePaternal);
+                $("#apeMaternal").val(apeMaternal);
+                $("#relationship").val(relationship);
+                $("#phone").val(phone);
+                $("#saveChangesButton").text("Actualizar");
+            });
+
         });
     </script>
 }

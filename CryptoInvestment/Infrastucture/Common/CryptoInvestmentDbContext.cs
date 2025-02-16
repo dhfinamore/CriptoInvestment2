@@ -12,6 +12,7 @@ public class CryptoInvestmentDbContext : DbContext, IUnitOfWork
     public DbSet<Customer> Customers { get; init; } = null!;
     public DbSet<CustomerQuestion> CustomerQuestions { get; init; } = null!;
     public DbSet<SecurityQuestion> SecurityQuestions { get; init; } = null!;
+    public DbSet<CustomerBeneficiary> CustomerBeneficiaries { get; init; } = null!;
     
     public CryptoInvestmentDbContext(DbContextOptions<CryptoInvestmentDbContext> options) : base(options)
     {

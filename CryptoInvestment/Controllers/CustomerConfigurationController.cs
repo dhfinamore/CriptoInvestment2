@@ -1,6 +1,11 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.CustomersBeneficiary.Command.AssignPercentageCommand;
+using CryptoInvestment.Application.CustomersBeneficiary.Command.CreateBeneficiaryCommand;
+using CryptoInvestment.Application.CustomersBeneficiary.Command.DeleteBeneficiaryCommand;
+using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
+using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using ErrorOr;
@@ -87,6 +92,16 @@ public class CustomerConfigurationController : Controller
                 
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
             
+            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+                _ => null!
+            );
+
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+            
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
         
@@ -104,12 +119,174 @@ public class CustomerConfigurationController : Controller
         var setSecurityQuestionResult = await _mediator.Send(command);
         
         return setSecurityQuestionResult.Match<IActionResult>(
-            customer => RedirectToAction("CustomerConfiguration", "Crypto"),
+            customer => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "security-questions" }),
             errors =>
             {
                 ModelState.AddModelError("", errors.First().Description);
                 return View("~/Views/Crypto/CustomerConfiguration.cshtml",customerConfigurationViewModel);
             }
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateBeneficiary(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        RemoveValidationForCreateBeneficiary(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+            
+            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            
+            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+                _ => null!
+            );
+
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+            
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+
+        var command = new CreateBeneficiaryCommand(
+            customerConfigurationViewModel.CustomerId,
+            customerConfigurationViewModel.CustomerBeneficiary.Name,
+            customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
+            customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
+            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
+            customerConfigurationViewModel.CustomerBeneficiary.Relationship
+        );
+        
+        var createCustomerResult = await _mediator.Send(command);
+        
+        return createCustomerResult.Match<IActionResult>(
+            customer => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "ben" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml",customerConfigurationViewModel);
+            }
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> UpdateBeneficiary(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        RemoveValidationForCreateBeneficiary(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+            
+            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            
+            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+                _ => null!
+            );
+
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+            
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+
+        var command = new CreateBeneficiaryCommand(
+            customerConfigurationViewModel.CustomerId,
+            customerConfigurationViewModel.CustomerBeneficiary.Name,
+            customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
+            customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
+            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
+            customerConfigurationViewModel.CustomerBeneficiary.Relationship,
+            customerConfigurationViewModel.CustomerBeneficiary.Id
+        );
+        
+        var createCustomerResult = await _mediator.Send(command);
+        
+        return createCustomerResult.Match<IActionResult>(
+            customer => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "ben" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml",customerConfigurationViewModel);
+            }
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> AssignBeneficiaryPercent(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        RemoveValidationForAssignBeneficiaryPercent(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            var query = new ListSecurityQuestionsQuery();
+            var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+                questions => questions,
+                _ => null!
+            );
+            
+            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            
+            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+                _ => null!
+            );
+
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+            
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+
+        var command = new AssignPercentageCommand(
+            customerConfigurationViewModel.CustomerId,
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries
+        );
+        
+        var assignBeneficiaryPercentResult = await _mediator.Send(command);
+        
+        return assignBeneficiaryPercentResult.Match<IActionResult>(
+            customer => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "ben" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml",customerConfigurationViewModel);
+            }
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> DeleteBeneficiary(int customerId, int beneficiaryId)
+    {
+        var command = new DeleteBeneficiaryCommand(customerId, beneficiaryId);
+        var deleteBeneficiaryResult = await _mediator.Send(command);
+        
+        return deleteBeneficiaryResult.Match<IActionResult>(
+            success => Json(new { success = true }),
+            errors => Json(new { success = false, message = errors.First().Description })
         );
     }
     
@@ -122,6 +299,12 @@ public class CustomerConfigurationController : Controller
         modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
         modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
         modelState.Remove("SetSecurityQuestion.SecurityQuestions");
+        
+        modelState.Remove("CustomerBeneficiary.Name");
+        modelState.Remove("CustomerBeneficiary.ApePaternal");
+        modelState.Remove("CustomerBeneficiary.PhoneNumber");
+        modelState.Remove("CustomerBeneficiary.Percentage");
+        modelState.Remove("CustomerBeneficiary.Relationship");
     }
     
     private void RemoveValidationForChangeSecurityQuestions(ModelStateDictionary modelState)
@@ -129,6 +312,47 @@ public class CustomerConfigurationController : Controller
         modelState.Remove("ResetPassword.CurrentPassword");
         modelState.Remove("ResetPassword.Password");
         modelState.Remove("ResetPassword.ConfirmPassword");
+        
+        modelState.Remove("CustomerBeneficiary.Name");
+        modelState.Remove("CustomerBeneficiary.ApePaternal");
+        modelState.Remove("CustomerBeneficiary.PhoneNumber");
+        modelState.Remove("CustomerBeneficiary.Percentage");
+        modelState.Remove("CustomerBeneficiary.Relationship");
     }
-
+    
+    private void RemoveValidationForCreateBeneficiary(ModelStateDictionary modelState)
+    {
+        modelState.Remove("ResetPassword.CurrentPassword");
+        modelState.Remove("ResetPassword.Password");
+        modelState.Remove("ResetPassword.ConfirmPassword");
+        
+        modelState.Remove("SetSecurityQuestion.FirstQuestionId");
+        modelState.Remove("SetSecurityQuestion.FirstQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.SecondQuestionId");
+        modelState.Remove("SetSecurityQuestion.SecondQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
+        modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.SecurityQuestions");
+    }
+    
+    private void RemoveValidationForAssignBeneficiaryPercent(ModelStateDictionary modelState)
+    {
+        modelState.Remove("ResetPassword.CurrentPassword");
+        modelState.Remove("ResetPassword.Password");
+        modelState.Remove("ResetPassword.ConfirmPassword");
+        
+        modelState.Remove("SetSecurityQuestion.FirstQuestionId");
+        modelState.Remove("SetSecurityQuestion.FirstQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.SecondQuestionId");
+        modelState.Remove("SetSecurityQuestion.SecondQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
+        modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
+        modelState.Remove("SetSecurityQuestion.SecurityQuestions");
+        
+        modelState.Remove("CustomerBeneficiary.Name");
+        modelState.Remove("CustomerBeneficiary.ApePaternal");
+        modelState.Remove("CustomerBeneficiary.PhoneNumber");
+        modelState.Remove("CustomerBeneficiary.Percentage");
+        modelState.Remove("CustomerBeneficiary.Relationship");
+    }
 }

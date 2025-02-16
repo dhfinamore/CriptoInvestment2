@@ -1,4 +1,5 @@
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
+using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
@@ -55,6 +56,16 @@ public class CryptoController : Controller
         model.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
         model.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
         model.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
+        var query3 = new GetCustomerBeneficiariesQuery(model.CustomerId);
+        var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+        var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+            customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+            _ => null!
+        );
+
+        model.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
         
         return View(model);
     }
