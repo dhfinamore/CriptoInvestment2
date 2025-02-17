@@ -78,4 +78,20 @@ public class CustomerRepository : ICustomerRepository
             .Where(cq => cq.IdCustomer == customerId)
             .OrderBy(cq => cq.Order).ToListAsync();
     }
+
+    public Task<CustomerPic?> GetCustomerPic(int customerId)
+    {
+        return _context.CustomerPics.FirstOrDefaultAsync(cp => cp.IdCustomer == customerId);
+    }
+
+    public Task UpdateCustomerPic(CustomerPic customerPic)
+    {
+        _context.CustomerPics.Update(customerPic);
+        return Task.CompletedTask;
+    }
+
+    public async Task CreateCustomerPicAsync(CustomerPic customerPic)
+    {
+        await _context.CustomerPics.AddAsync(customerPic);
+    }
 }

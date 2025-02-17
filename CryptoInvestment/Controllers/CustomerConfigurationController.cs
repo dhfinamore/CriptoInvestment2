@@ -4,6 +4,7 @@ using CryptoInvestment.Application.CustomersBeneficiary.Command.AssignPercentage
 using CryptoInvestment.Application.CustomersBeneficiary.Command.CreateBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.DeleteBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
+using CryptoInvestment.Application.CustomersPic.SaveCustomerPicCommand;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
@@ -285,6 +286,51 @@ public class CustomerConfigurationController : Controller
         var deleteBeneficiaryResult = await _mediator.Send(command);
         
         return deleteBeneficiaryResult.Match<IActionResult>(
+            success => Json(new { success = true }),
+            errors => Json(new { success = false, message = errors.First().Description })
+        );
+    }
+    
+    [HttpPost]
+    public IActionResult UpdateImages(string documentType, int customerId)
+    {
+        Console.WriteLine(documentType);
+
+        string type = documentType switch
+        {
+            "passport" => "Pasaporte",
+            "license" => "Licencia",
+            _ => "Identificación"
+        };
+
+        var model = new UpdateImageViewModel
+        {
+            CustomerId = customerId,
+            RequiresTwoPhotos = documentType != "passport",
+            Type = type
+        };
+        
+        return View(model);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> SaveCustomerPic(UpdateImageViewModel updateImageViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Error al guardar la imagen.");
+        }
+
+        var command = new SaveCustomerPicCommand(
+            updateImageViewModel.CustomerId,
+            updateImageViewModel.Type,
+            updateImageViewModel.PictureFrontBase64,
+            updateImageViewModel.PictureBackBase64
+        );
+
+        var saveCustomerPicResult = await _mediator.Send(command);
+
+        return saveCustomerPicResult.Match<IActionResult>(
             success => Json(new { success = true }),
             errors => Json(new { success = false, message = errors.First().Description })
         );

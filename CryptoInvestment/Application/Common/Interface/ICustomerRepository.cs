@@ -13,5 +13,8 @@ public interface ICustomerRepository
     public Task<bool> ExistPhoneAsync(string phone);
     public Task AddSecurityQuestions(List<CustomerQuestion> securityQuestions);
     public Task UpdateSecurityQuestions(int customerId, List<CustomerQuestion> securityQuestions);
-    public Task<List<CustomerQuestion>> GetSecurityQuestions(int customerId); 
+    public Task<List<CustomerQuestion>> GetSecurityQuestions(int customerId);
+    public Task<CustomerPic?> GetCustomerPic(int customerId);
+    public Task UpdateCustomerPic(CustomerPic customerPic);
+    public Task CreateCustomerPicAsync(CustomerPic customerPic);
 }
