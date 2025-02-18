@@ -13,15 +13,15 @@
     <title>Perfil del Usuario</title>
 
     @section Styles {
-    <environment names="Development,Staging,Production">
-        <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
-        <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
-        <link rel="stylesheet" href="~/css/intlTelInput.css">
-        <link rel="stylesheet" href="~/lib/sweetalert/dist/sweetalert.css" />
-        <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
-        <link rel="stylesheet" href="~/lib/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
-    </environment>
+        <environment names="Development,Staging,Production">
+            <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
+            <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
+            <link rel="stylesheet" href="~/css/intlTelInput.css">
+            <link rel="stylesheet" href="~/lib/sweetalert/dist/sweetalert.css" />
+            <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
+            <link rel="stylesheet" href="~/lib/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
+        </environment>
     }
 </head>
 <body>
@@ -32,20 +32,20 @@
         <h4>Foto Frontal</h4>
         <div class="row text-center">
             <!-- Botón para subir archivo -->
-            <div class="col-md-4">
+            <div class="m-r">
                 <label class="btn btn-primary">
                     <i class="fa fa-upload"></i> Subir Archivo
                     <input type="file" accept="image/*" id="frontFile" style="display:none;" onchange="previewImage(this, 'frontPreview')">
                 </label>
             </div>
             <!-- Botón para capturar con cámara -->
-            <div class="col-md-4">
+            <div class="m-r">
                 <button type="button" id="frontCaptureBtn" class="btn btn-primary">
                     <i class="fa fa-camera"></i> Iniciar Cámara
                 </button>
             </div>
             <!-- Botón para capturar foto manual (inicialmente oculto) -->
-            <div class="col-md-4 m-t-sm">
+            <div class="m-r">
                 <button type="button" id="captureNowFrontBtn" class="btn btn-primary" style="display:none;">
                     <i class="fa fa-camera"></i> Capturar Foto
                 </button>
@@ -62,18 +62,18 @@
     <div id="backSection" class="mb-4" style="display: @(Model.RequiresTwoPhotos ? "block" : "none");">
         <h4>Foto Trasera</h4>
         <div class="row text-center">
-            <div class="col-md-4">
+            <div class="m-r">
                 <label class="btn btn-primary">
                     <i class="fa fa-upload"></i> Subir Archivo
                     <input type="file" accept="image/*" id="backFile" style="display:none;" onchange="previewImage(this, 'backPreview')">
                 </label>
             </div>
-            <div class="col-md-4">
+            <div class="m-r">
                 <button type="button" id="backCaptureBtn" class="btn btn-primary">
                     <i class="fa fa-camera"></i> Iniciar Cámara
                 </button>
             </div>
-            <div class="col-md-4 m-t-sm">
+            <div class="m-r">
                 <button type="button" id="captureNowBackBtn" class="btn btn-primary" style="display:none;">
                     <i class="fa fa-camera"></i> Capturar Foto
                 </button>
@@ -124,7 +124,7 @@
                             zoomable: true,
                             scalable: true,
                             cropBoxResizable: true,
-                            maxCanvasWidth: 800,
+                            maxCanvasWidth: 500,
                             maxCanvasHeight: 600
                         };
                         if(previewId === "frontPreview"){
@@ -191,7 +191,7 @@
                     zoomable: true,
                     scalable: true,
                     cropBoxResizable: true,
-                    maxCanvasWidth: 800,
+                    maxCanvasWidth: 500,
                     maxCanvasHeight: 600
                 };
                 if(isFront){
@@ -250,14 +250,14 @@
 
                 // Obtener imagen recortada
                 var croppedFront = cropperInstanceFront ? cropperInstanceFront.getCroppedCanvas({
-                    maxWidth: 800,
+                    maxWidth: 500,
                     maxHeight: 600
                 }).toDataURL("image/png") : frontImageData;
 
                 var croppedBack = "";
                 if (requiresTwoPhotos) {
                     croppedBack = cropperInstanceBack ? cropperInstanceBack.getCroppedCanvas({
-                        maxWidth: 800,
+                        maxWidth: 500,
                         maxHeight: 600
                     }).toDataURL("image/png") : backImageData;
                 }

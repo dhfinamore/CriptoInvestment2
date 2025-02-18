@@ -1,3 +1,4 @@
+using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.ViewModels.Authentication;
 
 namespace CryptoInvestment.ViewModels.CustomerConfiguration;
@@ -8,6 +9,7 @@ public class CustomerConfigurationViewModel
     public ResetPasswordViewModel ResetPassword { get; set; }
     public SecurityQuestionsViewModel SetSecurityQuestion { get; set; }
     public CustomerBeneficiaryViewModel CustomerBeneficiary { get; set; }
+    public CustomerPic? CustomerPic { get; set; }
     
     public CustomerConfigurationViewModel()
     {

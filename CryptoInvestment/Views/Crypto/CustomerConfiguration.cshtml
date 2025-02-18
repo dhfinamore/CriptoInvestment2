@@ -181,14 +181,47 @@
         <div class="tab-pane fade @(activeTab == "subir-documentos" ? "show active" : "")" id="subir-documentos" role="tabpanel">
             <div class="row text-center">
                 <div>
-                    <h2>No ha sido agregado ningún documento de identificacíon</h2>
-                    <button type="button" class="btn btn-primary document-btn m-b d-flex justify-content-center align-items-center"
-                            style="height: 100px; width: 200px">
-                        <i class="fa fa-id-card fa-4x"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal1">
-                        Agregar documento
-                    </button>
+                    @if (Model.CustomerPic != null)
+                    {
+                        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                            @if (Model.CustomerPic.PictureFront != null)
+                            {
+                                <img class="m-b" src="data:image/png;base64,@Convert.ToBase64String(Model.CustomerPic.PictureFront)"
+                                     alt="Imagen Frontal"
+                                     width="300" height="200"/>
+                            }
+
+                            @if (Model.CustomerPic.PictureBack != null)
+                            {
+                                <img class="m-b" src="data:image/png;base64,@Convert.ToBase64String(Model.CustomerPic.PictureBack)"
+                                     alt="Imagen Trasera"
+                                     width="300" height="200"/>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <h2>No ha sido agregado ningún documento de identificacíon</h2>
+                            <button type="button" class="btn btn-primary document-btn m-b d-flex justify-content-center align-items-center"
+                                    style="height: 100px; width: 200px">
+                                <i class="fa fa-id-card fa-4x"></i>
+                            </button>
+                        </div>
+                    }
+                    
+                    @if (Model.CustomerPic != null)
+                    {
+                        <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal1">
+                            Actualizar documento
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal1">
+                            Agregar documento
+                        </button>
+                    }
                     <div class="modal inmodal" id="myModal1" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content animated fadeIn">
@@ -199,22 +232,28 @@
                                     <h3 class="modal-title">Seleccione el tipo de documento</h3>
                                 </div>
                                 <div class="modal-body">
-                                    <form id="documentForm" class="m-t" asp-action="UpdateImages" asp-controller="CustomerConfiguration"  method="post">
+                                    <form id="documentForm" class="m-t" asp-action="UpdateImages" asp-controller="CustomerConfiguration" method="post">
                                         <input type="hidden" asp-for="CustomerId"/>
                                         <div class="d-flex flex-column align-items-start">
                                             <div class="i-checks">
                                                 <label>
-                                                    <div><label> <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="passport" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Pasaporte </label></div>
+                                                    <div>
+                                                        <label>
+                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="passport" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Pasaporte </label></div>
                                                 </label>
                                             </div>
                                             <div class="i-checks">
                                                 <label>
-                                                    <div><label> <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="license" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Licencia de Conducción </label></div>
+                                                    <div>
+                                                        <label>
+                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="license" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Licencia de Conducción </label></div>
                                                 </label>
                                             </div>
                                             <div class="i-checks">
                                                 <label>
-                                                    <div><label> <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="identification" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Idenrificación Oficial </label></div>
+                                                    <div>
+                                                        <label>
+                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="identification" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Idenrificación Oficial </label></div>
                                                 </label>
                                             </div>
                                         </div>

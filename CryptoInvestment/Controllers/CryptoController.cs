@@ -1,5 +1,6 @@
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
+using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
@@ -33,7 +34,6 @@ public class CryptoController : Controller
         if (HttpContext.User.Identity!.IsAuthenticated)
         {
             model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
-            Console.WriteLine(model.CustomerId);
         }
         
         var query = new ListSecurityQuestionsQuery();
@@ -66,6 +66,16 @@ public class CryptoController : Controller
         );
 
         model.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+        var query4 = new GetCustomerPicQuery(model.CustomerId);
+        var getCustomerPicResult = await _mediator.Send(query4);
+        
+        var customerPic = getCustomerPicResult.Match<CustomerPic>(
+            customerPic => customerPic,
+            _ => null
+        );
+        
+        model.CustomerPic = customerPic;
         
         return View(model);
     }

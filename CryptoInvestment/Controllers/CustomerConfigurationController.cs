@@ -1,9 +1,11 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.AssignPercentageCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.CreateBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.DeleteBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
+using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.CustomersPic.SaveCustomerPicCommand;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
@@ -41,8 +43,39 @@ public class CustomerConfigurationController : Controller
                 questions => questions,
                 _ => null!
             );
-            
+        
+            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+                customerQuestions => customerQuestions,
+                _ => null!
+            );
+        
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
+            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+                _ => null!
+            );
+
+            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerPicResult = await _mediator.Send(query4);
+        
+            var customerPic = getCustomerPicResult.Match<CustomerPic>(
+                customerPic => customerPic,
+                _ => null
+            );
+        
+            customerConfigurationViewModel.CustomerPic = customerPic;
             
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
@@ -90,9 +123,20 @@ public class CustomerConfigurationController : Controller
                 questions => questions,
                 _ => null!
             );
-                
+        
+            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+                customerQuestions => customerQuestions,
+                _ => null!
+            );
+        
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            
+            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
             var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
             var getCustomerBeneficiariesResult = await _mediator.Send(query3);
         
@@ -102,6 +146,16 @@ public class CustomerConfigurationController : Controller
             );
 
             customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerPicResult = await _mediator.Send(query4);
+        
+            var customerPic = getCustomerPicResult.Match<CustomerPic>(
+                customerPic => customerPic,
+                _ => null
+            );
+        
+            customerConfigurationViewModel.CustomerPic = customerPic;
             
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
@@ -143,9 +197,20 @@ public class CustomerConfigurationController : Controller
                 questions => questions,
                 _ => null!
             );
-            
+        
+            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+                customerQuestions => customerQuestions,
+                _ => null!
+            );
+        
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            
+            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
             var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
             var getCustomerBeneficiariesResult = await _mediator.Send(query3);
         
@@ -155,6 +220,16 @@ public class CustomerConfigurationController : Controller
             );
 
             customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerPicResult = await _mediator.Send(query4);
+        
+            var customerPic = getCustomerPicResult.Match<CustomerPic>(
+                customerPic => customerPic,
+                _ => null
+            );
+        
+            customerConfigurationViewModel.CustomerPic = customerPic;
             
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
@@ -194,9 +269,20 @@ public class CustomerConfigurationController : Controller
                 questions => questions,
                 _ => null!
             );
-            
+        
+            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+                customerQuestions => customerQuestions,
+                _ => null!
+            );
+        
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            
+            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
             var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
             var getCustomerBeneficiariesResult = await _mediator.Send(query3);
         
@@ -206,6 +292,16 @@ public class CustomerConfigurationController : Controller
             );
 
             customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerPicResult = await _mediator.Send(query4);
+        
+            var customerPic = getCustomerPicResult.Match<CustomerPic>(
+                customerPic => customerPic,
+                _ => null
+            );
+        
+            customerConfigurationViewModel.CustomerPic = customerPic;
             
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
@@ -246,9 +342,20 @@ public class CustomerConfigurationController : Controller
                 questions => questions,
                 _ => null!
             );
-            
+        
+            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+                customerQuestions => customerQuestions,
+                _ => null!
+            );
+        
             customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            
+            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
             var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
             var getCustomerBeneficiariesResult = await _mediator.Send(query3);
         
@@ -258,6 +365,16 @@ public class CustomerConfigurationController : Controller
             );
 
             customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+            var getCustomerPicResult = await _mediator.Send(query4);
+        
+            var customerPic = getCustomerPicResult.Match<CustomerPic>(
+                customerPic => customerPic,
+                _ => null
+            );
+        
+            customerConfigurationViewModel.CustomerPic = customerPic;
             
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
@@ -294,8 +411,6 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public IActionResult UpdateImages(string documentType, int customerId)
     {
-        Console.WriteLine(documentType);
-
         string type = documentType switch
         {
             "passport" => "Pasaporte",
