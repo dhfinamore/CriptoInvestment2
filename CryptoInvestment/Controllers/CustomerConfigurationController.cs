@@ -284,7 +284,7 @@ public class CustomerConfigurationController : Controller
             return BadRequest("No tiene permisos para realizar esta acción.");
         
         var body = await CreateDocumentsValidationEmail(email);
-        var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync("daniel@vcc.com.mx", "Solicitud de Validacion de documentos", body);
+        var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync(_appSettings.AdminDestination, "Solicitud de Validacion de documentos", body);
 
         return RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "subir-documentos" });
     }
