@@ -94,4 +94,15 @@ public class CustomerRepository : ICustomerRepository
     {
         await _context.CustomerPics.AddAsync(customerPic);
     }
+
+    public Task DeleteCustomerPic(CustomerPic customerPic)
+    {
+        _context.CustomerPics.Remove(customerPic);
+        return Task.CompletedTask;
+    }
+
+    public async Task<List<CustomerRelationship>> GetCustomerRelationships()
+    {
+        return await _context.CustomerRelationships.ToListAsync();
+    }
 }

@@ -41,10 +41,9 @@ public class CustomerBeneficiaryConfigurations : IEntityTypeConfiguration<Custom
             .HasMaxLength(45)
             .IsRequired(false);
 
-        builder.Property(cb => cb.Relationship)
-            .HasColumnName("relacion")
-            .HasMaxLength(45)
-            .IsRequired(false);
+        builder.Property(cb => cb.RelationshipId)
+            .HasColumnName("id_customer_rela")
+            .IsRequired(true);
 
         builder.Property(cb => cb.Porcent)
             .HasColumnName("porce")

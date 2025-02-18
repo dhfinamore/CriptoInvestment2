@@ -16,9 +16,10 @@ public class CustomerBeneficiaryViewModel
     public string PhoneNumber { get; set; } = null!;
     
     [Required(ErrorMessage = "Relación con el benefeciario es requerido")]
-    public string Relationship { get; set; } = null!;
+    public int RelationshipId { get; set; }
 
     public decimal? Percentage { get; set; }
     
     public List<CustomerBeneficiary> CustomerBeneficiaries { get; set; } = [];
+    public List<CustomerRelationship> CustomerRelationships { get; set; } = [];
 }

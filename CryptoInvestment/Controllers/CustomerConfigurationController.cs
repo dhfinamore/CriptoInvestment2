@@ -1,21 +1,27 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
+using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.AssignPercentageCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.CreateBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Command.DeleteBeneficiaryCommand;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
+using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
+using CryptoInvestment.Application.CustomersPic.DeleteCustomerPicCommand;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.CustomersPic.SaveCustomerPicCommand;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
+using CryptoInvestment.Services.ConfigurationModels;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
 
 namespace CryptoInvestment.Controllers;
 
@@ -23,10 +29,14 @@ namespace CryptoInvestment.Controllers;
 public class CustomerConfigurationController : Controller
 {
     private readonly ISender _mediator;
+    private readonly AppSettings _appSettings;
+    private readonly IEmailService _emailService;
 
-    public CustomerConfigurationController(ISender mediator)
+    public CustomerConfigurationController(ISender mediator, IOptions<AppSettings> appSettings, IEmailService emailService)
     {
         _mediator = mediator;
+        _emailService = emailService;
+        _appSettings = appSettings.Value;
     }
 
     [HttpPost]
@@ -36,47 +46,7 @@ public class CustomerConfigurationController : Controller
 
         if (!ModelState.IsValid)
         {
-            var query = new ListSecurityQuestionsQuery();
-            var listSecurityQuestionsResult = await _mediator.Send(query);
-        
-            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
-                questions => questions,
-                _ => null!
-            );
-        
-            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
-        
-            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
-                customerQuestions => customerQuestions,
-                _ => null!
-            );
-        
-            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
-        
-            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
-        
-            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
-                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
-                _ => null!
-            );
-
-            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
-        
-            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerPicResult = await _mediator.Send(query4);
-        
-            var customerPic = getCustomerPicResult.Match<CustomerPic>(
-                customerPic => customerPic,
-                _ => null
-            );
-        
-            customerConfigurationViewModel.CustomerPic = customerPic;
-            
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
 
@@ -116,47 +86,7 @@ public class CustomerConfigurationController : Controller
 
         if (!ModelState.IsValid)
         {
-            var query = new ListSecurityQuestionsQuery();
-            var listSecurityQuestionsResult = await _mediator.Send(query);
-        
-            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
-                questions => questions,
-                _ => null!
-            );
-        
-            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
-        
-            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
-                customerQuestions => customerQuestions,
-                _ => null!
-            );
-        
-            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
-        
-            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
-        
-            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
-                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
-                _ => null!
-            );
-
-            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
-        
-            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerPicResult = await _mediator.Send(query4);
-        
-            var customerPic = getCustomerPicResult.Match<CustomerPic>(
-                customerPic => customerPic,
-                _ => null
-            );
-        
-            customerConfigurationViewModel.CustomerPic = customerPic;
-            
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
         
@@ -190,47 +120,7 @@ public class CustomerConfigurationController : Controller
 
         if (!ModelState.IsValid)
         {
-            var query = new ListSecurityQuestionsQuery();
-            var listSecurityQuestionsResult = await _mediator.Send(query);
-        
-            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
-                questions => questions,
-                _ => null!
-            );
-        
-            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
-        
-            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
-                customerQuestions => customerQuestions,
-                _ => null!
-            );
-        
-            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
-        
-            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
-        
-            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
-                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
-                _ => null!
-            );
-
-            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
-        
-            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerPicResult = await _mediator.Send(query4);
-        
-            var customerPic = getCustomerPicResult.Match<CustomerPic>(
-                customerPic => customerPic,
-                _ => null
-            );
-        
-            customerConfigurationViewModel.CustomerPic = customerPic;
-            
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
 
@@ -240,7 +130,7 @@ public class CustomerConfigurationController : Controller
             customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
             customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
             customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
-            customerConfigurationViewModel.CustomerBeneficiary.Relationship
+            customerConfigurationViewModel.CustomerBeneficiary.RelationshipId
         );
         
         var createCustomerResult = await _mediator.Send(command);
@@ -262,47 +152,7 @@ public class CustomerConfigurationController : Controller
 
         if (!ModelState.IsValid)
         {
-            var query = new ListSecurityQuestionsQuery();
-            var listSecurityQuestionsResult = await _mediator.Send(query);
-        
-            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
-                questions => questions,
-                _ => null!
-            );
-        
-            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
-        
-            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
-                customerQuestions => customerQuestions,
-                _ => null!
-            );
-        
-            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
-        
-            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
-        
-            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
-                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
-                _ => null!
-            );
-
-            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
-        
-            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerPicResult = await _mediator.Send(query4);
-        
-            var customerPic = getCustomerPicResult.Match<CustomerPic>(
-                customerPic => customerPic,
-                _ => null
-            );
-        
-            customerConfigurationViewModel.CustomerPic = customerPic;
-            
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
 
@@ -312,7 +162,7 @@ public class CustomerConfigurationController : Controller
             customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
             customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
             customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
-            customerConfigurationViewModel.CustomerBeneficiary.Relationship,
+            customerConfigurationViewModel.CustomerBeneficiary.RelationshipId,
             customerConfigurationViewModel.CustomerBeneficiary.Id
         );
         
@@ -335,47 +185,8 @@ public class CustomerConfigurationController : Controller
 
         if (!ModelState.IsValid)
         {
-            var query = new ListSecurityQuestionsQuery();
-            var listSecurityQuestionsResult = await _mediator.Send(query);
-        
-            var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
-                questions => questions,
-                _ => null!
-            );
-        
-            var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
-        
-            var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
-                customerQuestions => customerQuestions,
-                _ => null!
-            );
-        
-            customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
-            customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
-            customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
-        
-            var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerBeneficiariesResult = await _mediator.Send(query3);
-        
-            var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
-                customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
-                _ => null!
-            );
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
 
-            customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
-        
-            var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
-            var getCustomerPicResult = await _mediator.Send(query4);
-        
-            var customerPic = getCustomerPicResult.Match<CustomerPic>(
-                customerPic => customerPic,
-                _ => null
-            );
-        
-            customerConfigurationViewModel.CustomerPic = customerPic;
-            
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
 
@@ -395,7 +206,7 @@ public class CustomerConfigurationController : Controller
             }
         );
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> DeleteBeneficiary(int customerId, int beneficiaryId)
     {
@@ -415,7 +226,7 @@ public class CustomerConfigurationController : Controller
         {
             "passport" => "Pasaporte",
             "license" => "Licencia",
-            _ => "Identificación"
+            _ => "Identificacion"
         };
 
         var model = new UpdateImageViewModel
@@ -449,6 +260,99 @@ public class CustomerConfigurationController : Controller
             success => Json(new { success = true }),
             errors => Json(new { success = false, message = errors.First().Description })
         );
+    }
+
+    public async Task<IActionResult> SendDocumentsToValidation(int token)
+    {
+        var email = HttpContext.Session.GetString("UserEmail");
+        
+        if (string.IsNullOrEmpty(email))
+            return RedirectToAction("Login", "Authentication");
+        
+        var query = new GetCustomerByEmailQuery(email!);
+        var getCustomerByEmailResult = await _mediator.Send(query);
+        
+        var customerId = getCustomerByEmailResult.Match<int>(
+            customer => customer.IdCustomer,
+            _ => 0
+        );
+        
+        if (customerId == 0)
+            return RedirectToAction("Login", "Authentication");
+
+        if (customerId != token)
+            return BadRequest("No tiene permisos para realizar esta acción.");
+        
+        var body = await CreateDocumentsValidationEmail(email);
+        var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync("daniel@vcc.com.mx", "Solicitud de Validacion de documentos", body);
+
+        return RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "subir-documentos" });
+    }
+    
+    [HttpDelete]
+    public async Task<IActionResult> DeleteCustomerPic(int customerId)
+    {
+        var command = new DeleteCustomerPicCommand(customerId);
+        var deleteCustomerPicResult = await _mediator.Send(command);
+
+        return deleteCustomerPicResult.Match<IActionResult>(
+            success => Json(new { success = true }),
+            errors => Json(new { success = false, message = errors.First().Description })
+        );
+    }
+    
+    private async Task LoadCustomerConfigurationViewModel(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        var query = new ListSecurityQuestionsQuery();
+        var listSecurityQuestionsResult = await _mediator.Send(query);
+        
+        var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+            questions => questions,
+            _ => null!
+        );
+        
+        var query2 = new GetCustomerSecurityQuestionsQuery(customerConfigurationViewModel.CustomerId);
+        var getCustomerSecurityQuestionsResult = await _mediator.Send(query2);
+        
+        var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+            customerQuestions => customerQuestions,
+            _ => null!
+        );
+        
+        customerConfigurationViewModel.SetSecurityQuestion.SecurityQuestions = questions;
+        customerConfigurationViewModel.SetSecurityQuestion.FirstQuestionId = customerQuestions[0].IdQuestion;
+        customerConfigurationViewModel.SetSecurityQuestion.SecondQuestionId = customerQuestions[1].IdQuestion;
+        customerConfigurationViewModel.SetSecurityQuestion.ThirdQuestionId = customerQuestions[2].IdQuestion;
+        
+        var query3 = new GetCustomerBeneficiariesQuery(customerConfigurationViewModel.CustomerId);
+        var getCustomerBeneficiariesResult = await _mediator.Send(query3);
+        
+        var customerBeneficiaries = getCustomerBeneficiariesResult.Match<List<CustomerBeneficiary>>(
+            customerBeneficiaries => customerBeneficiaries.Count > 0 ? customerBeneficiaries : [],
+            _ => null!
+        );
+
+        customerConfigurationViewModel.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+        var query5 = new GetCustomerRelationshipQuery();
+        var getCustomerRelationshipResult = await _mediator.Send(query5);
+        
+        var customerRelationship = getCustomerRelationshipResult.Match<List<CustomerRelationship>>(
+            customerRelationship => customerRelationship,
+            _ => null!
+        );
+        
+        customerConfigurationViewModel.CustomerBeneficiary.CustomerRelationships = customerRelationship;
+        
+        var query4 = new GetCustomerPicQuery(customerConfigurationViewModel.CustomerId);
+        var getCustomerPicResult = await _mediator.Send(query4);
+        
+        var customerPic = getCustomerPicResult.Match<CustomerPic>(
+            customerPic => customerPic,
+            _ => null
+        );
+        
+        customerConfigurationViewModel.CustomerPic = customerPic;
     }
     
     private void RemoveValidationForResetPassword(ModelStateDictionary modelState)
@@ -515,5 +419,17 @@ public class CustomerConfigurationController : Controller
         modelState.Remove("CustomerBeneficiary.PhoneNumber");
         modelState.Remove("CustomerBeneficiary.Percentage");
         modelState.Remove("CustomerBeneficiary.Relationship");
+    }
+    
+    private async Task<string> CreateDocumentsValidationEmail(string email)
+    {
+        string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Templates", "SendDocumentsToValidation.html");
+
+        string bodyTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+
+        string body = bodyTemplate
+            .Replace("{email}", email);
+
+        return body;
     }
 }

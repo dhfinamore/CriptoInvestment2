@@ -212,9 +212,12 @@
                     
                     @if (Model.CustomerPic != null)
                     {
-                        <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal1">
-                            Actualizar documento
-                        </button>
+                        <div class="d-inline-flex">
+                            <button class="btn btn-danger m-b d-flex justify-content-center align-items-center m-r demo5">Eliminar documentos</button>
+                            <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal2">
+                                Validar Documentos
+                            </button>
+                        </div>
                     }
                     else
                     {
@@ -259,9 +262,30 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Guardar</button>
+                                            <button type="submit" class="btn btn-primary">Continuar</button>
                                         </div>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal inmodal" id="myModal2" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content animated fadeIn">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">
+                                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                    </button>
+                                    <h3 class="modal-title">Enviar documentos a validación</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <h4>Si está satisfecho con los documentos, es momento de enviarlos a validación.</h4>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                                        <a type="submit" class="btn btn-primary" href="@Url.Action("SendDocumentsToValidation", "CustomerConfiguration", new { token = Model.CustomerId })">Enviar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -308,8 +332,13 @@
                                                         </div>
 
                                                         <div class="form-group">
-                                                            <input asp-for="CustomerBeneficiary.Relationship" id="relationship" class="form-control" placeholder="Parentezco" required/>
-                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.Relationship)</span>
+                                                            @Html.DropDownListFor(model => model.CustomerBeneficiary.RelationshipId,
+                                                                new SelectList(Model.CustomerBeneficiary.CustomerRelationships, "RelationshipId", "Relationship"),
+                                                                "Seleccione una relación",
+                                                                new { @class = "form-control", required = "required" })
+                                                            <span class="text-danger">
+                                                                @Html.ValidationMessageFor(model => model.CustomerBeneficiary.RelationshipId)
+                                                            </span>
                                                         </div>
 
                                                         <div class="form-group">
@@ -356,7 +385,7 @@
                                                                         <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
                                                                         <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
                                                                         <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Relationship"/>
+                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].RelationshipId"/>
                                                                         <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
                                                                     </td>
                                                                     <td class="text-right mb-0">
@@ -397,7 +426,13 @@
                                             <tr>
                                                 <td>@beneficiary.Nombre @beneficiary.ApePat</td>
                                                 <td>@beneficiary.Tel</td>
-                                                <td>@beneficiary.Relationship</td>
+                                                <td>
+                                                    @{
+                                                        var rel = Model.CustomerBeneficiary.CustomerRelationships
+                                                            .FirstOrDefault(r => r.RelationshipId == beneficiary.RelationshipId)?.Relationship;
+                                                    }
+                                                    @rel
+                                                </td>
                                                 <td>
                                                     <span class="percentage-pie" data-value="@beneficiary.Porcent"></span>
                                                     @beneficiary.Porcent
@@ -408,7 +443,7 @@
                                                             data-name="@beneficiary.Nombre"
                                                             data-ape-pat="@beneficiary.ApePat"
                                                             data-ape-mat="@beneficiary.ApeMat"
-                                                            data-relationship="@beneficiary.Relationship"
+                                                            data-relationship="@beneficiary.RelationshipId"
                                                             data-phone="@beneficiary.Tel"
                                                             data-toggle="modal" data-target="#myModal4">
                                                         <i class="fa fa-pencil"></i>
@@ -449,7 +484,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"></script>
     </environment>
-    
+
     <script type="text/javascript">
         $(document).ready(function () {
             var options1 = {
@@ -699,6 +734,51 @@
                 checkboxClass: 'icheckbox_square-green',
                 radioClass: 'iradio_square-green',
             });
+
+            $('.demo5').click(function () {
+                swal({
+                        title: "¿Estas seguro?",
+                        text: "No será capaz de recuperar los documentos!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Eliminar",
+                        cancelButtonText: "Cancelar",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            $.ajax({
+                                url: '/CustomerConfiguration/DeleteCustomerPic',
+                                type: 'DELETE',
+                                data: {
+                                    customerId: @Model.CustomerId,
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        swal({
+                                            title: "¡Eliminado!",
+                                            text: "Los documentos han sido eliminados.",
+                                            type: "success",
+                                            confirmButtonText: "OK"
+                                        }, function () {
+                                            window.location.href = "/Crypto/CustomerConfiguration?activeTab=subir-documentos";
+                                        });
+                                    } else {
+                                        swal("Error", response.message || "No se pudo eliminar los documentos.", "error");
+                                    }
+                                },
+                                error: function () {
+                                    swal("Error", "No se pudo eliminar los documentos.", "error");
+                                }
+                            });
+                        } else {
+                            swal("Cancelled", "Your imaginary file is safe :)", "error");
+                        }
+                    });
+            });
+
         });
     </script>
 }

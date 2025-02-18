@@ -8,6 +8,6 @@ public class CustomerBeneficiary
     public string ApePat { get; set; } = null!;
     public string? ApeMat { get; set; }
     public string Tel { get; set; } = null!;
-    public string Relationship { get; set; } = null!;
+    public int RelationshipId { get; set; }
     public decimal? Porcent { get; set; }
 }

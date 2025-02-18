@@ -1,5 +1,6 @@
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
+using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
@@ -66,6 +67,16 @@ public class CryptoController : Controller
         );
 
         model.CustomerBeneficiary.CustomerBeneficiaries = customerBeneficiaries;
+        
+        var query5 = new GetCustomerRelationshipQuery();
+        var getCustomerRelationshipResult = await _mediator.Send(query5);
+        
+        var customerRelationship = getCustomerRelationshipResult.Match<List<CustomerRelationship>>(
+            customerRelationship => customerRelationship,
+            _ => null!
+        );
+        
+        model.CustomerBeneficiary.CustomerRelationships = customerRelationship;
         
         var query4 = new GetCustomerPicQuery(model.CustomerId);
         var getCustomerPicResult = await _mediator.Send(query4);

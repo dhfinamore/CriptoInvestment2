@@ -10,5 +10,5 @@ public record CreateBeneficiaryCommand(
     string ApePaternal,
     string? ApeMaternal,
     string PhoneNumber,
-    string Relationship,
+    int RelationshipId,
     int? BeneficiaryId = null) : IRequest<ErrorOr<Success>>;

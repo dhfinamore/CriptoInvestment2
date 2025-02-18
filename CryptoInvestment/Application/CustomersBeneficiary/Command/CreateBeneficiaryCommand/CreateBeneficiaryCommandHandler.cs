@@ -43,6 +43,7 @@ public class CreateBeneficiaryCommandHandler : IRequestHandler<Command.CreateBen
             beneficiary.ApePat = command.ApePaternal;
             beneficiary.ApeMat = command.ApeMaternal;
             beneficiary.Tel = command.PhoneNumber;
+            beneficiary.RelationshipId = command.RelationshipId;
             
             await _beneficiaryRepository.UpdateCustomerBeneficiaryAsync(customerBeneficiaries);
             await _unitOfWork.CommitChangesAsync();
@@ -57,7 +58,7 @@ public class CreateBeneficiaryCommandHandler : IRequestHandler<Command.CreateBen
             ApePat = command.ApePaternal,
             ApeMat = command.ApeMaternal,
             Tel = command.PhoneNumber,
-            Relationship = command.Relationship,
+            RelationshipId = command.RelationshipId,
             Porcent = customerBeneficiaries.Count == 0 ? 100 : 0
         };
         

@@ -262,9 +262,9 @@
                     }).toDataURL("image/png") : backImageData;
                 }
 
-                alert("Imagen frontal recortada: " + croppedFront);
+                console.log("Imagen frontal recortada: " + croppedFront);
                 if (requiresTwoPhotos) {
-                    alert("Imagen trasera recortada: " + croppedBack);
+                    console.log("Imagen trasera recortada: " + croppedBack);
                 }
                 
                 var data = {
@@ -274,7 +274,7 @@
                     PictureBackBase64: croppedBack
                 };
 
-                alert("Datos a enviar: " + JSON.stringify(data));
+                console.log("Datos a enviar: " + JSON.stringify(data));
 
                 $.ajax({
                     url: '/CustomerConfiguration/SaveCustomerPic',
