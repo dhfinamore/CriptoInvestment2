@@ -36,6 +36,10 @@ public class CryptoController : Controller
         {
             model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
         }
+        else
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
         
         var query = new ListSecurityQuestionsQuery();
         var listSecurityQuestionsResult = await _mediator.Send(query);

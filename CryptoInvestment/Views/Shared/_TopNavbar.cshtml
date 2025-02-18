@@ -8,9 +8,12 @@
                 <span class="m-r-sm text-muted welcome-message">Bienvenido a GHR INVESTMENTS & TRADING</span>
             </li>
             <li>
-                <a href="#">
-                    <i class="fa fa-sign-out"></i> Log out
-                </a>
+                <form id="logoutForm" asp-controller="Authentication" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-link">
+                            <i class="fa fa-sign-out"></i> Salir del Sistema
+                    </button>
+                </form>
             </li>
         </ul>
     </nav>

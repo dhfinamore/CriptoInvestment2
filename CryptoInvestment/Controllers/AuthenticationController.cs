@@ -356,6 +356,18 @@ public class AuthenticationController : Controller
     }
     #endregion
 
+    #region LogoutRegion
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        HttpContext.Session.Clear();
+        return RedirectToAction("Login", "Authentication");
+    }
+    #endregion
+    
     #region HelpersRegion
     private async Task<string> CreateVerificationEmail(string email)
     {

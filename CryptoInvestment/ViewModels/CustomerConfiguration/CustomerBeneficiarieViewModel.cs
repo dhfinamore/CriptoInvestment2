@@ -13,7 +13,7 @@ public class CustomerBeneficiaryViewModel
     public string ApePaternal { get; set; } = null!;
     
     public string? ApeMaternal { get; set; }
-    public string PhoneNumber { get; set; } = null!;
+    public string? PhoneNumber { get; set; }
     
     [Required(ErrorMessage = "Relación con el benefeciario es requerido")]
     public int RelationshipId { get; set; }
