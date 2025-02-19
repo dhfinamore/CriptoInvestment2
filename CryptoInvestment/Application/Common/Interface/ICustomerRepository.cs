@@ -19,4 +19,5 @@ public interface ICustomerRepository
     public Task CreateCustomerPicAsync(CustomerPic customerPic);
     public Task DeleteCustomerPic(CustomerPic customerPic);
     public Task<List<CustomerRelationship>> GetCustomerRelationships();
+    public Task<List<Customer>> GetCustomerReferrals(int customerId);
 }

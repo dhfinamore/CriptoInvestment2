@@ -1,17 +1,64 @@
+@model CryptoInvestment.ViewModels.Referrals.ReferralViewModel
+
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
     ViewBag.Title = "GHR I & T";
 }
 
-<!DOCTYPE html>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="text-center m-t-lg">
+                <h1>
+                    Referidos
+                </h1>
+            </div>
+            <div class="text-center m-t-md">
+                <h3>
+                    Gana el 10% de la inversión inicial de cada amigo que refieras a GHR Investment. <br />
+                    Invita, ellos invierten y tú generas ingresos pasivos sin límites <br />
+                    !Multiplica tus ganacias hoy!
+                </h3>
+            </div>
+            <div class="text-center m-t-md">
+                <div class="d-inline-flex center-container align-items-center m-t-md">
+                    <h4 id="copytext" class="m-r">@Model.ReferralCode</h4>
 
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      <h1>Referral</h1>
+                    <button class="btn btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copy</button>
+                </div>
+            </div>
+            <div class="text-center m-t-lg jumbotron container page-container">
+                <h4>Lista de referidos actuales</h4>
+                <div class="d-flex align-content-start">
+                    <ol>
+                        @foreach(var referral in Model.ReferralList)
+                        {
+                            <li>
+                                <label>
+                                    @referral.Name -
+                                    @referral.Email -
+                                    @referral.PhoneNumber
+                                </label>
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-</body>
-</html>
+
+@section Scripts {
+    <environment names="Development,Staging,Production">
+        <script src="~/lib/clipboard/clipboard.min.js"></script>
+    </environment>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            new Clipboard('.btn');
+
+        });
+    </script>
+}
+                

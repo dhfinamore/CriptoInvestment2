@@ -28,7 +28,10 @@ public class DeleteCustomerPicCommandHandler : IRequestHandler<DeleteCustomerPic
         
         if (customerPic is null)
             return Error.NotFound(description: "Customer pic not found");
+
+        customer.DocsValidated = 0;
         
+        await _customerRepository.UpdateCustomerAsync(customer);
         await _customerRepository.DeleteCustomerPic(customerPic);
         await _unitOfWork.CommitChangesAsync();
 

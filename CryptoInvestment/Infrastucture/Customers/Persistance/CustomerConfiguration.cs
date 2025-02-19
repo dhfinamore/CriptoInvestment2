@@ -88,6 +88,7 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.Property(c => c.DocsValidated)
             .HasColumnName("docs_validated")
+            .HasColumnType("TINYINT")
             .HasDefaultValue(false);
 
         builder.HasIndex(c => c.Email).IsUnique();

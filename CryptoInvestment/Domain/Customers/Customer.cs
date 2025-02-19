@@ -21,7 +21,7 @@ public class Customer
     public int? FailedLoginAttempts { get; set; } = 0;
     public bool? AcceptPromoEmail { get; set; }
     public DateTime? Arrival { get; set; }
-    public bool? DocsValidated { get; set; }
+    public int DocsValidated { get; set; }
     
     public Customer()
     {

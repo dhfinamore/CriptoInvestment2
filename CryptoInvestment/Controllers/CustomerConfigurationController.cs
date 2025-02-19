@@ -14,6 +14,7 @@ using CryptoInvestment.Application.CustomersPic.SaveCustomerPicCommand;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
+using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.Services.ConfigurationModels;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using ErrorOr;
@@ -31,11 +32,14 @@ public class CustomerConfigurationController : Controller
     private readonly ISender _mediator;
     private readonly AppSettings _appSettings;
     private readonly IEmailService _emailService;
+    // TODO Remove this
+    private readonly CryptoInvestmentDbContext _context;
 
-    public CustomerConfigurationController(ISender mediator, IOptions<AppSettings> appSettings, IEmailService emailService)
+    public CustomerConfigurationController(ISender mediator, IOptions<AppSettings> appSettings, IEmailService emailService, CryptoInvestmentDbContext context)
     {
         _mediator = mediator;
         _emailService = emailService;
+        _context = context;
         _appSettings = appSettings.Value;
     }
 
@@ -272,20 +276,25 @@ public class CustomerConfigurationController : Controller
         var query = new GetCustomerByEmailQuery(email!);
         var getCustomerByEmailResult = await _mediator.Send(query);
         
-        var customerId = getCustomerByEmailResult.Match<int>(
-            customer => customer.IdCustomer,
-            _ => 0
+        var customer = getCustomerByEmailResult.Match<Customer>(
+            customer => customer,
+            _ => null!
         );
         
-        if (customerId == 0)
+        if (customer is null)
             return RedirectToAction("Login", "Authentication");
 
-        if (customerId != token)
+        if (customer.IdCustomer != token)
             return BadRequest("No tiene permisos para realizar esta acción.");
         
         var body = await CreateDocumentsValidationEmail(email);
         var sendVerificationEmailResult = await _emailService.SendVerificationEmailAsync(_appSettings.AdminDestination, "Solicitud de Validacion de documentos", body);
 
+        // TODO Move to aplication layer
+        customer.DocsValidated = 1;
+        _context.Customers.Update(customer);
+        await _context.SaveChangesAsync();
+        
         return RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "subir-documentos" });
     }
     

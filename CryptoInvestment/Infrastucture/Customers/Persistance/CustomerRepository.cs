@@ -23,7 +23,8 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<Customer?> GetCustomerByEmailAsync(string email)
     {
-        return await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+        var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+        return customer;
     }
 
     public async Task<Customer?> GetCustomerByIdAsync(int idCustomer)
@@ -104,5 +105,11 @@ public class CustomerRepository : ICustomerRepository
     public async Task<List<CustomerRelationship>> GetCustomerRelationships()
     {
         return await _context.CustomerRelationships.ToListAsync();
+    }
+
+    public async Task<List<Customer>> GetCustomerReferrals(int customerId)
+    {
+        return await _context.Customers.
+            Where(c => c.IdParent == customerId).ToListAsync();
     }
 }

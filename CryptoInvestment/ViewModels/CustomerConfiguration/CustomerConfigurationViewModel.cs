@@ -10,6 +10,7 @@ public class CustomerConfigurationViewModel
     public SecurityQuestionsViewModel SetSecurityQuestion { get; set; }
     public CustomerBeneficiaryViewModel CustomerBeneficiary { get; set; }
     public CustomerPic? CustomerPic { get; set; }
+    public int DocsValidated { get; set; }
     
     public CustomerConfigurationViewModel()
     {

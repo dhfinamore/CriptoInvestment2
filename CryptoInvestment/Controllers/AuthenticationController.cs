@@ -390,32 +390,5 @@ public class AuthenticationController : Controller
 
         return body;
     }
-    
-    /* TODO Implementar lógica para generar el link de referido
-    public async Task<IActionResult> GenerateReferralLink(string email)
-    {
-        var query = new GetCustomerByEmailQuery(email);
-        var getCustomerResult = await _mediator.Send(query);
-
-        var customer = getCustomerResult.Match<Customer>(
-            customer => customer,
-            _ => null!
-        );
-
-        string referralToken = _encryptionService.EncryptId(customer.IdCustomer.ToString());
-        string referralUrl = Url.Action("Register", "Authentication", new { token = referralToken }, Request.Scheme)!;
-
-        var command = new GenerateReferralLinkCommand(customer.IdCustomer, referralUrl);
-        var generateReferralLinkResult = await _mediator.Send(command);
-
-        return generateReferralLinkResult.Match<IActionResult>(
-            _ => RedirectToAction("ConfirmEmail", "Authentication", new { email }),
-            errors =>
-            {
-                ModelState.AddModelError("", errors.First().Description);
-                return RedirectToAction("Login", "Authentication");
-            }
-        );
-    }*/
     #endregion
 }

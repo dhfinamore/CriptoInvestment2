@@ -183,6 +183,26 @@
                 <div>
                     @if (Model.CustomerPic != null)
                     {
+                        if (Model.DocsValidated == 0)
+                        {
+                            <h4 class="m-b">Si está satisfecho con los documentos, es momento de enviarlos a validación. <br/>
+                                Una vez enviados a validación, no podrán ser modificados o eliminados hasta <br/>
+                                recibir respuesta.</h4>
+                        }
+                        if (Model.DocsValidated == 1)
+                        {
+                            <h4 class="m-b">Documentos en revisión, este proceso podrá demorar hasta 48
+                                horas</h4>
+                        }
+                        if (Model.DocsValidated == 2)
+                        {
+                            <h4 class="m-b">@Model.CustomerPic.RejectMessage</h4>
+                        }
+                        if (Model.DocsValidated == 3)
+                        {
+                            <h4 class="m-b">Documentos validados exitosamente</h4>
+                        }
+                        
                         <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
                             @if (Model.CustomerPic.PictureFront != null)
                             {
@@ -203,9 +223,9 @@
                     {
                         <div>
                             <h2>No ha sido agregado ningún documento de identificacíon</h2>
-                            <button type="button" class="btn btn-primary document-btn m-b d-flex justify-content-center align-items-center"
+                            <button type="button" class="btn btn-white document-btn m-b d-flex justify-content-center align-items-center"
                                     style="height: 100px; width: 200px">
-                                <i class="fa fa-id-card fa-4x"></i>
+                                <i class="fa fa-id-card-o fa-4x"></i>
                             </button>
                         </div>
                     }
@@ -213,10 +233,17 @@
                     @if (Model.CustomerPic != null)
                     {
                         <div class="d-inline-flex">
-                            <button class="btn btn-danger m-b d-flex justify-content-center align-items-center m-r demo5">Eliminar documentos</button>
-                            <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal2">
-                                Validar Documentos
-                            </button>
+                            @if (Model.DocsValidated == 0 || Model.DocsValidated == 2)
+                            {
+                                <button class="btn btn-danger m-b d-flex justify-content-center align-items-center m-r demo5">Eliminar documentos</button>
+                            }
+
+                            @if (Model.DocsValidated == 0)
+                            {
+                                <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal2">
+                                    Validar Documentos
+                                </button>
+                            }
                         </div>
                     }
                     else
@@ -242,7 +269,7 @@
                                                 <label>
                                                     <div>
                                                         <label>
-                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="passport" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Pasaporte </label></div>
+                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="checked" value="passport" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Pasaporte </label></div>
                                                 </label>
                                             </div>
                                             <div class="i-checks">
@@ -256,7 +283,7 @@
                                                 <label>
                                                     <div>
                                                         <label>
-                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="identification" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Idenrificación Oficial </label></div>
+                                                            <div class="iradio_square-green" style="position: relative;"><input type="radio" checked="" value="identification" name="documentType" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div> <i></i> Identificación Oficial </label></div>
                                                 </label>
                                             </div>
                                         </div>
@@ -280,7 +307,9 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="d-flex flex-column align-items-center">
-                                        <h4>Si está satisfecho con los documentos, es momento de enviarlos a validación.</h4>
+                                        <h4>“Si está satisfecho con los documentos, es momento de enviarlos a validación.
+                                            Una vez enviados a validación, no podrán ser modificados o eliminados hasta
+                                            recibir respuesta.</h4>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
@@ -375,33 +404,53 @@
                                                                 <tbody id="beneficiaryTableBody">
                                                                 @for (var i = 0; i < Model.CustomerBeneficiary.CustomerBeneficiaries.Count; i++)
                                                                 {
-                                                                <tr>
-                                                                    <td>
-                                                                        <h4 class="mb-0">
-                                                                            @Model.CustomerBeneficiary.CustomerBeneficiaries[i].Nombre @Model.CustomerBeneficiary.CustomerBeneficiaries[i].ApePat
-                                                                        </h4>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomerBeneficiary"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomer"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].RelationshipId"/>
-                                                                        <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
-                                                                    </td>
-                                                                    <td class="text-right mb-0">
-                                                                        <div class="form-group">
-                                                                            <input asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Porcent" class="form-control m-t" placeholder="@Model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent" required/>
-                                                                            <span class="text-danger">
-                                                                                        @Html.ValidationMessageFor(model => model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent)
-                                                                                    </span>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <h4 class="mb-0">
+                                                                                @Model.CustomerBeneficiary.CustomerBeneficiaries[i].Nombre @Model.CustomerBeneficiary.CustomerBeneficiaries[i].ApePat
+                                                                            </h4>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomerBeneficiary"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomer"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].RelationshipId"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
+                                                                        </td>
+                                                                        <td class="text-right mb-0">
+                                                                            <div class="form-group">
+                                                                                <input asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Porcent" class="form-control m-t percent-input" placeholder="@Model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent" required/>
+                                                                                <span class="text-danger">
+                                                                                    @Html.ValidationMessageFor(model => model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent)
+                                                                                </span>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
                                                                 }
                                                                 </tbody>
                                                             </table>
                                                         </div>
-
+                                                        @{
+                                                            var percent = Model.CustomerBeneficiary.CustomerBeneficiaries.Sum(cb => cb.Porcent);
+                                                            
+                                                            <div>
+                                                                <span>Porcentage</span> 
+                                                                <span id="totalPercentText">@percent/100</span>
+                                                                    
+                                                            </div>
+                                                            if (percent <= 100)
+                                                            {
+                                                                <div class="progress progress-small">
+                                                                    <div style="width: @percent%;" class="progress-bar" id="progressBar"></div>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="progress progress-small">
+                                                                    <div style="width: 100%;" class="progress-bar progress-bar-danger" id="progressBar"></div>
+                                                                </div>
+                                                            }
+                                                        }
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
                                                             <button type="submit" class="btn btn-primary">Save changes</button>
@@ -661,7 +710,7 @@
                         confirmButtonText: "Eliminar",
                         cancelButtonText: "Cancelar",
                         closeOnConfirm: false,
-                        closeOnCancel: false
+                        closeOnCancel: true
                     },
                     function (isConfirm) {
                         if (isConfirm) {
@@ -675,14 +724,7 @@
                                 },
                                 success: function (response) {
                                     if (response.success) {
-                                        swal({
-                                            title: "¡Eliminado!",
-                                            text: "El beneficiario ha sido eliminado.",
-                                            type: "success",
-                                            confirmButtonText: "OK"
-                                        }, function () {
                                             window.location.href = "/Crypto/CustomerConfiguration?activeTab=ben";
-                                        });
                                     } else {
                                         swal("Error", response.message || "No se pudo eliminar el beneficiario.", "error");
                                     }
@@ -691,9 +733,6 @@
                                     swal("Error", "No se pudo eliminar el beneficiario.", "error");
                                 }
                             });
-                        }
-                        else {
-                            swal("Cancelled", "El beneficiario no ha sido eliminado.", "error");
                         }
                     });
             });
@@ -745,7 +784,7 @@
                         confirmButtonText: "Eliminar",
                         cancelButtonText: "Cancelar",
                         closeOnConfirm: false,
-                        closeOnCancel: false
+                        closeOnCancel: true
                     },
                     function (isConfirm) {
                         if (isConfirm) {
@@ -773,12 +812,32 @@
                                     swal("Error", "No se pudo eliminar los documentos.", "error");
                                 }
                             });
-                        } else {
-                            swal("Cancelled", "Your imaginary file is safe :)", "error");
                         }
                     });
             });
 
+            function updateProgressBar() {
+                var total = 0;
+                $('.percent-input').each(function () {
+                    var value = parseFloat($(this).val());
+                    if (!isNaN(value)) {
+                        total += value;
+                    }
+                });
+                
+                $('#totalPercentText').text(total + "/100");
+                if (total <= 100) {
+                    $('#progressBar').css('width', total + '%')
+                        .removeClass('progress-bar-danger');
+                } else {
+                    $('#progressBar').css('width', '100%')
+                        .addClass('progress-bar-danger');
+                }
+            }
+
+            $('.percent-input').off('input change').on('input change', updateProgressBar);
+
+            updateProgressBar();
         });
     </script>
 }

@@ -1,11 +1,16 @@
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
+using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
+using CryptoInvestment.Application.Referrals.Commands;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
+using CryptoInvestment.ViewModels.Referrals;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -17,10 +22,12 @@ namespace CryptoInvestment.Controllers;
 public class CryptoController : Controller
 {
     private readonly ISender _mediator;
+    private readonly IEncryptionService _encryptionService;
 
-    public CryptoController(ISender mediator)
+    public CryptoController(ISender mediator, IEncryptionService encryptionService)
     {
         _mediator = mediator;
+        _encryptionService = encryptionService;
     }
 
     public IActionResult Dashboard()
@@ -40,6 +47,16 @@ public class CryptoController : Controller
         {
             return RedirectToAction("Login", "Authentication");
         }
+        
+        var email = HttpContext.Session.GetString("UserEmail");
+        var query1 = new GetCustomerByEmailQuery(email!);
+
+        var customer = await _mediator.Send(query1);
+        
+        model.DocsValidated = customer.Match(
+            c => c.DocsValidated,
+            _ => 0
+        );
         
         var query = new ListSecurityQuestionsQuery();
         var listSecurityQuestionsResult = await _mediator.Send(query);
@@ -110,8 +127,42 @@ public class CryptoController : Controller
         return View();
     }
 
-    public IActionResult Referral()
+    public async Task<IActionResult> Referral()
     {
-        return View();
+        var model = new ReferralViewModel();
+        
+        if (HttpContext.User.Identity!.IsAuthenticated)
+        {
+            model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+        }
+        else
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+        
+        var query = new GetReferralsCommand(model.CustomerId);
+        var getReferralsResult = await _mediator.Send(query);
+        
+        var referrals = getReferralsResult.Match<List<Referral>>(
+            referrals => referrals.ConvertAll(referral => new Referral()
+            {
+                Name = $"{referral.Nombre} {referral.ApellidoPaterno}",
+                Email = referral.Email,
+                PhoneNumber = referral.Phone!
+            }),
+            _ => []
+        );
+        
+        model.ReferralList = referrals;
+        model.ReferralCode = GenerateReferralLink(model.CustomerId);
+
+        return View(model);
+    }
+    
+    public string GenerateReferralLink(int customerId)
+    {
+        string referralToken = _encryptionService.EncryptId(customerId.ToString());
+        string referralUrl = Url.Action("Register", "Authentication", new { token = referralToken }, Request.Scheme)!;
+        return referralUrl;
     }
 }
