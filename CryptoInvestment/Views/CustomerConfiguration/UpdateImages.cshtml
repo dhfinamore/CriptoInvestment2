@@ -2,7 +2,7 @@
 
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
-    ViewBag.Title = "Actualizar Imágenes";
+    ViewBag.Title = "Actualizar Documento";
 }
 
 <!DOCTYPE html>
@@ -25,7 +25,7 @@
     }
 </head>
 <body>
-<h2>Tomar las Imágenes</h2>
+<h2>Tomar las Imagen</h2>
 <div class="wrapper wrapper-content animated fadeInRight" style="margin-bottom:20px;">
     <!-- Sección para la Foto Frontal -->
     <div id="frontSection" class="mb-4">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <button type="button" id="saveImagesBtn" class="btn btn-primary mt-3">Guardar Imágenes</button>
+    <button type="button" id="saveImagesBtn" class="btn btn-primary mt-3">Guardar Documento</button>
 </div>
 
 @section scripts {
@@ -288,7 +288,7 @@
                     success: function () {
                         swal({
                             title: "¡Éxito!",
-                            text: "Las imágenes fueron guardadas correctamente.",
+                            text: "El Documento fué guardado correctamente.",
                             type: "success"
                         }, function () {
                             window.location.href = "/Crypto/CustomerConfiguration?activeTab=subir-documentos";
@@ -298,7 +298,7 @@
                         console.error("Error al guardar:", error);
                         swal({
                             title: "¡Error!",
-                            text: "Ocurrió un problema al guardar las imágenes. Intente nuevamente.",
+                            text: "Ocurrió un problema al guardar el Documento. Intente nuevamente.",
                             type: "error"
                         });
                     }
