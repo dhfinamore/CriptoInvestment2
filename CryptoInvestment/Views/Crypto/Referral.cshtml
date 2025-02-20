@@ -38,10 +38,17 @@
                 </div>
             </div>
             <div class="text-center m-t-lg jumbotron container page-container">
-                <h4>Lista de referidos actuales</h4>
+                @if (Model.ReferralList.Count > 0)
+                {
+                    <h4>Lista de referidos actuales</h4>
+                }
+                else
+                {
+                    <h4>Aún no hay Referidos</h4>
+                }
                 <div class="d-flex align-content-start">
                     <ol>
-                        @foreach(var referral in Model.ReferralList)
+                        @foreach (var referral in Model.ReferralList)
                         {
                             <li>
                                 <label>

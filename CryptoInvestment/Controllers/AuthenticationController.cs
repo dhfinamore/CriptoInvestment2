@@ -221,7 +221,7 @@ public class AuthenticationController : Controller
     #endregion
     
     # region SetPasswordRegion
-    public IActionResult SetPassword(string token, string date)
+    public async Task<IActionResult> SetPassword(string token, string date)
     {
         var sentDate = _encryptionService.DecryptDate(date);
         
@@ -231,6 +231,21 @@ public class AuthenticationController : Controller
         }
 
         string decryptedEmail = _encryptionService.DecryptEmail(token);
+
+        var query = new GetCustomerByEmailQuery(decryptedEmail);
+        var getCustomerResult = await _mediator.Send(query);
+
+        var customer = getCustomerResult.Match(
+            c => c,
+            e => null!);
+
+        if (customer is not null)
+        {
+            if (customer.EmailValidated == true)
+            {
+                TempData["InfoMessage"] = "Su correo ya fue validado. Por favor, inicie sesión.";
+            }
+        }
         
         var model = new SetPasswordViewModel
         {
