@@ -32,7 +32,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<C
             ApellidoPaterno = command.FirstFamilyName,
             ApellidoMaterno = command.SecondFamilyName,
             Phone = command.Phone,
-            AcceptPromoEmail = command.AcceptPromotions
+            AcceptPromoEmail = command.AcceptPromotions,
+            DocsValidated = 0
         };
 
         await _customerRepository.CreateCustomerAsync(customer);
