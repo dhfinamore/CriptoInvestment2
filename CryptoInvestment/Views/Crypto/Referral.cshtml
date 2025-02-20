@@ -1,3 +1,5 @@
+@using System.Net
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model CryptoInvestment.ViewModels.Referrals.ReferralViewModel
 
 @{
@@ -21,10 +23,18 @@
                 </h3>
             </div>
             <div class="text-center m-t-md">
-                <div class="d-inline-flex center-container align-items-center m-t-md">
                     <h4 id="copytext" class="m-r">@Model.ReferralCode</h4>
+                <div class="d-inline-flex center-container align-items-center m-t-md">
+                    <button class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copy</button>
+                    @{
+                        var referralUrl = Model.ReferralCode;
+                        var mensaje = $"¡Regístrate ahora y utiliza mi código de referido!\n{referralUrl}";
+                        var whatsappUrl = "https://api.whatsapp.com/send?text=" + WebUtility.UrlEncode(mensaje);
+                    }
 
-                    <button class="btn btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copy</button>
+                    <a href="@whatsappUrl" target="_blank" class="btn btn-primary m-l">
+                        <i class="fa fa-whatsapp fa-lg"></i> Compartir por WhatsApp
+                    </a>
                 </div>
             </div>
             <div class="text-center m-t-lg jumbotron container page-container">
@@ -56,7 +66,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            new Clipboard('.btn');
+            new Clipboard('.btn-clip');
 
         });
     </script>
