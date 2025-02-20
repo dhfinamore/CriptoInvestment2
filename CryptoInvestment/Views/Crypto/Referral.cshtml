@@ -28,7 +28,7 @@
                     <button class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copy</button>
                     @{
                         var referralUrl = Model.ReferralCode;
-                        var mensaje = $"¡Regístrate ahora y utiliza mi código de referido!\n{referralUrl}";
+                        var mensaje = $"¡Hola!, estoy usando esta aplicación de inversiones, regístrate con mi link de referido y pruébala!\n{referralUrl}";
                         var whatsappUrl = "https://api.whatsapp.com/send?text=" + WebUtility.UrlEncode(mensaje);
                     }
 
