@@ -28,7 +28,7 @@
     @if (TempData["Resend"] != null)
     {
         <div class="jumbotron text-center">
-                <h3>¡Hemos enviado un nuevo correo electrónico, si no lo ve en su bandeja de entrada verfiquelo en la carpeta de spam.</h3> <br />
+                <h3>¡Hemos enviado un nuevo correo electrónico, si no lo ve en su bandeja de entrada verifíquelo en la carpeta de spam.</h3> <br />
             <p>
                 <a href="@Url.Action("ResendEmail", "Authentication", new { name = _encryptionService.EncryptEmail(@ViewBag.Name), lastName = _encryptionService.EncryptEmail(@ViewBag.LastName), email = _encryptionService.EncryptEmail(@ViewBag.Email) })" role="button" class="btn btn-primary btn-lg">Reenviar</a>
             </p>
