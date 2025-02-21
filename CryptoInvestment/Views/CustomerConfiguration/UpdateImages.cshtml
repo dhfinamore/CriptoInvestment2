@@ -57,9 +57,9 @@
                 </button>
             </div>
         </div>
-        <div class="mt-3 text-center">
+        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; margin: auto;">
             <div id="frontPreviewContainer">
-                <img id="frontPreview" src="" alt="Vista previa frontal" class="img-fluid" style="max-height:300px; width:auto;">
+                <img id="frontPreview" src="" alt="Vista previa frontal" class="img-fluid" style="height:auto; width:auto;">
             </div>
         </div>
     </div>
@@ -93,9 +93,9 @@
                 </button>
             </div>
         </div>
-        <div class="mt-3 text-center">
+        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; margin: auto;">
             <div id="backPreviewContainer">
-                <img id="backPreview" src="" alt="Vista previa trasera" class="img-fluid" style="max-height:300px; width:auto;">
+                <img id="backPreview" src="" alt="Vista previa trasera" class="img-fluid" style="height:auto; width:auto;">
             </div>
         </div>
     </div>
@@ -138,8 +138,8 @@
                             zoomable: true,
                             scalable: true,
                             cropBoxResizable: true,
-                            maxCanvasWidth: 600,
-                            maxCanvasHeight: 900
+                            maxCanvasWidth: 1200,
+                            maxCanvasHeight: 1200
                         };
                         if(previewId === "frontPreview"){
                             cropperInstanceFront = new Cropper(img, options);
@@ -206,7 +206,7 @@
                     scalable: true,
                     cropBoxResizable: true,
                     maxCanvasWidth: 1200,
-                    maxCanvasHeight: 1000
+                    maxCanvasHeight: 1200
                 };
                 if(isFront){
                     if(cropperInstanceFront){ cropperInstanceFront.destroy(); }

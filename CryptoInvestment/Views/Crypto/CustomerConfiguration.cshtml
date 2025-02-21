@@ -47,6 +47,11 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link @(activeTab == "withdrawals" ? "active" : "")" id="withdrawals-tab" data-bs-toggle="tab" href="#withdrawals" role="tab">
+                Cuentas de Retiros
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link @(activeTab == "change-password" ? "active" : "")" id="change-password-tab" data-bs-toggle="tab" href="#change-password" role="tab">
                 Cambiar Contraseña
             </a>
@@ -453,6 +458,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- Document Tab -->
+        <div class="tab-pane fade @(activeTab == "withdrawals" ? "show active" : "")" id="withdrawals" role="tabpanel">
+            <div class="row text-center">
+                <h3>Cuentas de Retiros</h3>
             </div>
         </div>
         <!-- Change Password Tab: Se marca activo y visible -->

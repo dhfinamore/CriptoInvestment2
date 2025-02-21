@@ -40,25 +40,25 @@
             <div class="text-center m-t-lg jumbotron container page-container">
                 @if (Model.ReferralList.Count > 0)
                 {
-                    <h4>Lista de referidos actuales</h4>
+                    <h4>Lista de referidos</h4>
                 }
                 else
                 {
                     <h4>Aún no hay Referidos</h4>
                 }
-                <div class="d-flex align-content-start">
-                    <ol>
+                <div class="table-responsive">
+                    <table class="table table-hover issue-tracker">
+                        <tbody>
                         @foreach (var referral in Model.ReferralList)
                         {
-                            <li>
-                                <label>
-                                    @referral.Name -
-                                    @referral.Email -
-                                    @referral.PhoneNumber
-                                </label>
-                            </li>
+                            <tr>
+                                <td>@referral.Name</td>
+                                <td>@referral.Email</td>
+                                <td>@referral.PhoneNumber</td>
+                            </tr>
                         }
-                    </ol>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
