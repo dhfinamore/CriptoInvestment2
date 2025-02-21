@@ -1,3 +1,7 @@
+@using CryptoInvestment.Application.Common.Interface
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IEncryptionService _encryptionService
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -21,22 +25,34 @@
 </head>
 <body class="gray-bg">
 <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
-    <div class="jumbotron text-center">
-        <h1>GHR INVESTMENTS & TRADING</h1>
-        <h3>¡Verifique su correo electrónico para completar el registro!</h3>
-        <p> Hola @ViewBag.Name @ViewBag.LastName, <strong>Bienvenido a GHR Investments and Trading, </strong><br/>
-            para terminar de configurar su acceso al sistema, será necesario hacer dos pasos
-            muy simples: <br/>
-            1.- Definir una contraseña de acceso segura y <br/>
-            2.- Configurar tres preguntas de seguridad para recuperar su contraseña en caso
-            de que la olvide. <br/>
-            Ambos pasos le tomarán menos de 2 minutos..
-        </p>
-        <p> Puede solicitar un nuevo enlace de verificación haciendo clic en el siguiente botón:</p>
-        <p>
-            <a href="" role="button" class="btn btn-primary btn-lg">Reenviar</a>
-        </p>
-    </div>
+    @if (TempData["Resend"] != null)
+    {
+        <div class="jumbotron text-center">
+            <h3>¡Hemos enviado un nuevo email, verifique su correo así como su carpeta de spam.</h3> <br/>
+            <p>
+                <a href="@Url.Action("ResendEmail", "Authentication", new { name = _encryptionService.EncryptEmail(@ViewBag.Name), lastName = _encryptionService.EncryptEmail(@ViewBag.LastName), email = _encryptionService.EncryptEmail(@ViewBag.Email) })" role="button" class="btn btn-primary btn-lg">Reenviar</a>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="jumbotron text-center">
+            <h1>GHR INVESTMENTS & TRADING</h1>
+            <h3>¡Verifique su correo electrónico para completar el registro!</h3>
+            <p> Hola @ViewBag.Name @ViewBag.LastName, <strong>Bienvenido a GHR Investments and Trading, </strong><br/>
+                para terminar de configurar su acceso al sistema, será necesario hacer dos pasos
+                muy simples: <br/>
+                1.- Definir una contraseña de acceso segura y <br/>
+                2.- Configurar tres preguntas de seguridad para recuperar su contraseña en caso
+                de que la olvide. <br/>
+                Ambos pasos le tomarán menos de 2 minutos..
+            </p>
+            <p> Puede solicitar un nuevo enlace de verificación haciendo clic en el siguiente botón:</p>
+            <p>
+                <a href="@Url.Action("ResendEmail", "Authentication", new { name = _encryptionService.EncryptEmail(@ViewBag.Name), lastName = _encryptionService.EncryptEmail(@ViewBag.LastName), email = _encryptionService.EncryptEmail(@ViewBag.Email) })" role="button" class="btn btn-primary btn-lg">Reenviar</a>
+            </p>
+        </div>
+    }
 </div>
 </body>
 </html>

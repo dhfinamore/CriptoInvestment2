@@ -28,16 +28,26 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
         if (customer.EmailValidated != true)
             return LoginQueryErrors.EmailNotVerified;
         
-        if (!_passwordHasher.VerifyHashedPassword(customer.PasswdLogin, request.Password))
+        if (!_passwordHasher.VerifyHashedPassword(customer.PasswdLogin!, request.Password))
         {
             if (customer.LockedUp.HasValue && customer.LockedUp.Value.AddMinutes(15) < DateTime.Now)
             {
                 customer.FailedLoginAttempts = 0;
                 customer.LockedUp = null;
+                await _customerRepository.UpdateCustomerAsync(customer);
+                await _unitOfWork.CommitChangesAsync();
             }
             
             if (customer.LockedUp.HasValue && customer.LockedUp.Value.AddMinutes(15) > DateTime.Now)
             {
+                var minutesLeft = (int) (customer.LockedUp.Value.AddMinutes(15) - DateTime.Now).TotalMinutes;
+                if (minutesLeft == 1)
+                {
+                    customer.FailedLoginAttempts = 0;
+                    customer.LockedUp = null;
+                    await _customerRepository.UpdateCustomerAsync(customer);
+                    await _unitOfWork.CommitChangesAsync();
+                }
                 return LoginQueryErrors.AccountLocked;
             }
             
@@ -60,6 +70,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
         if (customer.FailedLoginAttempts > 0)
         {
             customer.FailedLoginAttempts = 0;
+            customer.LockedUp = null;
             await _customerRepository.UpdateCustomerAsync(customer);
             await _unitOfWork.CommitChangesAsync();
         }
