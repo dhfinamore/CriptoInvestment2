@@ -224,7 +224,7 @@ public class CustomerConfigurationController : Controller
     }
     
     [HttpPost]
-    public IActionResult UpdateImages(string documentType, int customerId)
+    public IActionResult UpdateImages(string documentType, int customerId, string method)
     {
         string type = documentType switch
         {
@@ -237,7 +237,8 @@ public class CustomerConfigurationController : Controller
         {
             CustomerId = customerId,
             RequiresTwoPhotos = documentType != "passport",
-            Type = type
+            Type = type,
+            IsCamera = method == "camera"
         };
         
         return View(model);

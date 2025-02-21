@@ -7,7 +7,7 @@
     var activeTab = Context.Request.Query["activeTab"].ToString();
     if (string.IsNullOrEmpty(activeTab))
     {
-        activeTab = "change-password";
+        activeTab = "ben";
     }
 }
 
@@ -37,6 +37,16 @@
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
+            <a class="nav-link @(activeTab == "ben" ? "active" : "")" id="ben-tab" data-bs-toggle="tab" href="#ben" role="tab">
+                Beneficiarios
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "subir-documentos" ? "active" : "")" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">
+                Documento
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link @(activeTab == "change-password" ? "active" : "")" id="change-password-tab" data-bs-toggle="tab" href="#change-password" role="tab">
                 Cambiar Contraseña
             </a>
@@ -46,131 +56,199 @@
                 Preguntas de Seguridad
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "subir-documentos" ? "active" : "")" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">
-                Documento
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(activeTab == "ben" ? "active" : "")" id="ben-tab" data-bs-toggle="tab" href="#ben" role="tab">
-                Beneficiarios
-            </a>
-        </li>
     </ul>
 
     <!-- Tab content -->
     <div class="tab-content">
-        <!-- Change Password Tab: Se marca activo y visible -->
-        <div class="tab-pane fade @(activeTab == "change-password" ? "show active" : "")" id="change-password" role="tabpanel">
-            <div class="d-flex align-items-center justify-content-center flex-column" style="height: 50vh;">
-                <div class="col-md-6">
-                    <div class="ibox ">
-                        <div class="ibox-content">
-                            <form class="m-t" asp-action="ResetPassword" asp-controller="CustomerConfiguration" method="post">
-                                <input type="hidden" asp-for="CustomerId"/>
-                                <div class="row" id="pwd-container1">
-                                    <div class="col-sm-12">
-                                        <div class="form-group">
-                                            <label for="password2">Confirmar Contraseña</label>
-                                            <input asp-for="ResetPassword.CurrentPassword" type="password" class="form-control" id="password" placeholder="Contraseña Actual">
-                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.CurrentPassword)</span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="password1">Nueva Contraseña</label>
-                                            <input asp-for="ResetPassword.Password" type="password" class="form-control example1" id="password1" placeholder="Contraseña">
-                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.Password)</span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="password2">Confirmar Contraseña</label>
-                                            <input asp-for="ResetPassword.ConfirmPassword" type="password" class="form-control" id="password2" placeholder="Confirmar Contraseña">
-                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.ConfirmPassword)</span>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="pwstrength_viewport_progress"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary block full-width m-b">Actualizar Contraseña</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Security Questions Tab -->
-        <div class="tab-pane fade @(activeTab == "security-questions" ? "show active" : "")" id="security-questions" role="tabpanel">
-            <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
+        <!-- Beneficiarios -->
+        <div class="tab-pane fade @(activeTab == "ben" ? "show active" : "")" id="ben" role="tabpanel">
+            <div class="wrapper wrapper-content animated fadeInRight">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="ibox">
+                            <div class="ibox-title">
+                                <h5>Lista de Beneficiarios</h5>
+                                <div class="ibox-tools">
+                                    <button type="button" id="addBeneficiary" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal4">Agregar Beneficiario</button>
+                                    <div class="modal inmodal" id="myModal4" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content animated fadeIn">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                                    </button>
+                                                    <h4 class="modal-title" id="modalTitle">Nuevo Beneficiario</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="beneficiaryForm" class="m-t" asp-action="CreateBeneficiary" asp-controller="CustomerConfiguration" method="post">
+                                                        <input type="hidden" asp-for="CustomerId"/>
+                                                        <input type="hidden" id="beneficiaryId" asp-for="CustomerBeneficiary.Id"/>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.Name" id="name" class="form-control" placeholder="Nombre" required/>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.Name)</span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.ApePaternal" id="apePaternal" class="form-control" placeholder="Apellido Paterno" required/>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.ApePaternal)</span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input asp-for="CustomerBeneficiary.ApeMaternal" id="apeMaternal" class="form-control" placeholder="Apellido Materno"/>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            @Html.DropDownListFor(model => model.CustomerBeneficiary.RelationshipId,
+                                                                new SelectList(Model.CustomerBeneficiary.CustomerRelationships, "RelationshipId", "Relationship"),
+                                                                "Seleccione una relación",
+                                                                new { @class = "form-control", required = "required", id = "relationship" })
+                                                            <span class="text-danger">
+                                                                @Html.ValidationMessageFor(model => model.CustomerBeneficiary.RelationshipId)
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input type="tel" asp-for="CustomerBeneficiary.PhoneNumber" id="phone" class="form-control"/>
+                                                            <span id="phone-error" class="validation-error" style="display: none; color: red;">
+                                                                Ingrese un número de teléfono válido.
+                                                            </span>
+                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.PhoneNumber)</span>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                                                            <button type="submit" class="btn btn-primary" id="saveChangesButton">Guardar</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal5">Asignación de porcentaje a beneficiarios</button>
+                                    <div class="modal inmodal" id="myModal5" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content animated fadeIn">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                                    </button>
+                                                    <h4 class="modal-title">Asignación de porcentaje</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="beneficiaryPercentForm" class="m-t" asp-action="AssignBeneficiaryPercent" asp-controller="CustomerConfiguration" method="post">
+                                                        <input type="hidden" asp-for="CustomerId"/>
+
+                                                        <div class="table-responsive" style="max-height: 500px">
+                                                            <table class="table table-hover issue-tracker">
+                                                                <tbody id="beneficiaryTableBody">
+                                                                @for (var i = 0; i < Model.CustomerBeneficiary.CustomerBeneficiaries.Count; i++)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            <h4 class="mb-0">
+                                                                                @Model.CustomerBeneficiary.CustomerBeneficiaries[i].Nombre @Model.CustomerBeneficiary.CustomerBeneficiaries[i].ApePat
+                                                                            </h4>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomerBeneficiary"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomer"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].RelationshipId"/>
+                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
+                                                                        </td>
+                                                                        <td class="text-right mb-0">
+                                                                            <div class="form-group">
+                                                                                <input asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Porcent" class="form-control m-t percent-input" placeholder="@Model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent" required/>
+                                                                                <span class="text-danger">
+                                                                                    @Html.ValidationMessageFor(model => model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent)
+                                                                                </span>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        @{
+                                                            var percent = Model.CustomerBeneficiary.CustomerBeneficiaries.Sum(cb => cb.Porcent);
+
+                                                            <div>
+                                                                <span>Porcentage</span>
+                                                                <span id="totalPercentText">@percent/100</span>
+
+                                                            </div>
+                                                            if (percent <= 100)
+                                                            {
+                                                                <div class="progress progress-small">
+                                                                    <div style="width: @percent%;" class="progress-bar" id="progressBar"></div>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="progress progress-small">
+                                                                    <div style="width: 100%;" class="progress-bar progress-bar-danger" id="progressBar"></div>
+                                                                </div>
+                                                            }
+                                                        }
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="ibox-content">
-                                <form id="securityQuestionsForm" asp-action="ChangeSecurityQuestions" asp-controller="CustomerConfiguration" method="post" class="wizard-big">
-                                    <input type="hidden" asp-for="CustomerId" />
+                                <div class="m-t m-b">
+                                    <strong><span id="beneficiaryCount">@Model.CustomerBeneficiary.CustomerBeneficiaries.Count</span> Beneficiarios.</strong>
+                                </div>
 
-                                    <h1>Primera Pregunta</h1>
-                                    <fieldset>
-                                        <h2 class="m-b-md">Primera Pregunta de Seguridad</h2>
-                                        <div class="form-group">
-                                            <select asp-for="SetSecurityQuestion.FirstQuestionId" id="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
-                                                <option value="">Seleccione una pregunta</option>
-                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
-                                                {
-                                                <option value="@item.IdSecurityQuestion">
-                                                    @item.Question
-                                                </option>
-                                                }
-                                            </select>
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionId"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <input asp-for="SetSecurityQuestion.FirstQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 1" required />
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionAnswer"></span>
-                                        </div>
-                                    </fieldset>
-
-                                    <h1>Segunda Pregunta</h1>
-                                    <fieldset>
-                                        <h2 class="m-b-md">Segunda Pregunta de Seguridad</h2>
-                                        <div class="form-group">
-                                            <select asp-for="SetSecurityQuestion.SecondQuestionId" id="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
-                                                <option value="">Seleccione una pregunta</option>
-                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
-                                                {
-                                                <option value="@item.IdSecurityQuestion">
-                                                    @item.Question
-                                                </option>
-                                                }
-                                            </select>
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionId"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <input asp-for="SetSecurityQuestion.SecondQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 2" required />
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionAnswer"></span>
-                                        </div>
-                                    </fieldset>
-
-                                    <h1>Tercera Pregunta</h1>
-                                    <fieldset>
-                                        <h2 class="m-b-md">Tercera Pregunta de Seguridad</h2>
-                                        <div class="form-group">
-                                            <select asp-for="SetSecurityQuestion.ThirdQuestionId" id="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
-                                                <option value="">Seleccione una pregunta</option>
-                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
-                                                {
-                                                <option value="@item.IdSecurityQuestion">
-                                                    @item.Question
-                                                </option>
-                                                }
-                                            </select>
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionId"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <input asp-for="SetSecurityQuestion.ThirdQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 3" required />
-                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionAnswer"></span>
-                                        </div>
-                                    </fieldset>
-                                </form>
+                                <div class="table-responsive">
+                                    <table class="table table-hover issue-tracker">
+                                        <tbody>
+                                        @foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
+                                        {
+                                            <tr>
+                                                <td>@beneficiary.Nombre @beneficiary.ApePat</td>
+                                                <td>@beneficiary.Tel</td>
+                                                <td>
+                                                    @{
+                                                        var rel = Model.CustomerBeneficiary.CustomerRelationships
+                                                            .FirstOrDefault(r => r.RelationshipId == beneficiary.RelationshipId)?.Relationship;
+                                                    }
+                                                    @rel
+                                                </td>
+                                                <td>
+                                                    <span class="percentage-pie" data-value="@beneficiary.Porcent"></span>
+                                                    @beneficiary.Porcent %
+                                                </td>
+                                                <td class="text-right">
+                                                    <button type="button" class="btn btn-sm btn-white edit-btn"
+                                                            data-id="@beneficiary.IdCustomerBeneficiary"
+                                                            data-name="@beneficiary.Nombre"
+                                                            data-ape-pat="@beneficiary.ApePat"
+                                                            data-ape-mat="@beneficiary.ApeMat"
+                                                            data-relationship="@beneficiary.RelationshipId"
+                                                            data-phone="@beneficiary.Tel"
+                                                            data-toggle="modal" data-target="#myModal4">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger delete-btn demo4"
+                                                            data-customer-id="@Model.CustomerId"
+                                                            data-beneficiary-id="@beneficiary.IdCustomerBeneficiary"
+                                                            data-percent="@beneficiary.Porcent">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -185,23 +263,30 @@
                     {
                         if (Model.DocsValidated == 0)
                         {
-                            <h4 class="m-b">Si está satisfecho con el documento, es momento de enviarlo a validación. <br/>
-                                Una vez enviado no podrá ser modificado o eliminado hasta recibir respuesta.</h4>
+                            <h4 class="m-b">
+                                Si está satisfecho con el documento, es momento de enviarlo a validación. <br/>
+                                Una vez enviado no podrá ser modificado o eliminado hasta recibir respuesta.
+                            </h4>
                         }
+
                         if (Model.DocsValidated == 1)
                         {
-                            <h4 class="m-b">Documento en revisión, este proceso podrá demorar hasta 48
-                                horas</h4>
+                            <h4 class="m-b">
+                                Documento en revisión, este proceso podrá demorar hasta 48
+                                horas
+                            </h4>
                         }
+
                         if (Model.DocsValidated == 2)
                         {
                             <h4 class="m-b">@Model.CustomerPic.RejectMessage</h4>
                         }
+
                         if (Model.DocsValidated == 3)
                         {
                             <h4 class="m-b">Documento validado exitosamente</h4>
                         }
-                        
+
                         <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
                             @if (Model.CustomerPic.PictureFront != null)
                             {
@@ -228,7 +313,7 @@
                             </button>
                         </div>
                     }
-                    
+
                     @if (Model.CustomerPic != null)
                     {
                         <div class="d-inline-flex">
@@ -305,6 +390,35 @@
                                             </div>
 
                                         </div>
+                                        <h3 class="m-b">Seleccione un método</h3>
+                                        <div class="d-inline-flex">
+                                            <div class="i-checks" style="margin-right: 20px">
+                                                <label>
+                                                    <div>
+                                                        <label>
+                                                            <div class="iradio_square-green" style="position: relative;">
+                                                                <input type="radio" checked="checked" value="camera" name="method" style="position: absolute; opacity: 0;">
+                                                                <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                            </div>
+                                                            <i></i> Tomar Foto
+                                                        </label>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            <div class="i-checks">
+                                                <label>
+                                                    <div>
+                                                        <label>
+                                                            <div class="iradio_square-green" style="position: relative;">
+                                                                <input type="radio" value="upload" name="method" style="position: absolute; opacity: 0;">
+                                                                <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                            </div>
+                                                            <i></i> Subir Foto
+                                                        </label>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
                                             <button type="submit" class="btn btn-primary">Continuar</button>
@@ -325,7 +439,8 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="d-flex flex-column align-items-center">
-                                        <h4>Si está satisfecho con el documento, es momento de enviarlo a validación.
+                                        <h4>
+                                            Si está satisfecho con el documento, es momento de enviarlo a validación.
                                             Una vez enviado no podrá ser modificado o eliminado hasta recibir respuesta.
                                         </h4>
                                     </div>
@@ -340,193 +455,117 @@
                 </div>
             </div>
         </div>
-        <!-- Beneficiarios -->
-        <div class="tab-pane fade @(activeTab == "ben" ? "show active" : "")" id="ben" role="tabpanel">
-            <div class="wrapper wrapper-content animated fadeInRight">
+        <!-- Change Password Tab: Se marca activo y visible -->
+        <div class="tab-pane fade @(activeTab == "change-password" ? "show active" : "")" id="change-password" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-center flex-column" style="height: 50vh;">
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-content">
+                            <form class="m-t" asp-action="ResetPassword" asp-controller="CustomerConfiguration" method="post">
+                                <input type="hidden" asp-for="CustomerId"/>
+                                <div class="row" id="pwd-container1">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="password2">Confirmar Contraseña</label>
+                                            <input asp-for="ResetPassword.CurrentPassword" type="password" class="form-control" id="password" placeholder="Contraseña Actual">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.CurrentPassword)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password1">Nueva Contraseña</label>
+                                            <input asp-for="ResetPassword.Password" type="password" class="form-control example1" id="password1" placeholder="Contraseña">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.Password)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password2">Confirmar Contraseña</label>
+                                            <input asp-for="ResetPassword.ConfirmPassword" type="password" class="form-control" id="password2" placeholder="Confirmar Contraseña">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.ResetPassword.ConfirmPassword)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="pwstrength_viewport_progress"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary block full-width m-b">Actualizar Contraseña</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Security Questions Tab -->
+        <div class="tab-pane fade @(activeTab == "security-questions" ? "show active" : "")" id="security-questions" role="tabpanel">
+            <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="ibox">
-                            <div class="ibox-title">
-                                <h5>Lista de Beneficiarios</h5>
-                                <div class="ibox-tools">
-                                    <button type="button" id="addBeneficiary" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal4">Agregar Beneficiario</button>
-                                    <div class="modal inmodal" id="myModal4" tabindex="-1" role="dialog" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content animated fadeIn">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal">
-                                                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                                                    </button>
-                                                    <h4 class="modal-title" id="modalTitle">Nuevo Beneficiario</h4>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form id="beneficiaryForm" class="m-t" asp-action="CreateBeneficiary" asp-controller="CustomerConfiguration" method="post">
-                                                        <input type="hidden" asp-for="CustomerId"/>
-                                                        <input type="hidden" id="beneficiaryId" asp-for="CustomerBeneficiary.Id"/>
-
-                                                        <div class="form-group">
-                                                            <input asp-for="CustomerBeneficiary.Name" id="name" class="form-control" placeholder="Nombre" required/>
-                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.Name)</span>
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            <input asp-for="CustomerBeneficiary.ApePaternal" id="apePaternal" class="form-control" placeholder="Apellido Paterno" required/>
-                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.ApePaternal)</span>
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            <input asp-for="CustomerBeneficiary.ApeMaternal" id="apeMaternal" class="form-control" placeholder="Apellido Materno"/>
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            @Html.DropDownListFor(model => model.CustomerBeneficiary.RelationshipId,
-                                                                new SelectList(Model.CustomerBeneficiary.CustomerRelationships, "RelationshipId", "Relationship"),
-                                                                "Seleccione una relación",
-                                                                new { @class = "form-control", required = "required", id = "relationship" })
-                                                            <span class="text-danger">
-                                                                @Html.ValidationMessageFor(model => model.CustomerBeneficiary.RelationshipId)
-                                                            </span>
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            <input type="tel" asp-for="CustomerBeneficiary.PhoneNumber" id="phone" class="form-control"/>
-                                                            <span id="phone-error" class="validation-error" style="display: none; color: red;">
-                                                                Ingrese un número de teléfono válido.
-                                                            </span>
-                                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.PhoneNumber)</span>
-                                                        </div>
-
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
-                                                            <button type="submit" class="btn btn-primary" id="saveChangesButton">Guardar</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal5">Asignación de porcentaje a beneficiarios</button>
-                                    <div class="modal inmodal" id="myModal5" tabindex="-1" role="dialog" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content animated fadeIn">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                                    <h4 class="modal-title">Asignación de porcentaje</h4>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form id="beneficiaryPercentForm" class="m-t" asp-action="AssignBeneficiaryPercent" asp-controller="CustomerConfiguration" method="post">
-                                                        <input type="hidden" asp-for="CustomerId"/>
-
-                                                        <div class="table-responsive" style="max-height: 500px">
-                                                            <table class="table table-hover issue-tracker">
-                                                                <tbody id="beneficiaryTableBody">
-                                                                @for (var i = 0; i < Model.CustomerBeneficiary.CustomerBeneficiaries.Count; i++)
-                                                                {
-                                                                    <tr>
-                                                                        <td>
-                                                                            <h4 class="mb-0">
-                                                                                @Model.CustomerBeneficiary.CustomerBeneficiaries[i].Nombre @Model.CustomerBeneficiary.CustomerBeneficiaries[i].ApePat
-                                                                            </h4>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomerBeneficiary"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].IdCustomer"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Nombre"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApePat"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].ApeMat"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].RelationshipId"/>
-                                                                            <input type="hidden" asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Tel"/>
-                                                                        </td>
-                                                                        <td class="text-right mb-0">
-                                                                            <div class="form-group">
-                                                                                <input asp-for="@Model.CustomerBeneficiary.CustomerBeneficiaries[@i].Porcent" class="form-control m-t percent-input" placeholder="@Model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent" required/>
-                                                                                <span class="text-danger">
-                                                                                    @Html.ValidationMessageFor(model => model.CustomerBeneficiary.CustomerBeneficiaries[i].Porcent)
-                                                                                </span>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                }
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        @{
-                                                            var percent = Model.CustomerBeneficiary.CustomerBeneficiaries.Sum(cb => cb.Porcent);
-                                                            
-                                                            <div>
-                                                                <span>Porcentage</span> 
-                                                                <span id="totalPercentText">@percent/100</span>
-                                                                    
-                                                            </div>
-                                                            if (percent <= 100)
-                                                            {
-                                                                <div class="progress progress-small">
-                                                                    <div style="width: @percent%;" class="progress-bar" id="progressBar"></div>
-                                                                </div>
-                                                            }
-                                                            else
-                                                            {
-                                                                <div class="progress progress-small">
-                                                                    <div style="width: 100%;" class="progress-bar progress-bar-danger" id="progressBar"></div>
-                                                                </div>
-                                                            }
-                                                        }
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
-                                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="ibox-content">
-                                <div class="m-t m-b">
-                                    <strong><span id="beneficiaryCount">@Model.CustomerBeneficiary.CustomerBeneficiaries.Count</span> Beneficiarios.</strong>
-                                </div>
+                                <form id="securityQuestionsForm" asp-action="ChangeSecurityQuestions" asp-controller="CustomerConfiguration" method="post" class="wizard-big">
+                                    <input type="hidden" asp-for="CustomerId"/>
 
-                                <div class="table-responsive">
-                                    <table class="table table-hover issue-tracker">
-                                        <tbody>
-                                        @foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
-                                        {
-                                            <tr>
-                                                <td>@beneficiary.Nombre @beneficiary.ApePat</td>
-                                                <td>@beneficiary.Tel</td>
-                                                <td>
-                                                    @{
-                                                        var rel = Model.CustomerBeneficiary.CustomerRelationships
-                                                            .FirstOrDefault(r => r.RelationshipId == beneficiary.RelationshipId)?.Relationship;
-                                                    }
-                                                    @rel
-                                                </td>
-                                                <td>
-                                                    <span class="percentage-pie" data-value="@beneficiary.Porcent"></span>
-                                                    @beneficiary.Porcent %
-                                                </td>
-                                                <td class="text-right">
-                                                    <button type="button" class="btn btn-sm btn-white edit-btn"
-                                                            data-id="@beneficiary.IdCustomerBeneficiary"
-                                                            data-name="@beneficiary.Nombre"
-                                                            data-ape-pat="@beneficiary.ApePat"
-                                                            data-ape-mat="@beneficiary.ApeMat"
-                                                            data-relationship="@beneficiary.RelationshipId"
-                                                            data-phone="@beneficiary.Tel"
-                                                            data-toggle="modal" data-target="#myModal4">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger delete-btn demo4"
-                                                            data-customer-id="@Model.CustomerId"
-                                                            data-beneficiary-id="@beneficiary.IdCustomerBeneficiary"
-                                                            data-percent="@beneficiary.Porcent">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        }
-                                        </tbody>
-                                    </table>
-                                </div>
+                                    <h1>Primera Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Primera Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.FirstQuestionId" id="FirstQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                    <option value="@item.IdSecurityQuestion">
+                                                        @item.Question
+                                                    </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.FirstQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 1" required/>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.FirstQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+
+                                    <h1>Segunda Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Segunda Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.SecondQuestionId" id="SecondQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                    <option value="@item.IdSecurityQuestion">
+                                                        @item.Question
+                                                    </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.SecondQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 2" required/>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.SecondQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+
+                                    <h1>Tercera Pregunta</h1>
+                                    <fieldset>
+                                        <h2 class="m-b-md">Tercera Pregunta de Seguridad</h2>
+                                        <div class="form-group">
+                                            <select asp-for="SetSecurityQuestion.ThirdQuestionId" id="ThirdQuestionId" class="form-control" style="border-radius: 6px; height: 40px" required>
+                                                <option value="">Seleccione una pregunta</option>
+                                                @foreach (var item in Model.SetSecurityQuestion.SecurityQuestions)
+                                                {
+                                                    <option value="@item.IdSecurityQuestion">
+                                                        @item.Question
+                                                    </option>
+                                                }
+                                            </select>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionId"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="SetSecurityQuestion.ThirdQuestionAnswer" type="text" class="form-control" placeholder="Respuesta de la pregunta 3" required/>
+                                            <span class="text-danger" asp-validation-for="SetSecurityQuestion.ThirdQuestionAnswer"></span>
+                                        </div>
+                                    </fieldset>
+                                </form>
                             </div>
                         </div>
                     </div>

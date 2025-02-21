@@ -31,19 +31,25 @@
     <div id="frontSection" class="mb-4">
         <h4>Foto Frontal</h4>
         <div class="row text-center">
-            <!-- Botón para subir archivo -->
-            <div class="m-r">
-                <label class="btn btn-primary">
-                    <i class="fa fa-upload"></i> Subir Archivo
-                    <input type="file" accept="image/*" id="frontFile" style="display:none;" onchange="previewImage(this, 'frontPreview')">
-                </label>
-            </div>
-            <!-- Botón para capturar con cámara -->
-            <div class="m-r">
-                <button type="button" id="frontCaptureBtn" class="btn btn-primary">
-                    <i class="fa fa-camera"></i> Iniciar Cámara
-                </button>
-            </div>
+            @if (Model.IsCamera)
+            {
+                <!-- Botón para capturar con cámara -->
+                <div class="m-r">
+                    <button type="button" id="frontCaptureBtn" class="btn btn-primary">
+                        <i class="fa fa-camera"></i> Iniciar Cámara
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Botón para subir archivo -->
+                <div class="m-r">
+                    <label class="btn btn-primary">
+                        <i class="fa fa-upload"></i> Subir Archivo
+                        <input type="file" accept="image/*" id="frontFile" style="display:none;" onchange="previewImage(this, 'frontPreview')">
+                    </label>
+                </div>
+            }
             <!-- Botón para capturar foto manual (inicialmente oculto) -->
             <div class="m-r">
                 <button type="button" id="captureNowFrontBtn" class="btn btn-primary" style="display:none;">
@@ -62,17 +68,25 @@
     <div id="backSection" class="mb-4" style="display: @(Model.RequiresTwoPhotos ? "block" : "none");">
         <h4>Foto Trasera</h4>
         <div class="row text-center">
-            <div class="m-r">
-                <label class="btn btn-primary">
-                    <i class="fa fa-upload"></i> Subir Archivo
-                    <input type="file" accept="image/*" id="backFile" style="display:none;" onchange="previewImage(this, 'backPreview')">
-                </label>
-            </div>
-            <div class="m-r">
-                <button type="button" id="backCaptureBtn" class="btn btn-primary">
-                    <i class="fa fa-camera"></i> Iniciar Cámara
-                </button>
-            </div>
+            @if (Model.IsCamera)
+            {
+                <div class="m-r">
+                    <button type="button" id="backCaptureBtn" class="btn btn-primary">
+                        <i class="fa fa-camera"></i> Iniciar Cámara
+                    </button>
+                </div>
+                
+            }
+            else
+            {
+                <div class="m-r">
+                    <label class="btn btn-primary">
+                        <i class="fa fa-upload"></i> Subir Archivo
+                        <input type="file" accept="image/*" id="backFile" style="display:none;" onchange="previewImage(this, 'backPreview')">
+                    </label>
+                </div>
+            }
+            
             <div class="m-r">
                 <button type="button" id="captureNowBackBtn" class="btn btn-primary" style="display:none;">
                     <i class="fa fa-camera"></i> Capturar Foto
@@ -124,8 +138,8 @@
                             zoomable: true,
                             scalable: true,
                             cropBoxResizable: true,
-                            maxCanvasWidth: 500,
-                            maxCanvasHeight: 600
+                            maxCanvasWidth: 600,
+                            maxCanvasHeight: 900
                         };
                         if(previewId === "frontPreview"){
                             cropperInstanceFront = new Cropper(img, options);
@@ -191,8 +205,8 @@
                     zoomable: true,
                     scalable: true,
                     cropBoxResizable: true,
-                    maxCanvasWidth: 500,
-                    maxCanvasHeight: 600
+                    maxCanvasWidth: 1200,
+                    maxCanvasHeight: 1000
                 };
                 if(isFront){
                     if(cropperInstanceFront){ cropperInstanceFront.destroy(); }
