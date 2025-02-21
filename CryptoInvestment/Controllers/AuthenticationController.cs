@@ -3,7 +3,9 @@ using CryptoInvestment.Application.Authentication.Commands.RegisterCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
+using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.Authentication.Queries.LoginQuery;
+using CryptoInvestment.Application.Authentication.Queries.VerifySecurityQuestionsQuery;
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
@@ -107,11 +109,30 @@ public class AuthenticationController : Controller
                 else if (errors.Any(e => e.Type == ErrorType.Unauthorized))
                 {
                     ModelState.AddModelError("Password", "Contraseña incorrecta.");
+                    TempData["Email"] = loginViewModel.Email;
+                    TempData["ForgotPasswordMessage"] = "¿Olvidó su contraseña?";
                     return await Task.FromResult<IActionResult>(View(loginViewModel));
                 }
                 else if (errors.Any(e => e.Code == "Authentication.AccountLocked"))
                 {
-                    ModelState.AddModelError("Password", "Su cuenta ha sido bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 15 minutos.");
+                    var query2 = new GetCustomerByEmailQuery(loginViewModel.Email);
+                    var getCustomerResult = await _mediator.Send(query2);
+                    
+                    var customer = getCustomerResult.Match<Customer>(
+                        customer => customer,
+                        _ => null!
+                    );
+
+                    if (customer.LockedUp.HasValue)
+                    {
+                        var minutesLeft = (int) (customer.LockedUp.Value.AddMinutes(15) - DateTime.Now).TotalMinutes;
+                        ModelState.AddModelError("Password", $"Su cuenta ha sido bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en {minutesLeft} minutos.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Password", "Su cuenta ha sido bloqueada por demasiados intentos fallidos. Inténtelo de nuevo en 15 minutos.");
+                    }
+
                     return await Task.FromResult<IActionResult>(View(loginViewModel));
                 }
                 else
@@ -183,7 +204,7 @@ public class AuthenticationController : Controller
                     _ => RedirectToAction(
                         "ConfirmEmail", 
                         "Authentication", 
-                        new { email = _encryptionService.EncryptEmail(customer.Email) }),
+                        new { name = _encryptionService.EncryptEmail(customer.Nombre!), lastName = _encryptionService.EncryptEmail(customer.ApellidoPaterno!) }),
                     errors =>
                     {
                         ModelState.AddModelError("", errors.First().Description);
@@ -211,9 +232,10 @@ public class AuthenticationController : Controller
         );
     }
     
-    public IActionResult ConfirmEmail(string email)
+    public IActionResult ConfirmEmail(string name, string lastName)
     {
-        ViewBag.Email = _encryptionService.DecryptEmail(email);
+        ViewBag.Name = _encryptionService.DecryptEmail(name);
+        ViewBag.LastName = _encryptionService.DecryptEmail(lastName);
         ViewBag.MailSoporte = _appSettings.MailSoporte;
         ViewBag.TelSoporte = _appSettings.TelSoporte;
         return View();
@@ -221,7 +243,7 @@ public class AuthenticationController : Controller
     #endregion
     
     # region SetPasswordRegion
-    public async Task<IActionResult> SetPassword(string token, string date)
+    public async Task<IActionResult> SetPassword(string token, string date, bool isReset)
     {
         var sentDate = _encryptionService.DecryptDate(date);
         
@@ -239,11 +261,14 @@ public class AuthenticationController : Controller
             c => c,
             e => null!);
 
-        if (customer is not null)
+        if (!isReset)
         {
-            if (customer.EmailValidated == true)
+            if (customer is not null)
             {
-                TempData["InfoMessage"] = "Su correo ya fue validado. Por favor, inicie sesión.";
+                if (customer.EmailValidated == true)
+                {
+                    TempData["InfoMessage"] = "Su correo ya fue validado. Por favor, inicie sesión.";
+                }
             }
         }
         
@@ -268,13 +293,17 @@ public class AuthenticationController : Controller
         var setPasswordResult = _mediator.Send(command).Result;
         
         return setPasswordResult.Match<IActionResult>(
-            customer => RedirectToAction(
-                "SecurityQuestions", 
-                "Authentication", 
-                new
+            customer =>
+            {
+                if (string.IsNullOrEmpty(command.CurrentPassword))
                 {
-                    token = _encryptionService.EncryptId(customer.IdCustomer.ToString())
-                }),
+                    return RedirectToAction("Login", "Authentication");
+                }
+                return RedirectToAction(
+                    "SecurityQuestions",
+                    "Authentication",
+                    new { token = _encryptionService.EncryptId(customer.IdCustomer.ToString()) });
+            },
             errors =>
             {
                 ModelState.AddModelError("", errors.First().Description);
@@ -282,6 +311,97 @@ public class AuthenticationController : Controller
             }
         );
     }
+
+    public async Task<IActionResult> VerifySecurityQuestions(string token)
+    {
+        string email = _encryptionService.DecryptEmail(token);
+        var query = new GetCustomerByEmailQuery(email);
+        var getCustomerResult = await _mediator.Send(query);
+
+        var customer = getCustomerResult.Match(
+            c => c,
+            e => null!);
+
+        if (customer is null)
+            return RedirectToAction("Login", "Authentication");
+        
+        var query2 = new ListSecurityQuestionsQuery();
+        var listSecurityQuestionsResult = await _mediator.Send(query2);
+        
+        var questions = listSecurityQuestionsResult.Match<List<SecurityQuestion>>(
+            questions => questions,
+            _ => null!
+        );
+        
+        var query3 = new GetCustomerSecurityQuestionsQuery(customer.IdCustomer);
+        var getCustomerSecurityQuestionsResult = await _mediator.Send(query3);
+        
+        var customerQuestions = getCustomerSecurityQuestionsResult.Match<List<CustomerQuestion>>(
+            customerQuestions => customerQuestions,
+            _ => null!
+        );
+
+        var question1 = questions.FirstOrDefault(q => q.IdSecurityQuestion == customerQuestions[0].IdQuestion);
+        var question2 = questions.FirstOrDefault(q => q.IdSecurityQuestion == customerQuestions[1].IdQuestion);
+        var question3 = questions.FirstOrDefault(q => q.IdSecurityQuestion == customerQuestions[2].IdQuestion);
+
+        if (question1 is null || question2 is null || question3 is null)
+            RedirectToAction("Login", "Authentication");
+        
+        var model = new VerifySecurityQuestionsViewModel()
+        {
+            Email = email,
+            FirstQuestion = question1!.Question,
+            SecondQuestion = question2!.Question,
+            ThirdQuestion = question3!.Question,
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifySecurityQuestions(VerifySecurityQuestionsViewModel verifySecurityQuestionsViewModel)
+    {
+        if (!ModelState.IsValid)
+            return View(verifySecurityQuestionsViewModel);
+
+        var query = new VerifySecurityQuestionsQuery(
+            verifySecurityQuestionsViewModel.Email,
+            verifySecurityQuestionsViewModel.FirstAnswer!,
+            verifySecurityQuestionsViewModel.SecondAnswer!,
+            verifySecurityQuestionsViewModel.ThirdAnswer!);
+
+        var verifySecurityQuestionResult = await _mediator.Send(query);
+
+        return verifySecurityQuestionResult.Match<IActionResult>(
+            valid => RedirectToAction(
+                "SetPassword", 
+                "Authentication", 
+                new
+                {
+                    token = _encryptionService.EncryptEmail(verifySecurityQuestionsViewModel.Email),
+                    date = _encryptionService.EncryptDate(DateTime.UtcNow),
+                    isReset = true
+                }),
+            errors =>
+            {
+                if (errors.Any(e => e.Type == ErrorType.NotFound))
+                {
+                    return RedirectToAction("Login", "Authentication");
+                }
+                else if (errors.Any(e => e.Type == ErrorType.Unauthorized))
+                {
+                    ModelState.AddModelError("ThirdAnswer", "Respuestas a las preguntas de seguridad inválidas");
+                    return View(verifySecurityQuestionsViewModel);
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unexpected Error");
+                    return View(verifySecurityQuestionsViewModel);
+                }
+            });
+    }
+
     # endregion
     
     # region SecurityQuestionsRegion

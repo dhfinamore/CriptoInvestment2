@@ -30,11 +30,23 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
         
         if (!_passwordHasher.VerifyHashedPassword(customer.PasswdLogin, request.Password))
         {
+            if (customer.LockedUp.HasValue && customer.LockedUp.Value.AddMinutes(15) < DateTime.Now)
+            {
+                customer.FailedLoginAttempts = 0;
+                customer.LockedUp = null;
+            }
+            
+            if (customer.LockedUp.HasValue && customer.LockedUp.Value.AddMinutes(15) > DateTime.Now)
+            {
+                return LoginQueryErrors.AccountLocked;
+            }
+            
             customer.FailedLoginAttempts++;
             await _customerRepository.UpdateCustomerAsync(customer);
             
             if (customer.FailedLoginAttempts > 3)
             {
+                customer.FailedLoginAttempts = 3;
                 customer.LockedUp = DateTime.Now;
                 await _customerRepository.UpdateCustomerAsync(customer);
                 await _unitOfWork.CommitChangesAsync();
@@ -45,11 +57,6 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Customer>>
             return Error.Unauthorized(description: "Contraseña incorrecta.");
         }
         
-        if (customer.LockedUp.HasValue && customer.LockedUp.Value.AddMinutes(15) > DateTime.Now)
-        {
-            return LoginQueryErrors.AccountLocked;
-        }
-
         if (customer.FailedLoginAttempts > 0)
         {
             customer.FailedLoginAttempts = 0;

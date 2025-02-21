@@ -1,0 +1,55 @@
+@model CryptoInvestment.ViewModels.Authentication.VerifySecurityQuestionsViewModel;
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] GHR I & T</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
+        <link rel="stylesheet" href="~/css/animate.css" />
+        <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="~/css/animate.css" />
+        <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    </environment>
+</head>
+<body class="gray-bg">
+<div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="jumbotron text-center col-lg-12">
+        <form class="m-t" asp-action="VerifySecurityQuestions" asp-controller="Authentication" method="post">
+            <input type="hidden" asp-for="Email"/>
+            <h4>@Model.FirstQuestion</h4>
+            <div class="form-group">
+                <input asp-for="FirstAnswer" class="form-control" placeholder="Respuesta a su primera preguntas" required/>
+                <span class="text-danger">@Html.ValidationMessageFor(model => model.FirstAnswer)</span>
+            </div>
+            <input type="hidden" asp-for="FirstQuestion"/>
+
+            <h4>@Model.SecondQuestion</h4>
+            <div class="form-group">
+                <input asp-for="SecondAnswer" class="form-control" placeholder="Respuesta a su segunda preguntas" required/>
+                <span class="text-danger">@Html.ValidationMessageFor(model => model.SecondAnswer)</span>
+            </div>
+            <input type="hidden" asp-for="SecondQuestion"/>
+
+            <h4>@Model.ThirdQuestion</h4>
+            <div class="form-group">
+                <input asp-for="ThirdAnswer" class="form-control" placeholder="Respuesta a su tercera preguntas" required/>
+                <span class="text-danger">@Html.ValidationMessageFor(model => model.ThirdAnswer)</span>
+            </div>
+            <input type="hidden" asp-for="ThirdQuestion"/>
+
+            <button type="submit" class="btn btn-primary block full-width m-b">Continuar</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
