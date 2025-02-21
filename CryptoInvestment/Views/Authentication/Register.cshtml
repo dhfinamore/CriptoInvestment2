@@ -113,10 +113,6 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('form').on('submit', function() {
-                $('#spinner-overlay').show();
-            });
-            
             const input = document.querySelector("#phone");
 
             const phoneInput = window.intlTelInput(input, {
@@ -150,6 +146,7 @@
                 } else {
                     $("#phone-error").hide();
                     input.value = phoneInput.getNumber();
+                    $('#spinner-overlay').show();
                 }
             });
         });

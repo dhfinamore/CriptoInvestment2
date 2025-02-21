@@ -314,6 +314,9 @@ public class AuthenticationController : Controller
         {
             TempData["IsReset"] = "true";
         }
+        
+        ViewBag.Name = customer!.Nombre!;
+        ViewBag.LastName = customer.ApellidoPaterno!;
 
         return View(model);
     }
