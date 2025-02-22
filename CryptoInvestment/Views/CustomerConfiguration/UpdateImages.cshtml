@@ -279,7 +279,7 @@
             }
 
             var data = {
-                CustomerId: @Json.Serialize(Model.CustomerId),
+                CustomerId: @Model.CustomerId,
                 Type: "@Model.Type",
                 PictureFrontBase64: croppedFront,
                 PictureBackBase64: croppedBack
@@ -290,16 +290,19 @@
             $.ajax({
                 url: '/CustomerConfiguration/SaveCustomerPic',
                 type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                dataType: 'json',
+                data: {
+                    CustomerId: @Model.CustomerId,
+                    Type: "@Model.Type",
+                    PictureFrontBase64: croppedFront,
+                    PictureBackBase64: croppedBack
+                },
                 success: function () {
                     swal({
                         title: "¡Éxito!",
-                        text: "El Documento fue guardado correctamente.",
+                        text: "El Documento fué guardado correctamente.",
                         type: "success"
-                    }).then(function(){
-                        window.location.href = '/Crypto/CustomerConfiguration?activeTab=subir-documentos';
+                    }, function () {
+                        window.location.href = "/Crypto/CustomerConfiguration?activeTab=subir-documentos";
                     });
                 },
                 error: function (xhr, status, error) {
