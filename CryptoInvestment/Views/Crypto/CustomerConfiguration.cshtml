@@ -493,7 +493,8 @@
                         </div>
                         <div class="modal-body">
                             <form class="m-t" asp-action="SetWithdrawalsPassword" asp-controller="CustomerConfiguration" method="post">
-                                <div class="d-flex justify-content-center">
+                                <label>Introduzca su PIN de Retiros</label>
+                                <div id="set-withdrawals-password-div" class="d-flex justify-content-center m-b">
                                     <input type="hidden" asp-for="CustomerId"/>
                                     <input asp-for="WithdrawalsPassword.Character1" name="WithdrawalsPassword.Character1" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
                                     <input asp-for="WithdrawalsPassword.Character2" name="WithdrawalsPassword.Character2" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
@@ -502,9 +503,18 @@
                                     <input asp-for="WithdrawalsPassword.Character5" name="WithdrawalsPassword.Character5" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
                                     <input asp-for="WithdrawalsPassword.Character6" name="WithdrawalsPassword.Character6" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
                                 </div>
+                                <label>Confirme su PIN de Retiros</label>
+                                <div id="confirm-withdrawals-password-div" class="d-flex justify-content-center m-b">
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter1" name="WithdrawalsPassword.ConfirmCharacter1" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter2" name="WithdrawalsPassword.ConfirmCharacter2" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter3" name="WithdrawalsPassword.ConfirmCharacter3" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter4" name="WithdrawalsPassword.ConfirmCharacter4" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter5" name="WithdrawalsPassword.ConfirmCharacter5" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter6" name="WithdrawalsPassword.ConfirmCharacter6" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Enviar</button>
+                                    <button id="set-withdrawals-password" type="submit" class="btn btn-primary">Guardar</button>
                                 </div>
                             </form>
                         </div>
@@ -967,6 +977,37 @@
                 if (e.key === "Backspace" && $(this).val() === "") {
                     $(this).prev('.pin-input').focus();
                 }
+            });
+
+            $('#set-withdrawals-password').click(function(e) {
+                // Inicializar variables para almacenar las contraseñas
+                var password = '';
+                var confirmPassword = '';
+
+                // Recolectar los caracteres de la contraseña
+                $('#confirm-withdrawals-password-div').first().find('.pin-input').each(function() {
+                    password += $(this).val().trim();
+                });
+
+                // Recolectar los caracteres de la confirmación de contraseña
+                $('#set-withdrawals-password-div').last().find('.pin-input').each(function() {
+                    confirmPassword += $(this).val().trim();
+                });
+
+                // Verificar que todos los campos estén completos
+                if (password.length < 6 || confirmPassword.length < 6) {
+                    e.preventDefault();
+                    alert('Por favor, completa todos los dígitos de la contraseña.');
+                    return;
+
+                    // Comparar las contraseñas
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Las PIN no coinciden. Por favor, intenta de nuevo.');
+                    return;
+                }
+
+                // Si todo está correcto, el formulario se enviará normalmente
             });
         });
     </script>
