@@ -57,7 +57,7 @@
                 </button>
             </div>
         </div>
-        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; margin: auto;">
+        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; height: auto;">
             <div id="frontPreviewContainer">
                 <img id="frontPreview" src="" alt="Vista previa frontal" class="img-fluid" style="height:auto; width:auto;">
             </div>
@@ -93,14 +93,18 @@
                 </button>
             </div>
         </div>
-        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; margin: auto;">
+        <div class="mt-3 text-center" style="padding-left: 80px; padding-right: 80px; width: auto; height: auto;">
             <div id="backPreviewContainer">
                 <img id="backPreview" src="" alt="Vista previa trasera" class="img-fluid" style="height:auto; width:auto;">
             </div>
         </div>
     </div>
 
-    <button type="button" id="saveImagesBtn" class="btn btn-primary mt-3">Guardar Documento</button>
+    <div class="row text-center">
+        <button type="button" id="saveImagesBtn" class="btn btn-primary mt-3 m-r">Guardar Documento</button>
+        <a href="@Url.Action("CustomerConfiguration", "Crypto", new { activeTab = "subir-documentos" })" class="btn btn-primary mt-3">Cancelar</a>
+    </div>
+        
 </div>
 
 @section scripts {
@@ -109,233 +113,223 @@
     <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha512-..." crossorigin="anonymous"></script>
 
-    <script>
-        $(document).ready(function(){
-            var cropperInstanceFront = null;
-            var cropperInstanceBack = null;
-            var cameraStream = null;
-            
-            // Función para previsualizar imagen subida e inicializar CropperJS
-            window.previewImage = function(input, previewId){
-                var file = input.files[0];
-                if(file){
-                    var reader = new FileReader();
-                    reader.onload = function(e){
-                        var img = document.getElementById(previewId);
-                        img.src = e.target.result;
-                        // Destruir instancia previa y crear nueva
-                        if(previewId === "frontPreview" && cropperInstanceFront){
-                            cropperInstanceFront.destroy();
-                        }
-                        if(previewId === "backPreview" && cropperInstanceBack){
-                            cropperInstanceBack.destroy();
-                        }
-                        var options = {
-                            aspectRatio: 16/9,
-                            viewMode: 1,
-                            autoCropArea: 1,
-                            movable: true,
-                            zoomable: true,
-                            scalable: true,
-                            cropBoxResizable: true,
-                            maxCanvasWidth: 1200,
-                            maxCanvasHeight: 1200
-                        };
-                        if(previewId === "frontPreview"){
-                            cropperInstanceFront = new Cropper(img, options);
-                        } else {
-                            cropperInstanceBack = new Cropper(img, options);
-                        }
+<script>
+    $(document).ready(function(){
+        var cropperInstanceFront = null;
+        var cropperInstanceBack = null;
+        var cameraStream = null;
+
+        // Función para previsualizar imagen subida e inicializar CropperJS sin restricciones fijas
+        window.previewImage = function(input, previewId) {
+            var file = input.files[0];
+            if(file){
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    var img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    // Destruir instancia previa y crear nueva
+                    if(previewId === "frontPreview" && cropperInstanceFront){
+                        cropperInstanceFront.destroy();
+                    }
+                    if(previewId === "backPreview" && cropperInstanceBack){
+                        cropperInstanceBack.destroy();
+                    }
+                    var options = {
+                        // Si deseas que el usuario tenga total libertad, puedes omitir aspectRatio
+                        // aspectRatio: 16/9, 
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        movable: true,
+                        zoomable: true,
+                        scalable: true,
+                        cropBoxResizable: true,
+                        responsive: true
                     };
-                    reader.readAsDataURL(file);
-                } else {
-                    document.getElementById(previewId).src = "";
-                }
+                    if(previewId === "frontPreview"){
+                        cropperInstanceFront = new Cropper(img, options);
+                    } else {
+                        cropperInstanceBack = new Cropper(img, options);
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById(previewId).src = "";
+            }
+        };
+
+        // Función para iniciar la cámara en un video dentro de la sección correspondiente
+        function startCamera(videoElementId) {
+            var video = document.getElementById(videoElementId);
+            if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(stream){
+                        cameraStream = stream;
+                        video.srcObject = stream;
+                        video.play();
+                        video.style.display = "block";
+                    })
+                    .catch(function(err){
+                        alert("Error accediendo a la cámara: " + err);
+                    });
+            }
+        }
+
+        // Función para capturar la imagen manualmente y aplicar CropperJS sin restricciones fijas
+        function captureImage(videoElementId, canvasElementId, previewId, isFront) {
+            var video = document.getElementById(videoElementId);
+            var canvas = document.getElementById(canvasElementId);
+            if(!canvas){
+                canvas = document.createElement("canvas");
+                canvas.id = canvasElementId;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.style.display = "none";
+                document.body.appendChild(canvas);
+            }
+            var context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            var dataUrl = canvas.toDataURL("image/png");
+            document.getElementById(previewId).src = dataUrl;
+
+            // Detener la cámara
+            if(cameraStream){
+                cameraStream.getTracks().forEach(function(track){
+                    track.stop();
+                });
+                cameraStream = null;
+            }
+            video.style.display = "none";
+
+            // Inicializar CropperJS sobre la imagen capturada sin restricciones fijas
+            var img = document.getElementById(previewId);
+            var options = {
+                // aspectRatio: 16/9,  // Opcional: comentar o quitar para libertad total
+                viewMode: 1,
+                autoCropArea: 1,
+                movable: true,
+                zoomable: true,
+                scalable: true,
+                cropBoxResizable: true,
+                responsive: true
+            };
+            if(isFront){
+                if(cropperInstanceFront){ cropperInstanceFront.destroy(); }
+                cropperInstanceFront = new Cropper(img, options);
+            } else {
+                if(cropperInstanceBack){ cropperInstanceBack.destroy(); }
+                cropperInstanceBack = new Cropper(img, options);
+            }
+        }
+
+        // Handler para iniciar cámara y mostrar botón de captura en sección frontal
+        $("#frontCaptureBtn").click(function(){
+            if($("#frontVideo").length === 0){
+                $("#frontSection").append('<video id="frontVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
+            }
+            startCamera("frontVideo");
+            $("#captureNowFrontBtn").show();
+        });
+
+        // Handler para capturar foto manualmente en sección frontal
+        $("#captureNowFrontBtn").click(function(){
+            captureImage("frontVideo", "canvasFront", "frontPreview", true);
+            $(this).hide();
+        });
+
+        // Handler para iniciar cámara y mostrar botón de captura en sección trasera
+        $("#backCaptureBtn").click(function(){
+            if($("#backVideo").length === 0){
+                $("#backSection").append('<video id="backVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
+            }
+            startCamera("backVideo");
+            $("#captureNowBackBtn").show();
+        });
+
+        // Handler para capturar foto manualmente en sección trasera
+        $("#captureNowBackBtn").click(function(){
+            captureImage("backVideo", "canvasBack", "backPreview", false);
+            $(this).hide();
+        });
+
+        // Handler para "Guardar Imágenes"
+        $("#saveImagesBtn").click(function(){
+            var frontImageData = $("#frontPreview").attr("src");
+            var backImageData = $("#backPreview").attr("src");
+            var requiresTwoPhotos = "@Model.RequiresTwoPhotos".toLowerCase() === "true";
+
+            if(!frontImageData || (requiresTwoPhotos && !backImageData)){
+                swal({
+                    title: "¡Atención!",
+                    text: "Debe capturar o subir la(s) imagen(es) requerida(s).",
+                    type: "warning"
+                });
+                return;
+            }
+
+            // Obtener imagen recortada sin restricciones fijas
+            var croppedFront = cropperInstanceFront ? cropperInstanceFront.getCroppedCanvas().toDataURL("image/png") : frontImageData;
+            var croppedBack = "";
+            if(requiresTwoPhotos){
+                croppedBack = cropperInstanceBack ? cropperInstanceBack.getCroppedCanvas().toDataURL("image/png") : backImageData;
+            }
+
+            console.log("Imagen frontal recortada: " + croppedFront);
+            if(requiresTwoPhotos){
+                console.log("Imagen trasera recortada: " + croppedBack);
+            }
+
+            var data = {
+                CustomerId: @Json.Serialize(Model.CustomerId),
+                Type: "@Model.Type",
+                PictureFrontBase64: croppedFront,
+                PictureBackBase64: croppedBack
             };
 
-            // Función para iniciar la cámara en un video dentro del contenedor especificado
-            function startCamera(videoElementId) {
-                var video = document.getElementById(videoElementId);
-                if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(function(stream){
-                            cameraStream = stream;
-                            video.srcObject = stream;
-                            video.play();
-                            video.style.display = "block";
-                        })
-                        .catch(function(err){
-                            alert("Error accediendo a la cámara: " + err);
-                        });
-                }
-            }
+            console.log("Datos a enviar: " + JSON.stringify(data));
 
-            // Función para capturar la imagen manualmente y aplicar CropperJS
-            function captureImage(videoElementId, canvasElementId, previewId, isFront){
-                var video = document.getElementById(videoElementId);
-                var canvas = document.getElementById(canvasElementId);
-                if(!canvas){
-                    canvas = document.createElement("canvas");
-                    canvas.id = canvasElementId;
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    canvas.style.display = "none";
-                    document.body.appendChild(canvas);
-                }
-                var context = canvas.getContext("2d");
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                var dataUrl = canvas.toDataURL("image/png");
-                document.getElementById(previewId).src = dataUrl;
-
-                // Detener la cámara
-                if(cameraStream){
-                    cameraStream.getTracks().forEach(function(track){
-                        track.stop();
-                    });
-                    cameraStream = null;
-                }
-                video.style.display = "none";
-                // Inicializar CropperJS sobre la imagen capturada
-                var img = document.getElementById(previewId);
-                var options = {
-                    aspectRatio: 16/9,
-                    viewMode: 1,
-                    autoCropArea: 1,
-                    movable: true,
-                    zoomable: true,
-                    scalable: true,
-                    cropBoxResizable: true,
-                    maxCanvasWidth: 1200,
-                    maxCanvasHeight: 1200
-                };
-                if(isFront){
-                    if(cropperInstanceFront){ cropperInstanceFront.destroy(); }
-                    cropperInstanceFront = new Cropper(img, options);
-                } else {
-                    if(cropperInstanceBack){ cropperInstanceBack.destroy(); }
-                    cropperInstanceBack = new Cropper(img, options);
-                }
-            }
-
-            // Handler para capturar frontal de forma manual
-            $("#frontCaptureBtn").click(function(){
-                // Crear video temporal dentro de frontSection, si no existe
-                if($("#frontVideo").length === 0){
-                    $("#frontSection").append('<video id="frontVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
-                }
-                startCamera("frontVideo");
-                $("#captureNowFrontBtn").show(); // Mostrar botón para capturar manualmente
-            });
-
-            $("#captureNowFrontBtn").click(function(){
-                captureImage("frontVideo", "canvasFront", "frontPreview", true);
-                $(this).hide();
-            });
-
-            // Handler para capturar trasera de forma manual
-            $("#backCaptureBtn").click(function(){
-                if($("#backVideo").length === 0){
-                    $("#backSection").append('<video id="backVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
-                }
-                startCamera("backVideo");
-                $("#captureNowBackBtn").show();
-            });
-
-            $("#captureNowBackBtn").click(function(){
-                captureImage("backVideo", "canvasBack", "backPreview", false);
-                $(this).hide();
-            });
-
-            $("#saveImagesBtn").click(function () {
-                var frontImageData = $("#frontPreview").attr("src");
-                var backImageData = $("#backPreview").attr("src");
-
-                // Convertir el valor booleano correctamente
-                var requiresTwoPhotos = "@Model.RequiresTwoPhotos".toLowerCase() === "true";
-
-                if (!frontImageData || (requiresTwoPhotos && !backImageData)) {
+            $.ajax({
+                url: '/CustomerConfiguration/SaveCustomerPic',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function () {
                     swal({
-                        title: "¡Atención!",
-                        text: "Debe capturar o subir la(s) imagen(es) requerida(s).",
-                        type: "warning"
+                        title: "¡Éxito!",
+                        text: "El Documento fue guardado correctamente.",
+                        type: "success"
+                    }).then(function(){
+                        window.location.href = '/Crypto/CustomerConfiguration?activeTab=subir-documentos';
                     });
-                    return;
-                }
-
-                // Obtener imagen recortada
-                var croppedFront = cropperInstanceFront ? cropperInstanceFront.getCroppedCanvas({
-                    maxWidth: 500,
-                    maxHeight: 600
-                }).toDataURL("image/png") : frontImageData;
-
-                var croppedBack = "";
-                if (requiresTwoPhotos) {
-                    croppedBack = cropperInstanceBack ? cropperInstanceBack.getCroppedCanvas({
-                        maxWidth: 500,
-                        maxHeight: 600
-                    }).toDataURL("image/png") : backImageData;
-                }
-
-                console.log("Imagen frontal recortada: " + croppedFront);
-                if (requiresTwoPhotos) {
-                    console.log("Imagen trasera recortada: " + croppedBack);
-                }
-                
-                var data = {
-                    CustomerId: @Model.CustomerId,
-                    Type: "@Model.Type",
-                    PictureFrontBase64: croppedFront,
-                    PictureBackBase64: croppedBack
-                };
-
-                console.log("Datos a enviar: " + JSON.stringify(data));
-
-                $.ajax({
-                    url: '/CustomerConfiguration/SaveCustomerPic',
-                    type: 'POST',
-                    data: {
-                        CustomerId: @Model.CustomerId,
-                        Type: "@Model.Type",
-                        PictureFrontBase64: croppedFront,
-                        PictureBackBase64: croppedBack
-                    },
-                    success: function () {
-                        swal({
-                            title: "¡Éxito!",
-                            text: "El Documento fué guardado correctamente.",
-                            type: "success"
-                        }, function () {
-                            window.location.href = "/Crypto/CustomerConfiguration?activeTab=subir-documentos";
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error al guardar:", error);
-                        swal({
-                            title: "¡Error!",
-                            text: "Ocurrió un problema al guardar el Documento. Intente nuevamente.",
-                            type: "error"
-                        });
-                    }
-                });
-            });
-
-            // Al cerrar la vista, detener la cámara y destruir cropper
-            $(window).on('beforeunload', function(){
-                if(cameraStream){
-                    cameraStream.getTracks().forEach(function(track){
-                        track.stop();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al guardar:", error);
+                    swal({
+                        title: "¡Error!",
+                        text: "Ocurrió un problema al guardar el Documento. Intente nuevamente.",
+                        type: "error"
                     });
-                }
-                if(cropperInstanceFront){
-                    cropperInstanceFront.destroy();
-                }
-                if(cropperInstanceBack){
-                    cropperInstanceBack.destroy();
                 }
             });
         });
-        
-    </script>
+
+        // Al cerrar la vista, detener la cámara y destruir cropper
+        $(window).on('beforeunload', function(){
+            if(cameraStream){
+                cameraStream.getTracks().forEach(function(track){
+                    track.stop();
+                });
+            }
+            if(cropperInstanceFront){
+                cropperInstanceFront.destroy();
+            }
+            if(cropperInstanceBack){
+                cropperInstanceBack.destroy();
+            }
+        });
+    });
+</script>
+
 }
 </body>
 </html>

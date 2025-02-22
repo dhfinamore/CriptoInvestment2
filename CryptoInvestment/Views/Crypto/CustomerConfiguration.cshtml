@@ -464,6 +464,14 @@
         <div class="tab-pane fade @(activeTab == "withdrawals" ? "show active" : "")" id="withdrawals" role="tabpanel">
             <div class="row text-center">
                 <h3>Cuentas de Retiros</h3>
+                <div class="d-flex justify-content-center">
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                    <input type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                </div>
             </div>
         </div>
         <!-- Change Password Tab: Se marca activo y visible -->
@@ -906,6 +914,22 @@
             $('.percent-input').off('input change').on('input change', updateProgressBar);
 
             updateProgressBar();
+
+            // Al ingresar un dígito, se mueve el foco al siguiente input.
+            $('.pin-input').on('input', function () {
+                var $this = $(this);
+                // Permitir solo números
+                $this.val($this.val().replace(/[^0-9]/g, ''));
+                if ($this.val().length === parseInt($this.attr('maxlength'))) {
+                    $this.next('.pin-input').focus();
+                }
+            });
+            // Permite retroceder si se presiona backspace en un campo vacío
+            $('.pin-input').on('keydown', function (e) {
+                if (e.key === "Backspace" && $(this).val() === "") {
+                    $(this).prev('.pin-input').focus();
+                }
+            });
         });
     </script>
 }
