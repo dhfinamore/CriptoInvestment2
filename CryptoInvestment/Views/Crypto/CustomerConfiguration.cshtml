@@ -463,14 +463,14 @@
         <div class="tab-pane fade @(activeTab == "withdrawals" ? "show active" : "")" id="withdrawals" role="tabpanel">
             @if (Model.IsWithdrawalsPasswordSet)
             {
-                <h4>¿Desea actualizar contraseña para retiros?</h4>
+                <h4>¿Desea actualizar su PIN para retiros?</h4>
                 <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal3">
                     Actualizar Contraseña de Retiros
                 </button>
             }
             else
             {
-                <h4>Defina una contraseña para retiros, al disponer de sus beneficios la aplicación la solicitará para su seguridad</h4>
+                <h4>Defina un PIN para retiros, al disponer de sus beneficios la aplicación la solicitará para su seguridad</h4>
                 <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal3">
                     Establecer Contraseña de Retiros
                 </button>
@@ -484,11 +484,11 @@
                             </button>
                             @if (Model.IsWithdrawalsPasswordSet)
                             {
-                                <h3 class="modal-title">Actualizar Contraseña de Retiros</h3>
+                                <h3 class="modal-title">Actualizar PIN de Retiros</h3>
                             }
                             else
                             {
-                                <h3 class="modal-title">Configurar Contraseña de Retiros</h3>
+                                <h3 class="modal-title">Configurar PIN de Retiros</h3>
                             }
                         </div>
                         <div class="modal-body">
@@ -505,12 +505,12 @@
                                 </div>
                                 <label>Confirme su PIN de Retiros</label>
                                 <div id="confirm-withdrawals-password-div" class="d-flex justify-content-center m-b">
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter1" name="WithdrawalsPassword.ConfirmCharacter1" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter2" name="WithdrawalsPassword.ConfirmCharacter2" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter3" name="WithdrawalsPassword.ConfirmCharacter3" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter4" name="WithdrawalsPassword.ConfirmCharacter4" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter5" name="WithdrawalsPassword.ConfirmCharacter5" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
-                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter6" name="WithdrawalsPassword.ConfirmCharacter6" type="password" class="form-control text-center mx-1 pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter1" name="WithdrawalsPassword.ConfirmCharacter1" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter2" name="WithdrawalsPassword.ConfirmCharacter2" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter3" name="WithdrawalsPassword.ConfirmCharacter3" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter4" name="WithdrawalsPassword.ConfirmCharacter4" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter5" name="WithdrawalsPassword.ConfirmCharacter5" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
+                                    <input asp-for="WithdrawalsPassword.ConfirmCharacter6" name="WithdrawalsPassword.ConfirmCharacter6" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
@@ -963,21 +963,75 @@
 
             updateProgressBar();
 
-            // Al ingresar un dígito, se mueve el foco al siguiente input.
             $('.pin-input').on('input', function () {
                 var $this = $(this);
                 // Permitir solo números
                 $this.val($this.val().replace(/[^0-9]/g, ''));
+
                 if ($this.val().length === parseInt($this.attr('maxlength'))) {
-                    $this.next('.pin-input').focus();
+                    var $next = $this.next('.pin-input');
+
+                    if ($next.length) {
+                        $next.val(''); // Limpia el valor del siguiente input
+                        $next.focus(); // Enfoca el siguiente input
+                    } else {
+                        // Mover el foco al primer .confirm-pin-input
+                        var $firstConfirmInput = $('.confirm-pin-input').first();
+                        if ($firstConfirmInput.length) {
+                            $firstConfirmInput.val(''); // Limpia el valor del primer .confirm-pin-input
+                            $firstConfirmInput.focus(); // Enfoca el primer .confirm-pin-input
+                        }
+                    }
                 }
             });
-            // Permite retroceder si se presiona backspace en un campo vacío
+
+            $('.confirm-pin-input').on('input', function () {
+                var $this = $(this);
+                // Permitir solo números
+                $this.val($this.val().replace(/[^0-9]/g, ''));
+
+                if ($this.val().length === parseInt($this.attr('maxlength'))) {
+                    var $next = $this.next('.pin-input');
+
+                    if ($next.length) {
+                        $next.val('');
+                        $next.focus();
+                    } else {
+                        var $focusableElements = $(':input, a[href], area[href], iframe, object, embed, [tabindex], [contenteditable]')
+                            .filter(':visible')
+                            .not('[tabindex=-1]')
+                            .not('.pin-input');
+
+                        var currentIndex = $focusableElements.index(this);
+                        var $nextFocusable = $focusableElements.eq(currentIndex + 1);
+
+                        if ($nextFocusable.length) {
+                            $nextFocusable.focus();
+                        }
+                    }
+                }
+            });
+
+            $('.confirm-pin-input').on('keydown', function (e) {
+                if (e.key === "Backspace" && $(this).val() === "") {
+                    var $prev = $(this).prev('.confirm-pin-input');
+                    if ($prev.length) {
+                        $prev.val(''); // Limpia el valor del input anterior
+                        $prev.focus();
+                    }
+                }
+            });
+
             $('.pin-input').on('keydown', function (e) {
                 if (e.key === "Backspace" && $(this).val() === "") {
-                    $(this).prev('.pin-input').focus();
+                    var $prev = $(this).prev('.pin-input');
+                    if ($prev.length) {
+                        $prev.val(''); // Limpia el valor del input anterior
+                        $prev.focus();
+                    }
                 }
             });
+
 
             $('#set-withdrawals-password').click(function(e) {
                 // Inicializar variables para almacenar las contraseñas
@@ -985,7 +1039,7 @@
                 var confirmPassword = '';
 
                 // Recolectar los caracteres de la contraseña
-                $('#confirm-withdrawals-password-div').first().find('.pin-input').each(function() {
+                $('#confirm-withdrawals-password-div').first().find('.confirm-pin-input').each(function() {
                     password += $(this).val().trim();
                 });
 
