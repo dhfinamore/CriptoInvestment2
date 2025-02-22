@@ -118,6 +118,7 @@
         var cropperInstanceFront = null;
         var cropperInstanceBack = null;
         var cameraStream = null;
+        var currentFacingMode = 'environment'; // Por defecto, se intentará usar la cámara trasera
 
         // Función para previsualizar imagen subida e inicializar CropperJS sin restricciones fijas
         window.previewImage = function(input, previewId) {
@@ -135,8 +136,6 @@
                         cropperInstanceBack.destroy();
                     }
                     var options = {
-                        // Si deseas que el usuario tenga total libertad, puedes omitir aspectRatio
-                        // aspectRatio: 16/9, 
                         viewMode: 1,
                         autoCropArea: 1,
                         movable: true,
@@ -158,10 +157,12 @@
         };
 
         // Función para iniciar la cámara en un video dentro de la sección correspondiente
-        function startCamera(videoElementId) {
+        function startCamera(videoElementId, facingMode) {
             var video = document.getElementById(videoElementId);
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-                navigator.mediaDevices.getUserMedia({ video: true })
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode }
+                })
                     .then(function(stream){
                         cameraStream = stream;
                         video.srcObject = stream;
@@ -171,6 +172,21 @@
                     .catch(function(err){
                         alert("Error accediendo a la cámara: " + err);
                     });
+            }
+        }
+
+        // Función para detener la cámara
+        function stopCamera(videoElementId) {
+            var video = document.getElementById(videoElementId);
+            if(cameraStream){
+                cameraStream.getTracks().forEach(function(track){
+                    track.stop();
+                });
+                cameraStream = null;
+            }
+            if(video){
+                video.srcObject = null;
+                video.style.display = "none";
             }
         }
 
@@ -192,18 +208,11 @@
             document.getElementById(previewId).src = dataUrl;
 
             // Detener la cámara
-            if(cameraStream){
-                cameraStream.getTracks().forEach(function(track){
-                    track.stop();
-                });
-                cameraStream = null;
-            }
-            video.style.display = "none";
+            stopCamera(videoElementId);
 
             // Inicializar CropperJS sobre la imagen capturada sin restricciones fijas
             var img = document.getElementById(previewId);
             var options = {
-                // aspectRatio: 16/9,  // Opcional: comentar o quitar para libertad total
                 viewMode: 1,
                 autoCropArea: 1,
                 movable: true,
@@ -224,31 +233,79 @@
         // Handler para iniciar cámara y mostrar botón de captura en sección frontal
         $("#frontCaptureBtn").click(function(){
             if($("#frontVideo").length === 0){
-                $("#frontSection").append('<video id="frontVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
+                $("#frontSection").append('<video id="frontVideo" autoplay playsinline style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
             }
-            startCamera("frontVideo");
+            startCamera("frontVideo", currentFacingMode);
             $("#captureNowFrontBtn").show();
+
+            // Botón para cambiar entre cámaras si hay más de una
+            if(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices){
+                navigator.mediaDevices.enumerateDevices()
+                    .then(function(devices){
+                        var videoInputCount = 0;
+                        devices.forEach(function(device){
+                            if(device.kind === 'videoinput'){
+                                videoInputCount++;
+                            }
+                        });
+                        if(videoInputCount > 1){
+                            $("#switchCameraFrontBtn").show();
+                        }
+                    });
+            }
+        });
+
+        // Handler para cambiar entre cámaras en sección frontal
+        $("#switchCameraFrontBtn").click(function(){
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+            stopCamera("frontVideo");
+            startCamera("frontVideo", currentFacingMode);
         });
 
         // Handler para capturar foto manualmente en sección frontal
         $("#captureNowFrontBtn").click(function(){
             captureImage("frontVideo", "canvasFront", "frontPreview", true);
             $(this).hide();
+            $("#switchCameraFrontBtn").hide();
         });
 
         // Handler para iniciar cámara y mostrar botón de captura en sección trasera
         $("#backCaptureBtn").click(function(){
             if($("#backVideo").length === 0){
-                $("#backSection").append('<video id="backVideo" width="300" height="200" autoplay style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
+                $("#backSection").append('<video id="backVideo" autoplay playsinline style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
             }
-            startCamera("backVideo");
+            startCamera("backVideo", currentFacingMode);
             $("#captureNowBackBtn").show();
+
+            // Botón para cambiar entre cámaras si hay más de una
+            if(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices){
+                navigator.mediaDevices.enumerateDevices()
+                    .then(function(devices){
+                        var videoInputCount = 0;
+                        devices.forEach(function(device){
+                            if(device.kind === 'videoinput'){
+                                videoInputCount++;
+                            }
+                        });
+                        if(videoInputCount > 1){
+                            $("#switchCameraBackBtn").show();
+                        }
+                    });
+            }
+        });
+
+        // Handler para cambiar entre cámaras en sección trasera
+        $("#switchCameraBackBtn").click(function(){
+            currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+            stopCamera("backVideo");
+            startCamera("backVideo", currentFacingMode);
         });
 
         // Handler para capturar foto manualmente en sección trasera
         $("#captureNowBackBtn").click(function(){
             captureImage("backVideo", "canvasBack", "backPreview", false);
             $(this).hide();
+            $("#switchCameraBackBtn").hide();
         });
 
         // Handler para "Guardar Imágenes"
@@ -299,7 +356,7 @@
                 success: function () {
                     swal({
                         title: "¡Éxito!",
-                        text: "El Documento fué guardado correctamente.",
+                        text: "El Documento fue guardado correctamente.",
                         type: "success"
                     }, function () {
                         window.location.href = "/Crypto/CustomerConfiguration?activeTab=subir-documentos";
@@ -332,6 +389,7 @@
         });
     });
 </script>
+
 
 }
 </body>
