@@ -11,11 +11,14 @@ public class CustomerConfigurationViewModel
     public CustomerBeneficiaryViewModel CustomerBeneficiary { get; set; }
     public CustomerPic? CustomerPic { get; set; }
     public int DocsValidated { get; set; }
+    public WithdrawalsPasswordViewModel WithdrawalsPassword { get; set; }
+    public bool IsWithdrawalsPasswordSet { get; set; }
     
     public CustomerConfigurationViewModel()
     {
         ResetPassword = new ResetPasswordViewModel();
         SetSecurityQuestion = new SecurityQuestionsViewModel();
         CustomerBeneficiary = new CustomerBeneficiaryViewModel();
+        WithdrawalsPassword = new WithdrawalsPasswordViewModel();
     }
 }

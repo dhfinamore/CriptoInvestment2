@@ -58,6 +58,11 @@ public class CryptoController : Controller
             _ => 0
         );
         
+        model.IsWithdrawalsPasswordSet = customer.Match(
+            c => c.PasswdWithdrawal != null,
+            _ => false
+        );
+        
         var query = new ListSecurityQuestionsQuery();
         var listSecurityQuestionsResult = await _mediator.Send(query);
         

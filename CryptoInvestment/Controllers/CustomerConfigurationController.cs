@@ -1,5 +1,6 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
+using CryptoInvestment.Application.Authentication.Commands.SetWithdrawalsPasswordCommand;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.Common.Interface;
@@ -308,6 +309,39 @@ public class CustomerConfigurationController : Controller
         return deleteCustomerPicResult.Match<IActionResult>(
             success => Json(new { success = true }),
             errors => Json(new { success = false, message = errors.First().Description })
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> SetWithdrawalsPassword(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        RemoveValidationForAssignBeneficiaryPercent(ModelState);
+        
+        if (!ModelState.IsValid)
+        {
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+        
+        var command = new SetWithdrawalsPasswordCommand(
+            customerConfigurationViewModel.CustomerId,
+            customerConfigurationViewModel.WithdrawalsPassword.Character1 +
+            customerConfigurationViewModel.WithdrawalsPassword.Character2 +
+            customerConfigurationViewModel.WithdrawalsPassword.Character3 +
+            customerConfigurationViewModel.WithdrawalsPassword.Character4 +
+            customerConfigurationViewModel.WithdrawalsPassword.Character5 +
+            customerConfigurationViewModel.WithdrawalsPassword.Character6
+        );
+        
+        var setWithdrawalsPasswordResult = await _mediator.Send(command);
+        
+        return setWithdrawalsPasswordResult.Match<IActionResult>(
+            success => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "withdrawals" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+            }
         );
     }
     
