@@ -113,7 +113,7 @@
     <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha512-..." crossorigin="anonymous"></script>
 
-<script>
+    <script>
     $(document).ready(function(){
         var cropperInstanceFront = null;
         var cropperInstanceBack = null;
@@ -232,6 +232,10 @@
 
         // Handler para iniciar cámara y mostrar botón de captura en sección frontal
         $("#frontCaptureBtn").click(function(){
+            if(cropperInstanceFront){
+                cropperInstanceFront.destroy();
+            }
+            $("#frontPreview").attr("src", "");
             if($("#frontVideo").length === 0){
                 $("#frontSection").append('<video id="frontVideo" autoplay playsinline style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
             }
@@ -271,6 +275,10 @@
 
         // Handler para iniciar cámara y mostrar botón de captura en sección trasera
         $("#backCaptureBtn").click(function(){
+            if(cropperInstanceBack){
+                cropperInstanceBack.destroy();
+            }
+            $("#backPreview").attr("src", "");
             if($("#backVideo").length === 0){
                 $("#backSection").append('<video id="backVideo" autoplay playsinline style="display:none; max-width:300px; max-height:200px; margin-top:10px;"></video>');
             }

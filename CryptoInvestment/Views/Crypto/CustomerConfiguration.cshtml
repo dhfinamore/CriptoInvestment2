@@ -513,7 +513,7 @@
                                     <input asp-for="WithdrawalsPassword.ConfirmCharacter6" name="WithdrawalsPassword.ConfirmCharacter6" type="password" class="form-control text-center mx-1 confirm-pin-input" maxlength="1" pattern="\d" autocomplete="off"/>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
                                     <button id="set-withdrawals-password" type="submit" class="btn btn-primary">Guardar</button>
                                 </div>
                             </form>
@@ -1051,7 +1051,7 @@
                 // Verificar que todos los campos estén completos
                 if (password.length < 6 || confirmPassword.length < 6) {
                     e.preventDefault();
-                    alert('Por favor, completa todos los dígitos de la contraseña.');
+                    alert('Por favor, completa todos los dígitos de su PIN.');
                     return;
                 }
 
@@ -1059,7 +1059,6 @@
                 if (password !== confirmPassword) {
                     e.preventDefault();
                     alert('Las PIN no coinciden. Por favor, intenta de nuevo.');
-                    return;
                 }
             });
         });
