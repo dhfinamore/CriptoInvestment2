@@ -999,6 +999,7 @@
                     e.preventDefault();
                     alert('Por favor, completa todos los dígitos de la contraseña.');
                     return;
+                }
 
                     // Comparar las contraseñas
                 if (password !== confirmPassword) {
@@ -1006,8 +1007,6 @@
                     alert('Las PIN no coinciden. Por favor, intenta de nuevo.');
                     return;
                 }
-
-                // Si todo está correcto, el formulario se enviará normalmente
             });
         });
     </script>
