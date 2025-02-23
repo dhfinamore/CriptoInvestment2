@@ -465,14 +465,14 @@
             {
                 <h4>¿Desea actualizar su PIN para retiros?</h4>
                 <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal3">
-                    Actualizar Contraseña de Retiros
+                    Actualizar PIN de Retiros
                 </button>
             }
             else
             {
-                <h4>Defina un PIN para retiros, al disponer de sus beneficios la aplicación la solicitará para su seguridad</h4>
+                <h4>Defina un PIN para retiros, al disponer de sus beneficios la aplicación lo solicitará para su seguridad</h4>
                 <button type="button" class="btn btn-primary m-b d-flex justify-content-center align-items-center" data-toggle="modal" data-target="#myModal3">
-                    Establecer Contraseña de Retiros
+                    Establecer PIN de Retiros
                 </button>
             }
             <div class="modal inmodal" id="myModal3" tabindex="-1" role="dialog" aria-hidden="true">
@@ -991,7 +991,7 @@
                 $this.val($this.val().replace(/[^0-9]/g, ''));
 
                 if ($this.val().length === parseInt($this.attr('maxlength'))) {
-                    var $next = $this.next('.pin-input');
+                    var $next = $this.next('.confirm-pin-input');
 
                     if ($next.length) {
                         $next.val('');
