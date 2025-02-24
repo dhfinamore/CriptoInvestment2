@@ -1,17 +1,53 @@
+@model CryptoInvestment.ViewModels.Deposit.InvPlanViewModel
+
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
     ViewBag.Title = "GHR I & T";
 }
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
 <div>
-      <h1>Depositos</h1>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <h1>Depósitos</h1>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            @foreach (var invPlan in Model.InvPlans)
+            {
+                <div class="col-md-3">
+                    <div class="ibox">
+                        <div class="ibox-content product-box">
+                            <label class="inv-plan-id" style="display: none">@invPlan.IdInvPlans</label>
+                            <div class="product-imitation">
+                                <h1>
+                                    @{
+                                        var formatedAmount = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C2}", invPlan.MinAmount);
+                                    }
+                                    <strong>Inversión @formatedAmount</strong>
+                                </h1>
+                            </div>
+                            <div class="product-desc">
+                                <span class="product-price">
+                                    @invPlan.ProfitPercentage %
+                                </span>
+                                <a href="#" class="product-name">
+                                    @{
+                                        var profit = invPlan.MinAmount * invPlan.ProfitPercentage / 100;
+                                        var formattedProfit = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C2}", profit);
+                                    }
+                                    <label>Beneficio Mínimo @formattedProfit</label>
+                                </a>
+                                <div class="small m-t-xs">
+                                    Duranción de la inversión @invPlan.MonthsInvested mes
+                                </div>
+                                <div class="m-t text-righ">
+                                    <a href="#" class="btn btn-xs btn-outline btn-primary">Comenzar Hoy <i class="fa fa-long-arrow-right"></i> </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
-</body>
-</html>

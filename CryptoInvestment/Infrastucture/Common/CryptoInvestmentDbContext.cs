@@ -1,8 +1,9 @@
 using System.Reflection;
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.InvOperations;
+using CryptoInvestment.Domain.InvPlan;
 using CryptoInvestment.Domain.SecurityQuestions;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptoInvestment.Infrastucture.Common;
@@ -15,6 +16,9 @@ public class CryptoInvestmentDbContext : DbContext, IUnitOfWork
     public DbSet<CustomerBeneficiary> CustomerBeneficiaries { get; init; } = null!;
     public DbSet<CustomerPic> CustomerPics { get; init; } = null!;
     public DbSet<CustomerRelationship> CustomerRelationships { get; init; } = null!;
+    public DbSet<InvPlan> InvPlans { get; init; } = null!;
+    public DbSet<InvOperation> InvOperations { get; init; } = null!;
+    public DbSet<InvAction> InvActions { get; init; } = null!;
     
     public CryptoInvestmentDbContext(DbContextOptions<CryptoInvestmentDbContext> options) : base(options)
     {

@@ -4,11 +4,14 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
+using CryptoInvestment.Application.InvPlans.Queries.ListInvPlanQuery;
 using CryptoInvestment.Application.Referrals.Commands;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.InvPlan;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
+using CryptoInvestment.ViewModels.Deposit;
 using CryptoInvestment.ViewModels.Referrals;
 
 using MediatR;
@@ -117,9 +120,30 @@ public class CryptoController : Controller
         return View(model);
     }
     
-    public IActionResult Deposit()
+    public async Task<IActionResult> Deposit()
     {
-        return View();
+        var model = new InvPlanViewModel();
+            
+        if (HttpContext.User.Identity!.IsAuthenticated)
+        {
+            model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+        }
+        else
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+
+        var query = new ListInvPlansQuery();
+        var getInvPlansResult = await _mediator.Send(query);
+        
+        var invPlans = getInvPlansResult.Match<List<InvPlan>>(
+            invPlans => invPlans,
+            _ => null!
+        );
+        
+        model.InvPlans = invPlans;
+        
+        return View(model);
     }
     
     public IActionResult Withdraw()

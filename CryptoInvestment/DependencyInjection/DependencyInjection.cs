@@ -3,6 +3,8 @@ using CryptoInvestment.Infrastucture.Authentication;
 using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.Infrastucture.Customers.Persistance;
 using CryptoInvestment.Infrastucture.CustomersBeneficiary.Persistance;
+using CryptoInvestment.Infrastucture.InvOperations.Persistance;
+using CryptoInvestment.Infrastucture.InvPlans.Persistance;
 using CryptoInvestment.Infrastucture.SecurityQuestions.Persistance;
 using CryptoInvestment.Services;
 using CryptoInvestment.Services.ConfigurationModels;
@@ -66,6 +68,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ISecurityQuestionRepository, SecurityQuestionRepository>();
         services.AddScoped<ICustomerBeneficiaryRepository, CustomerBeneficiaryRepository>();
+        services.AddScoped<IInvPlanRepository, InvPlanRepository>();
+        services.AddScoped<IInvOperationRepository, InvOperationRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<CryptoInvestmentDbContext>());
         
         return services;
