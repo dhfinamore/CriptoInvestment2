@@ -38,10 +38,17 @@
                                     <label>Beneficio Mínimo @formattedProfit</label>
                                 </a>
                                 <div class="small m-t-xs">
-                                    Duranción de la inversión @invPlan.MonthsInvested mes
+                                    Duración de la inversión @invPlan.MonthsInvested mes
                                 </div>
-                                <div class="m-t text-righ">
-                                    <a href="#" class="btn btn-xs btn-outline btn-primary">Comenzar Hoy <i class="fa fa-long-arrow-right"></i> </a>
+                                <div class="m-t text-right">
+                                    <form asp-action="DepositWizard" asp-controller="Crypto" method="post" style="display: inline;">
+                                        <input type="hidden" name="CustomerId" value="@Model.CustomerId" />
+                                        <input type="hidden" name="InvPlanId" value="@invPlan.IdInvPlans" />
+                                        <button type="submit" class="btn btn-xs btn-outline btn-primary start-today">
+                                            Comenzar Hoy 
+                                            <i class="fa fa-long-arrow-right"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

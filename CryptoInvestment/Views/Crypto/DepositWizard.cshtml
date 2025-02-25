@@ -1,0 +1,182 @@
+@model CryptoInvestment.ViewModels.Deposit.DepositViewModel
+
+@{
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+    ViewBag.Title = "GHR I & T";
+}
+
+<div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <h1>Depósitos</h1>
+    </div>
+
+    <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <form id="securityQuestionsForm" asp-action="SecurityQuestions" asp-controller="Authentication" method="post" class="wizard-big">
+                            <input type="hidden" asp-for="CustomerId" />
+
+                            <h1>Primer Paso</h1>
+                            <fieldset>
+                                <h2 class="m-b-md">Descripción del Plan</h2>
+                                <div class="form-group">
+                                    <select asp-for="InvPlanId" id="InvPlanId" class="form-control" style="border-radius: 10px; height: 40px" required>
+                                        <option value="">Seleccione un plan de inversión</option>
+                                        @foreach (var plan in Model.InvPlans)
+                                        {
+                                        <option value="@plan.IdInvPlans" data-max="@plan.MaxAmount" data-min="@plan.MinAmount">
+                                            @plan.PlanName
+                                        </option>
+                                        }
+                                    </select>
+                                    <span class="text-danger" asp-validation-for="InvPlanId"></span>
+                                    <div class="m-r-xl">
+                                        <h4 class="m-t m-r-lg">
+                                            Monto Mínimo: <span id="minAmountDisplay"></span> |
+                                            Monto Máximo: <span id="maxAmountDisplay"></span>
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-t-xl">
+                                    <h3>Seleccione una moneda:</h3>
+                                    <div class="currency-options">
+                                        @foreach (var currency in Model.InvCurrencies)
+                                        {
+                                            <div class="form-check form-check-inline">
+                                                <input type="radio" id="currency_@currency.CurrencyId" name="SelectedCurrencyId" value="@currency.CurrencyId" class="form-check-input" required>
+                                                <label for="currency_@currency.CurrencyId" class="form-check-label">
+                                                    <img src="@Url.Content("~/images/" + currency.CurrencyId + ".svg")"
+                                                         alt="@currency.Description"
+                                                         width="24" height="24" style="margin-right: 8px;">
+                                                    @currency.Description
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <h1>Segundo Paso</h1>
+                            <fieldset>
+                                
+                            </fieldset>
+
+                            <h1>Tercera Paso</h1>
+                            <fieldset>
+                                
+                            </fieldset>
+                        </form>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <environment names="Development,Staging,Production">
+        <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
+        <link rel="stylesheet" href="~/lib/steps/jquery.steps.css" />
+    </environment>
+}
+
+@section Scripts {
+    <environment names="Development,Staging,Production">
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+        <script src="~/lib/steps/jquery.steps.min.js"></script>
+    </environment>
+    <script type="text/javascript">
+
+        function updateAmounts() {
+            var selectedOption = $('#InvPlanId').find('option:selected');
+            var maxAmount = selectedOption.data('max');
+            var minAmount = selectedOption.data('min');
+
+            if (minAmount !== undefined && minAmount !== null) {
+                $('#minAmountDisplay').text(
+                    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount)
+                );
+            } else {
+                $('#minAmountDisplay').text('');
+            }
+
+            if (maxAmount !== undefined && maxAmount !== null) {
+                $('#maxAmountDisplay').text(
+                    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount)
+                );
+            } else {
+                $('#maxAmountDisplay').text('');
+            }
+        }
+
+        $(document).ready(function () {
+            // Inicializar el wizard
+            $("#securityQuestionsForm").steps({
+                headerTag: "h1",
+                bodyTag: "fieldset",
+                transitionEffect: "fade",
+                autoFocus: true,
+                labels: {
+                    cancel: "Cancelar",
+                    current: "Actual",
+                    finish: "Finalizar",
+                    next: "Siguiente",
+                    previous: "Anterior",
+                    loading: "Cargando..."
+                },
+                onStepChanged: function (event, currentIndex, priorIndex) {
+                    if (currentIndex === 1) {
+                        var firstVal = $('#FirstQuestionId').val();
+                        var secondVal = $('#SecondQuestionId').val();
+
+                        if (firstVal !== "" && secondVal === firstVal) {
+                            $('#SecondQuestionId').val("");
+                        }
+                    } else if (currentIndex === 2) {
+                        var firstVal = $('#FirstQuestionId').val();
+                        var secondVal = $('#SecondQuestionId').val();
+                        var thirdVal = $('#ThirdQuestionId').val();
+
+                        if ((firstVal !== "" && thirdVal === firstVal) || (secondVal !== "" && thirdVal === secondVal)) {
+                            $('#ThirdQuestionId').val("");
+                        }
+                    }
+                },
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    if (currentIndex > newIndex) {
+                        return true;
+                    }
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    $(this).submit();
+                }
+            }).validate({
+                errorPlacement: function (error, element) {
+                    error.insertBefore(element);
+                }
+            });
+
+            updateAmounts();
+            $('#InvPlanId').change(updateAmounts);
+        });
+    </script>
+}

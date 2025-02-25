@@ -1,4 +1,5 @@
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

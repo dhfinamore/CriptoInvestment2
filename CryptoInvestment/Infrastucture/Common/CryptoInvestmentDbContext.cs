@@ -2,7 +2,7 @@ using System.Reflection;
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.InvOperations;
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
 using CryptoInvestment.Domain.SecurityQuestions;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,7 @@ public class CryptoInvestmentDbContext : DbContext, IUnitOfWork
     public DbSet<CustomerPic> CustomerPics { get; init; } = null!;
     public DbSet<CustomerRelationship> CustomerRelationships { get; init; } = null!;
     public DbSet<InvPlan> InvPlans { get; init; } = null!;
+    public DbSet<InvCurrency> InvCurrencies { get; init; } = null!;
     public DbSet<InvOperation> InvOperations { get; init; } = null!;
     public DbSet<InvAction> InvActions { get; init; } = null!;
     

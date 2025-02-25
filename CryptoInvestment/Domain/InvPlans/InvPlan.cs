@@ -1,4 +1,4 @@
-namespace CryptoInvestment.Domain.InvPlan;
+namespace CryptoInvestment.Domain.InvPlans;
 
 public class InvPlan
 {

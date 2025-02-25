@@ -1,5 +1,5 @@
 using CryptoInvestment.Application.Common.Interface;
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
 using CryptoInvestment.Infrastucture.Common;
 
 using Microsoft.EntityFrameworkCore;

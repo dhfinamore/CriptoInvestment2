@@ -1,5 +1,6 @@
 using CryptoInvestment.Application.Common.Interface;
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
+
 using ErrorOr;
 using MediatR;
 

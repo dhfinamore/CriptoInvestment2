@@ -8,8 +8,9 @@ using CryptoInvestment.Application.InvPlans.Queries.ListInvPlanQuery;
 using CryptoInvestment.Application.Referrals.Commands;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
 using CryptoInvestment.Domain.SecurityQuestions;
+using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using CryptoInvestment.ViewModels.Deposit;
 using CryptoInvestment.ViewModels.Referrals;
@@ -26,11 +27,13 @@ public class CryptoController : Controller
 {
     private readonly ISender _mediator;
     private readonly IEncryptionService _encryptionService;
+    private readonly CryptoInvestmentDbContext _context;
 
-    public CryptoController(ISender mediator, IEncryptionService encryptionService)
+    public CryptoController(ISender mediator, IEncryptionService encryptionService, CryptoInvestmentDbContext context)
     {
         _mediator = mediator;
         _encryptionService = encryptionService;
+        _context = context;
     }
 
     public IActionResult Dashboard()
@@ -142,6 +145,30 @@ public class CryptoController : Controller
         );
         
         model.InvPlans = invPlans;
+        
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DepositWizard(int customerId, int invPlanId)
+    {
+        var query = new ListInvPlansQuery();
+        var getInvPlansResult = await _mediator.Send(query);
+        
+        var invPlans = getInvPlansResult.Match<List<InvPlan>>(
+            invPlans => invPlans,
+            _ => null!
+        );
+        
+        var currencies = _context.InvCurrencies.ToList();
+        
+        var model = new DepositViewModel()
+        {
+            CustomerId = customerId,
+            InvPlanId = invPlanId,
+            InvPlans = invPlans,
+            InvCurrencies = currencies
+        };
         
         return View(model);
     }

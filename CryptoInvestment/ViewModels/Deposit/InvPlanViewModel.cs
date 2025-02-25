@@ -1,4 +1,4 @@
-using CryptoInvestment.Domain.InvPlan;
+using CryptoInvestment.Domain.InvPlans;
 
 namespace CryptoInvestment.ViewModels.Deposit;
 
