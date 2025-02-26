@@ -22,13 +22,18 @@
                             <fieldset>
                                 <h2 class="m-b-md">Descripción del Plan</h2>
                                 <div class="form-group">
-                                    <select asp-for="InvPlanId" id="InvPlanId" class="form-control" style="border-radius: 10px; height: 40px" required>
+                                    <select asp-for="InvPlanId" id="InvPlanId" class="form-control" style="border-radius: 10px; height: 40px; width: auto" required>
                                         <option value="">Seleccione un plan de inversión</option>
                                         @foreach (var plan in Model.InvPlans)
                                         {
-                                        <option value="@plan.IdInvPlans" data-max="@plan.MaxAmount" data-min="@plan.MinAmount">
-                                            @plan.PlanName
-                                        </option>
+                                            var profit = plan.MinAmount * plan.ProfitPercentage / 100;
+                                            <option value="@plan.IdInvPlans" 
+                                                    data-max="@plan.MaxAmount" 
+                                                    data-min="@plan.MinAmount" 
+                                                    data-percent="@plan.ProfitPercentage" 
+                                                    data-profit="@profit">
+                                                @plan.PlanName
+                                            </option>
                                         }
                                     </select>
                                     <span class="text-danger" asp-validation-for="InvPlanId"></span>
@@ -36,6 +41,10 @@
                                         <h4 class="m-t m-r-lg">
                                             Monto Mínimo: <span id="minAmountDisplay"></span> |
                                             Monto Máximo: <span id="maxAmountDisplay"></span>
+                                        </h4>
+                                        <h4 class="m-t m-r-lg">
+                                            Porcentage de Ganancia: <span id="percentProfit"></span> |
+                                            Beneficio Mínimo: <span id="minProfit"></span>
                                         </h4>
                                     </div>
                                 </div>
@@ -46,7 +55,13 @@
                                         @foreach (var currency in Model.InvCurrencies)
                                         {
                                             <div class="form-check form-check-inline">
-                                                <input type="radio" id="currency_@currency.CurrencyId" name="SelectedCurrencyId" value="@currency.CurrencyId" class="form-check-input" required>
+                                                <input type="radio" id="currency_@currency.CurrencyId" 
+                                                       name="SelectedCurrencyId" 
+                                                       value="@currency.CurrencyId" 
+                                                       data-icon="@Url.Content("~/images/" + currency.CurrencyId + ".svg")"
+                                                       data-description="@currency.Description"
+                                                       data-wallet="@currency.WalletAddress"
+                                                       class="form-check-input" required>
                                                 <label for="currency_@currency.CurrencyId" class="form-check-label">
                                                     <img src="@Url.Content("~/images/" + currency.CurrencyId + ".svg")"
                                                          alt="@currency.Description"
@@ -55,18 +70,41 @@
                                                 </label>
                                             </div>
                                         }
+                                        <input type="hidden" asp-for="SelectedCurrencyId" id="hiddenCurrency" />
                                     </div>
                                 </div>
                             </fieldset>
 
                             <h1>Segundo Paso</h1>
                             <fieldset>
-                                
+                                <div id="selectedCurrencyDisplay"></div>
+
+                                <label>Monto a depositar</label>
+                                <div class="form-group" style="width: auto">
+                                    <input asp-for="DepositAmount" type="number" class="form-control" placeholder="Monto a depositar" required style="width: auto"/>
+                                    <span class="text-danger">@Html.ValidationMessageFor(model => model.DepositAmount)</span>
+                                </div>
+
+                                <label>Monto a reinvertir</label>
+                                <div class="form-group" style="width: auto">
+                                    <input asp-for="ReinversionAmount" type="number" class="form-control" placeholder="Monto a reinvertir" required style="width: auto"/>
+                                    <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinversionAmount)</span>
+                                </div>
                             </fieldset>
 
                             <h1>Tercera Paso</h1>
-                            <fieldset>
+                            <fieldset id="step3">
                                 
+                                <div id="step3Message1"></div>
+                                <br />
+                                <div id="selectedCurrencyDisplay2"></div>
+
+                                <div class="d-inline-flex center-container align-items-center m-b">
+                                    <h4 id="copytext" class="m-r">wallet</h4>
+                                    <button type="button" class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copiar</button>
+                                </div>
+                                
+                                <div id="step3Message2"></div>
                             </fieldset>
                         </form>
                         @if (!ViewData.ModelState.IsValid)
@@ -91,36 +129,15 @@
 
 @section Scripts {
     <environment names="Development,Staging,Production">
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
         <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/lib/steps/jquery.steps.min.js"></script>
+        <script src="~/lib/clipboard/clipboard.min.js"></script>
     </environment>
     <script type="text/javascript">
-
-        function updateAmounts() {
-            var selectedOption = $('#InvPlanId').find('option:selected');
-            var maxAmount = selectedOption.data('max');
-            var minAmount = selectedOption.data('min');
-
-            if (minAmount !== undefined && minAmount !== null) {
-                $('#minAmountDisplay').text(
-                    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount)
-                );
-            } else {
-                $('#minAmountDisplay').text('');
-            }
-
-            if (maxAmount !== undefined && maxAmount !== null) {
-                $('#maxAmountDisplay').text(
-                    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount)
-                );
-            } else {
-                $('#maxAmountDisplay').text('');
-            }
-        }
-
         $(document).ready(function () {
+            new Clipboard('.btn-clip');
+            
             // Inicializar el wizard
             $("#securityQuestionsForm").steps({
                 headerTag: "h1",
@@ -135,31 +152,36 @@
                     previous: "Anterior",
                     loading: "Cargando..."
                 },
-                onStepChanged: function (event, currentIndex, priorIndex) {
-                    if (currentIndex === 1) {
-                        var firstVal = $('#FirstQuestionId').val();
-                        var secondVal = $('#SecondQuestionId').val();
-
-                        if (firstVal !== "" && secondVal === firstVal) {
-                            $('#SecondQuestionId').val("");
-                        }
-                    } else if (currentIndex === 2) {
-                        var firstVal = $('#FirstQuestionId').val();
-                        var secondVal = $('#SecondQuestionId').val();
-                        var thirdVal = $('#ThirdQuestionId').val();
-
-                        if ((firstVal !== "" && thirdVal === firstVal) || (secondVal !== "" && thirdVal === secondVal)) {
-                            $('#ThirdQuestionId').val("");
-                        }
-                    }
-                },
                 onStepChanging: function (event, currentIndex, newIndex) {
                     if (currentIndex > newIndex) {
                         return true;
                     }
+
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled,:hidden";
+
+                    if (currentIndex === 1 && newIndex === 2) {
+                        var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
+                        var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
+                        var totalInvest = deposit + reinversion;
+                        var selectedOption = $('#InvPlanId').find('option:selected');
+                        var minAmount = parseFloat(selectedOption.data('min')) || 0;
+                        var maxAmount = parseFloat(selectedOption.data('max')) || 0;
+
+                        if (totalInvest < minAmount || totalInvest > maxAmount) {
+                            alert("El monto total a invertir (" + totalInvest + ") no está dentro del rango permitido del plan seleccionado. " +
+                                "Debe elegir otro plan que permita esta cantidad.");
+                            return false; // Evita avanzar al paso 3
+                        }
+                    }
+
                     return form.valid();
+                },
+                onStepChanged: function(event, currentIndex, priorIndex) {
+                    // Si estamos en el tercer paso (índice 2)
+                    if (currentIndex === 2) {
+                        updateStep3Info();
+                    }
                 },
                 onFinishing: function (event, currentIndex) {
                     var form = $(this);
@@ -175,8 +197,73 @@
                 }
             });
 
+            function updateAmounts() {
+                var selectedOption = $('#InvPlanId').find('option:selected');
+                var maxAmount = selectedOption.data('max');
+                var minAmount = selectedOption.data('min');
+                var percentProfit = selectedOption.data('percent');
+                var minProfit = selectedOption.data('profit');
+
+                $('#minAmountDisplay').text(minAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount) : '');
+                $('#maxAmountDisplay').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount) : '');
+                $('#percentProfit').text(percentProfit ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(percentProfit) : '');
+                $('#minProfit').text(minProfit ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minProfit) : '');
+            }
             updateAmounts();
             $('#InvPlanId').change(updateAmounts);
+
+            $('.currency-options input[type="radio"]').first().prop('checked', true);
+
+            // Actualizar el campo oculto de moneda y la visualización en el segundo paso
+            $('input[name="SelectedCurrencyId"]').on('change', function(){
+                var selected = $(this).val();
+                $('#hiddenCurrency').val(selected);
+                updateSelectedCurrencyDisplay();
+            });
+
+            function updateSelectedCurrencyDisplay() {
+                var selectedRadio = $('input[name="SelectedCurrencyId"]:checked');
+                if (selectedRadio.length > 0) {
+                    var icon = selectedRadio.data('icon');
+                    var description = selectedRadio.data('description');
+                    var wallet = selectedRadio.data('wallet');
+                    
+                    var html = '<label for="' + selectedRadio.attr('id') + '" class="form-check-label">' +
+                        '<img src="' + icon + '" alt="' + description + '" width="24" height="24" style="margin-right: 8px;">' +
+                        description +
+                        '</label>';
+                    $('#selectedCurrencyDisplay').html(html);
+                    $('#selectedCurrencyDisplay2').html(html);
+                    $('#copytext').text(wallet);
+                } else {
+                    $('#selectedCurrencyDisplay').html('');
+                    $('#selectedCurrencyDisplay2').html('');
+                    $('#copytext').text('');
+                }
+            }
+            
+            updateSelectedCurrencyDisplay();
+
+            // Función para actualizar el contenido del paso 3
+            function updateStep3Info() {
+                var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
+                var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
+                var totalInvest = deposit + reinversion;
+                var selectedOption = $('#InvPlanId').find('option:selected');
+                var profitPercentage = parseFloat(selectedOption.data('percent')) || 0;
+                var totalProfit = totalInvest * profitPercentage / 100;
+                var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                
+                var message1 = "Solo un paso más para completar su depósito, su monto total a invertir es de " + formatter.format(totalInvest) +
+                               ", con un beneficio de " + profitPercentage + "%, para un total de ganancias de " + formatter.format(totalProfit) +
+                               ". Sus fondos estarán disponibles para retirar o reinvertir dentro de 30 días.";
+                               
+                var message2 = "Debe enviar la cantidad de " + formatter.format(deposit) +
+                               " en la moneda indicada a la billetera que se le ha proporcionado.";
+                
+                $("#step3Message1").text(message1);
+                $("#step3Message2").text(message2);
+            }
         });
     </script>
 }

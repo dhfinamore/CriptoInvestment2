@@ -167,7 +167,8 @@ public class CryptoController : Controller
             CustomerId = customerId,
             InvPlanId = invPlanId,
             InvPlans = invPlans,
-            InvCurrencies = currencies
+            InvCurrencies = currencies,
+            ReinversionAmount = 0
         };
         
         return View(model);

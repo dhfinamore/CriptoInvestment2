@@ -1,6 +1,7 @@
 using System.Reflection;
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.InvAssets;
 using CryptoInvestment.Domain.InvOperations;
 using CryptoInvestment.Domain.InvPlans;
 using CryptoInvestment.Domain.SecurityQuestions;
@@ -20,6 +21,7 @@ public class CryptoInvestmentDbContext : DbContext, IUnitOfWork
     public DbSet<InvCurrency> InvCurrencies { get; init; } = null!;
     public DbSet<InvOperation> InvOperations { get; init; } = null!;
     public DbSet<InvAction> InvActions { get; init; } = null!;
+    public DbSet<InvAsset> InvAssets { get; init; } = null!;
     
     public CryptoInvestmentDbContext(DbContextOptions<CryptoInvestmentDbContext> options) : base(options)
     {
