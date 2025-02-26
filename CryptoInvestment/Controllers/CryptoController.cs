@@ -4,10 +4,14 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
+using CryptoInvestment.Application.InvAssets.Queries;
+using CryptoInvestment.Application.InvOperations.Queries.ListInvCurrenciesQuery;
 using CryptoInvestment.Application.InvPlans.Queries.ListInvPlanQuery;
 using CryptoInvestment.Application.Referrals.Commands;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.InvAssets;
+using CryptoInvestment.Domain.InvOperations;
 using CryptoInvestment.Domain.InvPlans;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.Infrastucture.Common;
@@ -160,7 +164,21 @@ public class CryptoController : Controller
             _ => null!
         );
         
-        var currencies = _context.InvCurrencies.ToList();
+        var query2 = new ListInvCurrenciesQuery();
+        var getInvCurrenciesResult = await _mediator.Send(query2);
+        
+        var currencies = getInvCurrenciesResult.Match<List<InvCurrency>>(
+            currencies => currencies,
+            _ => null!
+        );
+        
+        var query3 = new GetCustomerBalanceQuery(customerId);
+        var getCustomerBalanceResult = await _mediator.Send(query3);
+        
+        var balances = getCustomerBalanceResult.Match<List<InvBalance>>(
+            balances => balances,
+            _ => null!
+        );
         
         var model = new DepositViewModel()
         {
@@ -168,7 +186,8 @@ public class CryptoController : Controller
             InvPlanId = invPlanId,
             InvPlans = invPlans,
             InvCurrencies = currencies,
-            ReinversionAmount = 0
+            ReinversionAmount = 0,
+            InvBalances = balances
         };
         
         return View(model);

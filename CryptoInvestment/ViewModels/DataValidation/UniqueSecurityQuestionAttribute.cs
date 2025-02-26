@@ -1,6 +1,5 @@
 using CryptoInvestment.ViewModels.Authentication;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace CryptoInvestment.ViewModels.DataValidation;
 

@@ -32,16 +32,6 @@ public class InvAssetConfiguration : IEntityTypeConfiguration<InvAsset>
             .HasColumnName("expected_profit")
             .HasColumnType("decimal(12,2)");
 
-        builder.Property(a => a.Withdrawals)
-            .HasColumnName("withdrawals")
-            .HasColumnType("decimal(12,2)")
-            .HasDefaultValue(0.00m);
-
-        builder.Property(a => a.Balance)
-            .HasColumnName("balance")
-            .HasColumnType("decimal(12,2)")
-            .HasDefaultValue(0.00m);
-
         builder.Property(a => a.DateStart)
             .HasColumnName("date_start")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");

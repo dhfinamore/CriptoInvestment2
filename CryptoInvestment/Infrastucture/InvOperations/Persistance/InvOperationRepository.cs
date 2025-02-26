@@ -36,4 +36,9 @@ public class InvOperationRepository : IInvOperationRepository
     {
         return await _context.InvActions.ToListAsync();
     }
+
+    public async Task<List<InvCurrency>> GetInvCurrenciesAsync()
+    {
+        return await _context.InvCurrencies.ToListAsync();
+    }
 }

@@ -85,10 +85,12 @@
                                     <span class="text-danger">@Html.ValidationMessageFor(model => model.DepositAmount)</span>
                                 </div>
 
-                                <label>Monto a reinvertir</label>
-                                <div class="form-group" style="width: auto">
-                                    <input asp-for="ReinversionAmount" type="number" class="form-control" placeholder="Monto a reinvertir" required style="width: auto"/>
-                                    <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinversionAmount)</span>
+                                <div id="reinversionSection" style="display: none;">
+                                    <label id="reinversionLabel"></label>
+                                    <div class="form-group" style="width: auto">
+                                        <input asp-for="ReinversionAmount" type="number" class="form-control" placeholder="Monto a reinvertir" required style="width: auto"/>
+                                        <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinversionAmount)</span>
+                                    </div>
                                 </div>
                             </fieldset>
 
@@ -137,7 +139,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             new Clipboard('.btn-clip');
-            
+
             // Inicializar el wizard
             $("#securityQuestionsForm").steps({
                 headerTag: "h1",
@@ -156,7 +158,6 @@
                     if (currentIndex > newIndex) {
                         return true;
                     }
-
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled,:hidden";
 
@@ -168,10 +169,26 @@
                         var minAmount = parseFloat(selectedOption.data('min')) || 0;
                         var maxAmount = parseFloat(selectedOption.data('max')) || 0;
 
+                        var invBalances = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.InvBalances));
+                        
+                        // Obtener el balance disponible de la moneda seleccionada
+                        var selectedCurrencyId = $('input[name="SelectedCurrencyId"]:checked').val();
+                        var balanceObj = invBalances.find(function(b) {
+                            return b.IdCurrency == selectedCurrencyId;
+                        });
+                        var availableBalance = balanceObj ? parseFloat(balanceObj.Balance) || 0 : 0;
+
+                        // Validar que el monto total de inversión está dentro del rango permitido
                         if (totalInvest < minAmount || totalInvest > maxAmount) {
                             alert("El monto total a invertir (" + totalInvest + ") no está dentro del rango permitido del plan seleccionado. " +
                                 "Debe elegir otro plan que permita esta cantidad.");
-                            return false; // Evita avanzar al paso 3
+                            return false;
+                        }
+
+                        // Validar que la reinversión no supere el balance disponible
+                        if (reinversion > availableBalance) {
+                            alert("El monto de reinversión (" + reinversion + ") no puede ser mayor que tu balance disponible (" + availableBalance + ").");
+                            return false;
                         }
                     }
 
@@ -219,6 +236,7 @@
                 var selected = $(this).val();
                 $('#hiddenCurrency').val(selected);
                 updateSelectedCurrencyDisplay();
+                updateReinversionSection();
             });
 
             function updateSelectedCurrencyDisplay() {
@@ -227,7 +245,7 @@
                     var icon = selectedRadio.data('icon');
                     var description = selectedRadio.data('description');
                     var wallet = selectedRadio.data('wallet');
-                    
+
                     var html = '<label for="' + selectedRadio.attr('id') + '" class="form-check-label">' +
                         '<img src="' + icon + '" alt="' + description + '" width="24" height="24" style="margin-right: 8px;">' +
                         description +
@@ -241,8 +259,37 @@
                     $('#copytext').text('');
                 }
             }
-            
+
             updateSelectedCurrencyDisplay();
+
+            // Serializar la lista de balances del modelo
+            var invBalances = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.InvBalances));
+
+            // Función para actualizar la sección de reinversión según el balance disponible para la moneda seleccionada
+            function updateReinversionSection() {
+                var selectedCurrencyId = parseInt($('input[name="SelectedCurrencyId"]:checked').val());
+                if (!selectedCurrencyId) {
+                    $("#reinversionSection").hide();
+                    return;
+                }
+                // Buscar el balance correspondiente en la lista
+                var balanceObj = invBalances.find(function(b) {
+                    return b.IdCurrency === selectedCurrencyId;
+                });
+                if (balanceObj && balanceObj.Balance > 0) {
+                    var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                    var formattedBalance = formatter.format(balanceObj.Balance);
+                    var description = $('input[name="SelectedCurrencyId"]:checked').data('description');
+                    var message = "Tienes dividendos disponibles por: " + formattedBalance + " " + description +
+                        ", podrá reinvertir la cantidad que usted desee.";
+                    $("#reinversionLabel").text(message);
+                    $("#reinversionSection").show();
+                } else {
+                    $("#reinversionSection").hide();
+                }
+            }
+
+            updateReinversionSection();
 
             // Función para actualizar el contenido del paso 3
             function updateStep3Info() {
@@ -253,14 +300,14 @@
                 var profitPercentage = parseFloat(selectedOption.data('percent')) || 0;
                 var totalProfit = totalInvest * profitPercentage / 100;
                 var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-                
+
                 var message1 = "Solo un paso más para completar su depósito, su monto total a invertir es de " + formatter.format(totalInvest) +
-                               ", con un beneficio de " + profitPercentage + "%, para un total de ganancias de " + formatter.format(totalProfit) +
-                               ". Sus fondos estarán disponibles para retirar o reinvertir dentro de 30 días.";
-                               
+                    ", con un beneficio de " + profitPercentage + "%, para un total de ganancias de " + formatter.format(totalProfit) +
+                    ". Sus fondos estarán disponibles para retirar o reinvertir dentro de 30 días.";
+
                 var message2 = "Debe enviar la cantidad de " + formatter.format(deposit) +
-                               " en la moneda indicada a la billetera que se le ha proporcionado.";
-                
+                    " en la moneda indicada a la billetera que se le ha proporcionado.";
+
                 $("#step3Message1").text(message1);
                 $("#step3Message2").text(message2);
             }

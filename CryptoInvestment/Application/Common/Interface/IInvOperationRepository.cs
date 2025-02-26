@@ -8,4 +8,5 @@ public interface IInvOperationRepository
     Task<List<InvOperation>> GetInvOperationsAsync(int customerId);
     Task<InvOperation?> GetInvOperationByIdAsync(int id);
     Task<List<InvAction>> GetInvActionsAsync();
+    Task<List<InvCurrency>> GetInvCurrenciesAsync();
 }

@@ -22,6 +22,7 @@ public class CryptoInvestmentDbContext : DbContext, IUnitOfWork
     public DbSet<InvOperation> InvOperations { get; init; } = null!;
     public DbSet<InvAction> InvActions { get; init; } = null!;
     public DbSet<InvAsset> InvAssets { get; init; } = null!;
+    public DbSet<InvBalance> InvBalances { get; init; } = null!;
     
     public CryptoInvestmentDbContext(DbContextOptions<CryptoInvestmentDbContext> options) : base(options)
     {
