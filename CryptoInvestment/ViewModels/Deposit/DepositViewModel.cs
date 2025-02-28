@@ -15,7 +15,7 @@ public class DepositViewModel
     [Required(ErrorMessage = "Debe seleccionar una moneda para continuar con su depósito")]
     public int SelectedCurrencyId { get; set; }
     
-    [Required(ErrorMessage = "Debe seleccionar una moneda para continuar con su depósito")]
+    [Required(ErrorMessage = "El monto a depositar no es válido")]
     [Range(0, int.MaxValue, ErrorMessage = "El monto a depositar no es válido")]
     public decimal DepositAmount { get; set; }
     

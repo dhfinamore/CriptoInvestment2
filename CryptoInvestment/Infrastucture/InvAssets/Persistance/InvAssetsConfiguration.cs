@@ -53,7 +53,8 @@ public class InvAssetConfiguration : IEntityTypeConfiguration<InvAsset>
             .HasColumnName("date_end");
         
         builder.Property(a => a.DateCreation)
-            .HasColumnName("date_creation");
+            .HasColumnName("date_creation")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         builder.Property(a => a.Finalized)
             .HasColumnName("finalized")

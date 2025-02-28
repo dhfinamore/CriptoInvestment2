@@ -1,5 +1,4 @@
 using ErrorOr;
-
 using MediatR;
 
 namespace CryptoInvestment.Application.InvAssets.Commands;
@@ -11,4 +10,5 @@ public record CreateInvAssetsCommand(
     decimal Amount,
     decimal ReinvestAmount,
     int EndType,
-    decimal ReinvestPercent) : IRequest<ErrorOr<Success>>;
+    decimal ReinvestPercent,
+    decimal ExpectedProfit) : IRequest<ErrorOr<Success>>;

@@ -17,7 +17,7 @@ public class ListInvPlansQueryHandler : IRequestHandler<ListInvPlansQuery, Error
 
     public async Task<ErrorOr<List<InvPlan>>> Handle(ListInvPlansQuery request, CancellationToken cancellationToken)
     {
-        var invPlans = await _invPlanRepository.GetInvPlansAsync();
+        var invPlans = await _invPlanRepository.GetInvPlansAsync(request.CustomerId);
         
         return invPlans.Count > 0
             ? invPlans

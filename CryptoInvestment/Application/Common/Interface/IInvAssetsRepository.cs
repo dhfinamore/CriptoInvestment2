@@ -6,4 +6,5 @@ public interface IInvAssetsRepository
 {
     public Task<List<InvBalance>> GetInvBalances(int customerId);
     public Task CreateInvAssetsAsync(InvAsset invAsset);
+    public Task UpdateInvBalance(InvBalance invBalance);
 }

@@ -24,4 +24,10 @@ public class InvAssetsRepository : IInvAssetsRepository
     {
         await _context.InvAssets.AddAsync(invAsset);
     }
+
+    public Task UpdateInvBalance(InvBalance invBalance)
+    {
+        _context.InvBalances.Update(invBalance);
+        return Task.CompletedTask;
+    }
 }

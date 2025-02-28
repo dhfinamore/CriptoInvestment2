@@ -139,7 +139,7 @@ public class CryptoController : Controller
             return RedirectToAction("Login", "Authentication");
         }
 
-        var query = new ListInvPlansQuery();
+        var query = new ListInvPlansQuery(model.CustomerId);
         var getInvPlansResult = await _mediator.Send(query);
         
         var invPlans = getInvPlansResult.Match<List<InvPlan>>(
@@ -155,7 +155,7 @@ public class CryptoController : Controller
     [HttpPost]
     public async Task<IActionResult> DepositWizard(int customerId, int invPlanId)
     {
-        var query = new ListInvPlansQuery();
+        var query = new ListInvPlansQuery(customerId);
         var getInvPlansResult = await _mediator.Send(query);
         
         var invPlans = getInvPlansResult.Match<List<InvPlan>>(
@@ -197,7 +197,7 @@ public class CryptoController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var query = new ListInvPlansQuery();
+            var query = new ListInvPlansQuery(depositViewModel.CustomerId);
             var getInvPlansResult = await _mediator.Send(query);
         
             depositViewModel.InvPlans = getInvPlansResult.Match<List<InvPlan>>(
@@ -231,12 +231,13 @@ public class CryptoController : Controller
             depositViewModel.DepositAmount + depositViewModel.ReinversionAmount,
             depositViewModel.ReinversionAmount,
             depositViewModel.EndType,
-            depositViewModel.ReinvestPercent
+            depositViewModel.ReinvestPercent,
+            depositViewModel.MonthProfit
         );
 
         var createInvAssetsResult = await _mediator.Send(command);
 
-        return RedirectToAction(createInvAssetsResult.IsError ? "Deposit" : "Movement", "Crypto");
+        return RedirectToAction(createInvAssetsResult.IsError ? "Deposit" : "Dashboard", "Crypto");
     }
     
     public IActionResult Withdraw()

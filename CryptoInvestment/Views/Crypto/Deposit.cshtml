@@ -20,10 +20,7 @@
                             <label class="inv-plan-id" style="display: none">@invPlan.IdInvPlans</label>
                             <div class="product-imitation">
                                 <h1>
-                                    @{
-                                        var formatedAmount = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C2}", invPlan.MinAmount);
-                                    }
-                                    <strong>Inversión @formatedAmount</strong>
+                                    <strong>@invPlan.PlanName</strong>
                                 </h1>
                             </div>
                             <div class="product-desc">
@@ -32,7 +29,7 @@
                                 </span>
                                 <a href="#" class="product-name">
                                     @{
-                                        var profit = invPlan.MinAmount * invPlan.ProfitPercentage / 100;
+                                        var profit = invPlan.MinAmount * invPlan.ProfitPercentage / 100 * int.Parse(invPlan.MonthsInvested);
                                         var formattedProfit = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C2}", profit);
                                     }
                                     <label>Beneficio Mínimo @formattedProfit</label>

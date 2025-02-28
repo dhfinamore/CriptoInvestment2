@@ -69,8 +69,23 @@ public class CreateInvAssetsCommandHandler : IRequestHandler<CreateInvAssetsComm
                 IdInvAction = 3,
                 Status = 0
             };
-
+            
+            var invBalances = await _invAssetsRepository.GetInvBalances(command.CustomerId);
+            var balance = invBalances.FirstOrDefault(b => b.IdCurrency == command.CurrencyId);
+            
+            if (balance is null)
+                return Error.NotFound(description: "Balance not found");
+            
+            balance.Balance -= command.ReinvestAmount;
+            
+            await _invAssetsRepository.UpdateInvBalance(balance);
             await _invOperationRepository.CreateInvOperationAsync(invOperation);
+        }
+
+        if (command.ReinvestAmount == command.Amount)
+        {
+            invAssets.DateStart = DateTime.Now;
+            invAssets.ExpectedProfit = command.ExpectedProfit;
         }
 
         await _invAssetsRepository.CreateInvAssetsAsync(invAssets);

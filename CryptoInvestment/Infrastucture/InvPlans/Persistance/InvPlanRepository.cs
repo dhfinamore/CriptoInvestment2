@@ -15,9 +15,16 @@ public class InvPlanRepository : IInvPlanRepository
         _context = context;
     }
 
-    public async Task<List<InvPlan>> GetInvPlansAsync()
+    public async Task<List<InvPlan>> GetInvPlansAsync(int customerId)
     {
-        return await _context.InvPlans.ToListAsync();
+        var invPlans = await _context.InvPlans
+            .Where(plan => !_context.InvAssets
+                        .Where(asset => asset.IdCustomer == customerId && !asset.Finalized)
+                        .Select(asset => asset.IdInvPlans)
+                        .Contains(plan.IdInvPlans))
+            .ToListAsync();
+
+        return invPlans;
     }
 
     public async Task<InvPlan?> GetInvPlanByIdAsync(int invPlaId)
