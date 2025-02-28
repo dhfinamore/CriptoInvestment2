@@ -43,5 +43,9 @@ public class InvOperationConfiguration : IEntityTypeConfiguration<InvOperation>
         builder.Property(io => io.IdInvAction)
             .HasColumnName("id_inv_actions")
             .IsRequired();
+        
+        builder.Property(io => io.Status)
+            .HasColumnName("status")
+            .IsRequired();
     }
 }

@@ -35,9 +35,25 @@ public class InvAssetConfiguration : IEntityTypeConfiguration<InvAsset>
         builder.Property(a => a.DateStart)
             .HasColumnName("date_start")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        
+        builder.Property(a => a.EndType)
+            .HasColumnName("end_type")
+            .HasColumnType("TINYINT")
+            .HasDefaultValue(false);
+
+        builder.Property(a => a.ReinvestPercent)
+            .HasColumnName("reinvest_porc")
+            .HasColumnType("decimal(5,2)");
+        
+        builder.Property(a => a.ReinvestAmount)
+            .HasColumnName("reinvest_amount")
+            .HasColumnType("decimal(12,2)");
 
         builder.Property(a => a.DateEnd)
             .HasColumnName("date_end");
+        
+        builder.Property(a => a.DateCreation)
+            .HasColumnName("date_creation");
 
         builder.Property(a => a.Finalized)
             .HasColumnName("finalized")

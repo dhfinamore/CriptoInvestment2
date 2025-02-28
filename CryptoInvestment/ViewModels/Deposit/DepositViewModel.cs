@@ -22,6 +22,12 @@ public class DepositViewModel
     [Range(0, int.MaxValue, ErrorMessage = "El monto a depositar no es válido")]
     public decimal ReinversionAmount { get; set; }
     
+    [Range(0, 100, ErrorMessage = "El porcentaje de reinversión no es válido")]
+    public decimal ReinvestPercent { get; set; }
+    public decimal MonthProfit { get; set; }
+    
+    public int EndType { get; set; }
+    
     public List<InvPlan> InvPlans = [];
     public List<InvCurrency> InvCurrencies = [];
     public List<InvBalance> InvBalances = [];

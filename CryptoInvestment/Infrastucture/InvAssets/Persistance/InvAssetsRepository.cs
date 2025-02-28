@@ -19,4 +19,9 @@ public class InvAssetsRepository : IInvAssetsRepository
     {
         return await _context.InvBalances.Where(c => c.IdCustomer == customerId).ToListAsync();
     }
+
+    public async Task CreateInvAssetsAsync(InvAsset invAsset)
+    {
+        await _context.InvAssets.AddAsync(invAsset);
+    }
 }

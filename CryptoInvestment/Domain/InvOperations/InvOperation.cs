@@ -9,4 +9,5 @@ public class InvOperation
     public int IdInvPlans { get; set; }
     public DateTime Date { get; set; }
     public int IdInvAction { get; set; }
+    public int Status { get; set; }
 }

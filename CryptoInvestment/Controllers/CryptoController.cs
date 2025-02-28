@@ -4,6 +4,7 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
+using CryptoInvestment.Application.InvAssets.Commands;
 using CryptoInvestment.Application.InvAssets.Queries;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvCurrenciesQuery;
 using CryptoInvestment.Application.InvPlans.Queries.ListInvPlanQuery;
@@ -18,9 +19,7 @@ using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using CryptoInvestment.ViewModels.Deposit;
 using CryptoInvestment.ViewModels.Referrals;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -191,6 +190,53 @@ public class CryptoController : Controller
         };
         
         return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreatePlan(DepositViewModel depositViewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var query = new ListInvPlansQuery();
+            var getInvPlansResult = await _mediator.Send(query);
+        
+            depositViewModel.InvPlans = getInvPlansResult.Match<List<InvPlan>>(
+                invPlans => invPlans,
+                _ => null!
+            );
+        
+            var query2 = new ListInvCurrenciesQuery();
+            var getInvCurrenciesResult = await _mediator.Send(query2);
+        
+            depositViewModel.InvCurrencies = getInvCurrenciesResult.Match<List<InvCurrency>>(
+                currencies => currencies,
+                _ => null!
+            );
+        
+            var query3 = new GetCustomerBalanceQuery(depositViewModel.CustomerId);
+            var getCustomerBalanceResult = await _mediator.Send(query3);
+        
+            depositViewModel.InvBalances = getCustomerBalanceResult.Match<List<InvBalance>>(
+                balances => balances,
+                _ => null!
+            );
+            
+            return View("~/Views/Crypto/DepositWizard.cshtml", depositViewModel);
+        }
+        
+        var command = new CreateInvAssetsCommand(
+            depositViewModel.CustomerId,
+            depositViewModel.SelectedCurrencyId,
+            depositViewModel.InvPlanId,
+            depositViewModel.DepositAmount + depositViewModel.ReinversionAmount,
+            depositViewModel.ReinversionAmount,
+            depositViewModel.EndType,
+            depositViewModel.ReinvestPercent
+        );
+
+        var createInvAssetsResult = await _mediator.Send(command);
+
+        return RedirectToAction(createInvAssetsResult.IsError ? "Deposit" : "Movement", "Crypto");
     }
     
     public IActionResult Withdraw()

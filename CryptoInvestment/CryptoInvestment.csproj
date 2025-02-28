@@ -21,7 +21,6 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="Application\InvAssets\Commands\" />
       <Folder Include="Application\InvOperations\Command\" />
     </ItemGroup>
 

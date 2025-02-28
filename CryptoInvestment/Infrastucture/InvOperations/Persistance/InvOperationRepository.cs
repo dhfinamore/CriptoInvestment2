@@ -15,7 +15,7 @@ public class InvOperationRepository : IInvOperationRepository
         _context = context;
     }
 
-    public async Task CreateAsync(InvOperation invOperation)
+    public async Task CreateInvOperationAsync(InvOperation invOperation)
     {
         await _context.InvOperations.AddAsync(invOperation);
     }

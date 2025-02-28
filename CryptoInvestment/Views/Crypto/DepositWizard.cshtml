@@ -15,7 +15,7 @@
             <div class="col-lg-12">
                 <div class="ibox">
                     <div class="ibox-content">
-                        <form id="securityQuestionsForm" asp-action="SecurityQuestions" asp-controller="Authentication" method="post" class="wizard-big">
+                        <form id="securityQuestionsForm" asp-action="CreatePlan" asp-controller="Crypto" method="post" class="wizard-big">
                             <input type="hidden" asp-for="CustomerId" />
 
                             <h1>Primer Paso</h1>
@@ -94,10 +94,62 @@
                                 </div>
                             </fieldset>
 
-                            <h1>Tercera Paso</h1>
+                            <h1>Tercer Paso</h1>
                             <fieldset id="step3">
-                                
-                                <div id="step3Message1"></div>
+                                <div class="i-checks">
+                                    <label>
+                                        <div>
+                                            <label>
+                                                <div class="iradio_square-green" style="position: relative;">
+                                                    <input type="radio" name="ReinvestOption" value="100" data-endtype="1" checked="checked" style="position: absolute; opacity: 0;">
+                                                    <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
+                                                </div>
+                                                <i></i> Reinversión automática Capital y Beneficios
+                                            </label>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="i-checks">
+                                    <label>
+                                        <div>
+                                            <label>
+                                                <div class="iradio_square-green" style="position: relative;">
+                                                    <input type="radio" name="ReinvestOption" value="custom" data-endtype="2" style="position: absolute; opacity: 0;">
+                                                    <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
+                                                </div>
+                                                <i></i> Reinversión automática del Capital y Reinvertir X% de los beneficios
+                                            </label>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div id="customReinvestInput" class="form-group" style="display: none; margin-top: 10px; margin-bottom: 10px; width: auto">
+                                    <label>Ingrese % de ganancias a reinvertir</label>
+                                    <input type="number" id="customReinvestPercent" class="form-control" min="0" max="100" style="width: auto"/>
+                                    <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinvestPercent)</span>
+                                </div>
+                                <div class="i-checks">
+                                    <label>
+                                        <div>
+                                            <label>
+                                                <div class="iradio_square-green" style="position: relative;">
+                                                    <input type="radio" name="ReinvestOption" value="0" data-endtype="3" style="position: absolute; opacity: 0;">
+                                                    <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
+                                                </div>
+                                                <i></i> No Reinvertir (Capital y Beneficios pasan al Saldo Disponible para retiros)
+                                            </label>
+                                        </div>
+                                    </label>
+                                </div>
+                                <!-- Campo oculto para el binding de ReinvestPercent -->
+                                <input type="hidden" asp-for="ReinvestPercent" id="hiddenReinvestPercent" />
+                                <!-- Campo oculto para el binding de EndType -->
+                                <input type="hidden" asp-for="EndType" id="hiddenEndType" />
+                            </fieldset>
+
+                            <h1>Cuarto Paso</h1>
+                            <fieldset id="step4">
+                                <input type="hidden" asp-for="MonthProfit" id="MonthProfit" />
+                                <div id="step4Message1"></div>
                                 <br />
                                 <div id="selectedCurrencyDisplay2"></div>
 
@@ -106,7 +158,8 @@
                                     <button type="button" class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copiar</button>
                                 </div>
                                 
-                                <div id="step3Message2"></div>
+                                <div id="step4Message2"></div>
+                                <div id="step4Message3"></div>
                             </fieldset>
                         </form>
                         @if (!ViewData.ModelState.IsValid)
@@ -135,6 +188,7 @@
         <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
         <script src="~/lib/steps/jquery.steps.min.js"></script>
         <script src="~/lib/clipboard/clipboard.min.js"></script>
+        <script src="~/lib/iCheck/icheck.min.js"></script>
     </environment>
     <script type="text/javascript">
         $(document).ready(function () {
@@ -195,9 +249,9 @@
                     return form.valid();
                 },
                 onStepChanged: function(event, currentIndex, priorIndex) {
-                    // Si estamos en el tercer paso (índice 2)
-                    if (currentIndex === 2) {
-                        updateStep3Info();
+                    // Si estamos en el cuarto paso (índice 3)
+                    if (currentIndex === 3) {
+                        updateStep4Info();
                     }
                 },
                 onFinishing: function (event, currentIndex) {
@@ -291,26 +345,75 @@
 
             updateReinversionSection();
 
-            // Función para actualizar el contenido del paso 3
-            function updateStep3Info() {
+            // Función para actualizar el contenido del paso 4
+            function updateStep4Info() {
                 var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
                 var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
                 var totalInvest = deposit + reinversion;
                 var selectedOption = $('#InvPlanId').find('option:selected');
                 var profitPercentage = parseFloat(selectedOption.data('percent')) || 0;
-                var totalProfit = totalInvest * profitPercentage / 100;
+
+                var totalProfit = totalInvest * profitPercentage / 100; // Ganancia total del mes
+                var today = new Date();
+                var daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(); // Días en el mes actual
+                var currentDay = today.getDate();
+                var remainingDays = daysInMonth - currentDay; // Días restantes en el mes
+
+                var dailyProfit = totalProfit / daysInMonth; // Ganancia diaria
+                var adjustedProfit = dailyProfit * remainingDays; // Ganancia ajustada para el mes actual
+
                 var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-                var message1 = "Solo un paso más para completar su depósito, su monto total a invertir es de " + formatter.format(totalInvest) +
-                    ", con un beneficio de " + profitPercentage + "%, para un total de ganancias de " + formatter.format(totalProfit) +
-                    ". Sus fondos estarán disponibles para retirar o reinvertir dentro de 30 días.";
+                var message1 = "Su inversión de " + formatter.format(totalInvest) +
+                    " generará un beneficio total de " + formatter.format(totalProfit) +
+                    ", con una ganancia diaria de " + formatter.format(dailyProfit) + ".";
 
-                var message2 = "Debe enviar la cantidad de " + formatter.format(deposit) +
-                    " en la moneda indicada a la billetera que se le ha proporcionado.";
+                var message2 = "Debido a que hoy es día " + currentDay +
+                    ", recibirá " + formatter.format(adjustedProfit) +
+                    " en este mes. A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit);
+                    
+                var message3 = "Sus beneficios comenzarán a generarse una vez validado su depósito, para ello copie el ID de la " +
+                 " transacción y envié la misma a revision en la sección de Activos"
 
-                $("#step3Message1").text(message1);
-                $("#step3Message2").text(message2);
+                $("#step4Message1").text(message1);
+                $("#step4Message2").text(message2);
+                
+                if (deposit > 0)
+                    $("#step4Message3").text(message3);
+
+                $("#MonthProfit").val(adjustedProfit.toFixed(2));
             }
+
+            // Inicializar iCheck para los radio buttons del paso 3
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green'
+            });
+
+            // Handler para cambios en los radio buttons usando iCheck
+            $('input[name="ReinvestOption"]').on('ifChanged', function (event) {
+                var selectedValue = $(this).val();
+                var selectedEndType = $(this).data('endtype'); // Obtiene el valor de EndType
+                if (selectedValue === 'custom') {
+                    $("#customReinvestInput").show();
+                    var customVal = $("#customReinvestPercent").val();
+                    $("#hiddenReinvestPercent").val(customVal);
+                } else {
+                    $("#customReinvestInput").hide();
+                    $("#hiddenReinvestPercent").val(selectedValue);
+                }
+                // Actualizar el campo hidden para EndType
+                $("#hiddenEndType").val(selectedEndType);
+            });
+
+            // Actualizar el campo hidden cuando se ingresa un valor en el input custom
+            $("#customReinvestPercent").on('input', function () {
+                $("#hiddenReinvestPercent").val($(this).val());
+            });
+
+            // Establecer valores por defecto: opción 1: reinvertir 100% y EndType = 1
+            $("#hiddenReinvestPercent").val(100);
+            $("#hiddenEndType").val(1);
         });
     </script>
 }
