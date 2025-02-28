@@ -7,7 +7,7 @@
 
 <div>
     <div class="row wrapper border-bottom white-bg page-heading">
-        <h1>Depósitos</h1>
+        <h1>Iniciar Inversión</h1>
     </div>
 
     <div class="wrapper animated fadeInRight" style="padding: 80px 10px 40px;">
@@ -123,7 +123,8 @@
                                     </label>
                                 </div>
                                 <div id="customReinvestInput" class="form-group" style="display: none; margin-top: 10px; margin-bottom: 10px; width: auto">
-                                    <label>Ingrese el porcentaje de Beneficios que desea reinvertir</label>
+                                    <label>Ingrese el porcentaje de Beneficios que desea reinvertir<br>
+                                        (Puede dejar el valor en 0 para reinvertir sólo el capítal y dejar el beneficio disponible para retiro)</label>
                                     <input type="number" value="0" id="customReinvestPercent" class="form-control" min="0" max="100" style="width: auto"/>
                                     <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinvestPercent)</span>
                                 </div>
