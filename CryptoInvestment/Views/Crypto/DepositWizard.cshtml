@@ -18,7 +18,7 @@
                         <form id="securityQuestionsForm" asp-action="CreatePlan" asp-controller="Crypto" method="post" class="wizard-big">
                             <input type="hidden" asp-for="CustomerId" />
 
-                            <h1>Primer Paso</h1>
+                            <h1>Definición del Plan y Moneda</h1>
                             <fieldset>
                                 <h2 class="m-b-md">Descripción del Plan</h2>
                                 <div class="form-group">
@@ -43,7 +43,7 @@
                                             Monto Máximo: <span id="maxAmountDisplay"></span>
                                         </h4>
                                         <h4 class="m-t m-r-lg">
-                                            Porcentage de Ganancia: <span id="percentProfit"></span> |
+                                            Porcentaje de Ganancia: <span id="percentProfit"></span> |
                                             Beneficio Mínimo: <span id="minProfit"></span>
                                         </h4>
                                     </div>
@@ -75,7 +75,7 @@
                                 </div>
                             </fieldset>
 
-                            <h1>Segundo Paso</h1>
+                            <h1>Monto a Invertir</h1>
                             <fieldset>
                                 <div id="selectedCurrencyDisplay"></div>
 
@@ -94,7 +94,7 @@
                                 </div>
                             </fieldset>
 
-                            <h1>Tercer Paso</h1>
+                            <h1>Qué hacer al finalizar</h1>
                             <fieldset id="step3">
                                 <div class="i-checks">
                                     <label>
@@ -104,7 +104,7 @@
                                                     <input type="radio" name="ReinvestOption" value="100" data-endtype="1" checked="checked" style="position: absolute; opacity: 0;">
                                                     <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
                                                 </div>
-                                                <i></i> Reinversión automática Capital y Beneficios
+                                                <i></i> Reinversión automática del Capital y los Beneficios
                                             </label>
                                         </div>
                                     </label>
@@ -117,13 +117,13 @@
                                                     <input type="radio" name="ReinvestOption" value="custom" data-endtype="2" style="position: absolute; opacity: 0;">
                                                     <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
                                                 </div>
-                                                <i></i> Reinversión automática del Capital y Reinvertir X% de los beneficios
+                                                <i></i> Reinversión automática del Capital y Reinvertir sólo cierto porcentaje de los beneficios
                                             </label>
                                         </div>
                                     </label>
                                 </div>
                                 <div id="customReinvestInput" class="form-group" style="display: none; margin-top: 10px; margin-bottom: 10px; width: auto">
-                                    <label>Ingrese % de ganancias a reinvertir</label>
+                                    <label>Ingrese el porcentaje de Beneficios que desea reinvertir</label>
                                     <input type="number" value="0" id="customReinvestPercent" class="form-control" min="0" max="100" style="width: auto"/>
                                     <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinvestPercent)</span>
                                 </div>
@@ -135,7 +135,7 @@
                                                     <input type="radio" name="ReinvestOption" value="0" data-endtype="3" style="position: absolute; opacity: 0;">
                                                     <ins class="iCheck-helper" style="position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; margin: 0; padding: 0; background: #fff; border: 0; opacity: 0;"></ins>
                                                 </div>
-                                                <i></i> No Reinvertir (Capital y Beneficios pasan al Saldo Disponible para retiros)
+                                                <i></i>No Reinvertir (Quedarán disponibles para retiro todo de Capital y los Beneficios))
                                             </label>
                                         </div>
                                     </label>
@@ -146,7 +146,7 @@
                                 <input type="hidden" asp-for="EndType" id="hiddenEndType" />
                             </fieldset>
 
-                            <h1>Cuarto Paso</h1>
+                            <h1>Confirmación</h1>
                             <fieldset id="step4">
                                 <input type="hidden" asp-for="MonthProfit" id="MonthProfit" />
                                 <div id="step4Message1"></div>
@@ -388,14 +388,14 @@
 
                 var message1 = "Su inversión de " + formatter.format(totalInvest) +
                     " generará un beneficio total de " + formatter.format(totalProfit) +
-                    ", con una ganancia diaria de " + formatter.format(dailyProfit) + ".";
+                    ", con una ganancia diaria de " + formatter.format(dailyProfit) + " a partir de que validade su depósito.";
 
                 var message2 = "Debido a que hoy es día " + currentDay +
-                    ", recibirá " + formatter.format(adjustedProfit) +
-                    " en este mes. A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit);
+                    ", recibirá este mes " + formatter.format(adjustedProfit) +
+                    " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit);
                     
-                var message3 = "Sus beneficios comenzarán a generarse una vez validado su depósito, para ello copie el ID de la " +
-                 " transacción y envié la misma a revision en la sección de Activos"
+                var message3 = "Sus beneficios comenzarán a generarse a partir de que sea validado su depósito, para ello copie el ID de la " +
+                 " transacción y captúrela en la sección de Activos"
 
                 $("#step4Message1").text(message1);
                 $("#step4Message2").text(message2);
