@@ -31,7 +31,8 @@
                                                     data-name="@plan.PlanName"
                                                     data-max="@plan.MaxAmount" 
                                                     data-min="@plan.MinAmount" 
-                                                    data-percent="@plan.ProfitPercentage" 
+                                                    data-percent="@plan.ProfitPercentage"
+                                                    data-period="@plan.MonthsInvested"
                                                     data-profit="@profit">
                                                 @plan.PlanName
                                             </option>
@@ -387,8 +388,9 @@
                 var totalInvest = deposit + reinversion;
                 var selectedOption = $('#InvPlanId').find('option:selected');
                 var profitPercentage = parseFloat(selectedOption.data('percent')) || 0;
+                var months = parseFloat(selectedOption.data('period')) || 0;
 
-                var totalProfit = totalInvest * profitPercentage / 100; // Ganancia total del mes
+                var totalProfit = totalInvest * profitPercentage / 100 * months; // Ganancia total del mes
                 var today = new Date();
                 var daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(); // Días en el mes actual
                 var currentDay = today.getDate();
@@ -401,11 +403,12 @@
 
                 var message1 = "Su inversión de " + formatter.format(totalInvest) +
                     " generará un beneficio total de " + formatter.format(totalProfit) +
-                    ", con una ganancia diaria de " + formatter.format(dailyProfit) + " a partir de que validade su depósito.";
+                    ", con una ganancia diaria de " + formatter.format(dailyProfit) + " durante los " + months +  
+                    " mes(es) de duración de su plan a partir de que validade su depósito.";
 
                 var message2 = "Debido a que hoy es día " + currentDay +
                     ", recibirá este mes " + formatter.format(adjustedProfit) +
-                    " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit);
+                    " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit) + " durante los " + months + " mes(es) de duración de su plan";
                     
                 var message3 = "Sus beneficios comenzarán a generarse a partir de que sea validado su depósito, para ello copie el ID de la " +
                  " transacción y captúrela en la sección de Activos"
