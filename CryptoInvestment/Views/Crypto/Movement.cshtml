@@ -38,12 +38,12 @@
                                     @movement.IdInvOperations
                                 </td>
                                 <td>
-                                    @movement.Date
+                                    @movement.Date.ToString("dd/MM/yyyy HH:mm")
                                 </td>
                                 <td>
                                     @if (movement.IdInvPlans is null)
                                     {
-                                        <span class="label label-danger">N/A</span>
+                                        <span class="label" style="background: lightgrey">N/A</span>
                                     }
                                     else
                                     {
