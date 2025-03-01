@@ -405,7 +405,7 @@
 
                 var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-                if (months = 1) {
+                if (months === 1) {
                     var message1 = "Su inversión de " + formatter.format(totalInvest) +
                         " generará un beneficio total de " + formatter.format(totalProfit) +
                             ", con una ganancia diaria de " + formatter.format(dailyProfit) + " durante el mes  " +
@@ -414,7 +414,7 @@
                     var message1 = "Su inversión de " + formatter.format(totalInvest) +
                         " generará un beneficio total de " + formatter.format(totalProfit) +
                         ", con una ganancia diaria de " + formatter.format(dailyProfit) + " durante los " + months +
-                        " mes (es) de duración de su plan a partir de que valide su depósito.";
+                        " meses de duración de su plan a partir de que valide su depósito.";
                 }
                 var message2 = "Debido a que hoy es día " + currentDay +
                     ", recibirá este mes " + formatter.format(adjustedProfit) +
