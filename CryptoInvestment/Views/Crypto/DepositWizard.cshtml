@@ -28,6 +28,7 @@
                                         {
                                             var profit = plan.MinAmount * plan.ProfitPercentage / 100 * int.Parse(plan.MonthsInvested);
                                             <option value="@plan.IdInvPlans" 
+                                                    data-name="@plan.PlanName"
                                                     data-max="@plan.MaxAmount" 
                                                     data-min="@plan.MinAmount" 
                                                     data-percent="@plan.ProfitPercentage" 
@@ -77,6 +78,11 @@
 
                             <h1>Monto a Invertir</h1>
                             <fieldset>
+                                <h3><span id="selectedPlan"></span></h3>
+                                <h4 class="m-t m-r-lg">
+                                    Monto Mínimo: <span id="selected-minAmountDisplay"></span> |
+                                    Monto Máximo: <span id="selected-maxAmountDisplay"></span>
+                                </h4>
                                 <div id="selectedCurrencyDisplay"></div>
 
                                 <label>Monto a depositar</label>
@@ -153,9 +159,9 @@
                                 <br />
                                 <div id="selectedCurrencyDisplay2"></div>
 
-                                <div class="d-inline-flex center-container align-items-center m-b">
+                                <div id="wallet-address" class="d-inline-flex center-container align-items-center m-b">
                                     <h4 id="copytext" class="m-r">wallet</h4>
-                                    <button type="button" class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copiar</button>
+                                    <button id="copytext-button" type="button" class="btn btn-clip btn-primary" data-clipboard-target="#copytext"><i class="fa fa-copy"></i> Copiar</button>
                                 </div>
                                 
                                 <div id="step4Message2"></div>
@@ -278,8 +284,7 @@
                 onFinishing: function (event, currentIndex) {
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled";
-                    if (form.isValid())
-                        return form.valid();
+                    return form.valid();
                 },
                 onFinished: function (event, currentIndex) {
                     $(this).submit();
@@ -296,11 +301,16 @@
                 var minAmount = selectedOption.data('min');
                 var percentProfit = selectedOption.data('percent');
                 var minProfit = selectedOption.data('profit');
+                var name = selectedOption.data('name')
 
                 $('#minAmountDisplay').text(minAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount) : '');
                 $('#maxAmountDisplay').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount) : '');
                 $('#percentProfit').text(percentProfit + '%');
                 $('#minProfit').text(minProfit ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minProfit) : '');
+                
+                $('#selectedPlan').text(name);
+                $('#selected-minAmountDisplay').text(minAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount) : '');
+                $('#selected-maxAmountDisplay').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount) : '');
             }
             updateAmounts();
             $('#InvPlanId').change(updateAmounts);
@@ -402,6 +412,11 @@
                 
                 if (deposit > 0)
                     $("#step4Message3").text(message3);
+                else {
+                    $('#wallet-address').css('display', 'none');
+                    $('#copytext').css('display', 'none');
+                    $('#copytext-button').css('display', 'none');
+                }
 
                 $("#MonthProfit").val(adjustedProfit.toFixed(2));
             }
