@@ -81,7 +81,8 @@
                                 <h3><span id="selectedPlan"></span></h3>
                                 <h4 class="m-t m-r-lg">
                                     Monto Mínimo: <span id="selected-minAmountDisplay"></span> |
-                                    Monto Máximo: <span id="selected-maxAmountDisplay"></span>
+                                    Monto Máximo: <span id="selected-maxAmountDisplay"></span> |
+                                    Porcentaje de Ganancia: <span id="selected-percentProfit"></span>
                                 </h4>
                                 <div id="selectedCurrencyDisplay"></div>
 
@@ -312,6 +313,7 @@
                 $('#selectedPlan').text(name);
                 $('#selected-minAmountDisplay').text(minAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount) : '');
                 $('#selected-maxAmountDisplay').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount) : '');
+                $('#selected-percentProfit').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(percentProfit) : '');
             }
             updateAmounts();
             $('#InvPlanId').change(updateAmounts);
