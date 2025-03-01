@@ -50,7 +50,7 @@ public class InvOperationConfiguration : IEntityTypeConfiguration<InvOperation>
         builder.Property(io => io.IdTransaction)
             .HasColumnName("id_transaction")
             .IsRequired(false)
-            .HasColumnType("varchar(45)");
+            .HasColumnType("varchar(150)");
         
         builder.Property(io => io.Status)
             .HasColumnName("status")
