@@ -375,7 +375,10 @@
                     var formattedBalance = formatter.format(balanceObj.Balance);
                     var description = $('input[name="SelectedCurrencyId"]:checked').data('description');
                     var message = "Tienes dividendos disponibles por: " + formattedBalance + " " + description +
-                        ", podrá reinvertir la cantidad que usted desee.";
+                        ", podrá reinvertir la cantidad que usted desee." +
+                        " Podrá iniciar la inversión con los dividendos disponibles sin necesidad de hacer un depósito adicional."
+                        
+                        ;
                     $("#reinversionLabel").text(message);
                     $("#reinversionSection").show();
                 } else {
@@ -421,7 +424,7 @@
                     " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit) + " durante los " + months + " mes (es) de duración de su plan";
                     
                 var message3 = "Sus beneficios comenzarán a generarse a partir de que sea validado su depósito, para ello copie el ID de la " +
-                 " transacción y captúrela en la sección de Activos"
+                 " transacción y captúrelo en la sección de Activos"
 
                 $("#step4Message1").text(message1);
                 $("#step4Message2").text(message2);
