@@ -242,7 +242,7 @@
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled,:hidden";
 
-                    if (currentIndex === 1 && newIndex === 2) {
+                    if (currentIndex === 1) {
                         var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
                         var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
                         var totalInvest = deposit + reinversion;
@@ -274,6 +274,10 @@
                             alert("El monto de reinversión (" + reinvestAmount + ") no puede ser mayor que tu balance disponible (" + availableAmount + ").");
                             return false;
                         }
+                    }
+
+                    if (currentIndex === 3) {
+                        updateStep4Info();
                     }
                     
                     return form.valid();
@@ -404,11 +408,11 @@
                 var message1 = "Su inversión de " + formatter.format(totalInvest) +
                     " generará un beneficio total de " + formatter.format(totalProfit) +
                     ", con una ganancia diaria de " + formatter.format(dailyProfit) + " durante los " + months +  
-                    " mes(es) de duración de su plan a partir de que validade su depósito.";
+                    " mes (es) de duración de su plan a partir de que valide su depósito.";
 
                 var message2 = "Debido a que hoy es día " + currentDay +
                     ", recibirá este mes " + formatter.format(adjustedProfit) +
-                    " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit) + " durante los " + months + " mes(es) de duración de su plan";
+                    " A partir del próximo mes, recibirá la ganancia completa de " + formatter.format(totalProfit) + " durante los " + months + " mes (es) de duración de su plan";
                     
                 var message3 = "Sus beneficios comenzarán a generarse a partir de que sea validado su depósito, para ello copie el ID de la " +
                  " transacción y captúrela en la sección de Activos"

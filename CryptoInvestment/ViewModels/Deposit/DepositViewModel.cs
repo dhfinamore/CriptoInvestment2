@@ -19,6 +19,7 @@ public class DepositViewModel
     [Range(0, int.MaxValue, ErrorMessage = "El monto a depositar no es válido")]
     public decimal DepositAmount { get; set; }
     
+    [Required(ErrorMessage = "El monto a reinvertir no es válido")]
     [Range(0, int.MaxValue, ErrorMessage = "El monto a depositar no es válido")]
     public decimal ReinversionAmount { get; set; }
     
