@@ -6,7 +6,10 @@ using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelat
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.InvAssets.Commands;
 using CryptoInvestment.Application.InvAssets.Queries;
+using CryptoInvestment.Application.InvOperations.Queries.ListInvActionsQuery;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvCurrenciesQuery;
+using CryptoInvestment.Application.InvOperations.Queries.ListInvOperationsQuery;
+using CryptoInvestment.Application.InvPlans.Queries;
 using CryptoInvestment.Application.InvPlans.Queries.ListInvPlanQuery;
 using CryptoInvestment.Application.Referrals.Commands;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
@@ -18,6 +21,7 @@ using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.ViewModels.CustomerConfiguration;
 using CryptoInvestment.ViewModels.Deposit;
+using CryptoInvestment.ViewModels.Movements;
 using CryptoInvestment.ViewModels.Referrals;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -245,9 +249,48 @@ public class CryptoController : Controller
         return View();
     }
     
-    public IActionResult Movement()
+    public async Task<IActionResult> Movement()
     {
-        return View();
+        var model = new MovementsViewModel();
+        
+        if (HttpContext.User.Identity!.IsAuthenticated)
+        {
+            model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+        }
+        else
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+        
+        var query = new ListInvActionsQuery();
+        var getInvActionsResult = await _mediator.Send(query);
+        
+        var invActions = getInvActionsResult.Match<List<InvAction>>(
+            invActions => invActions,
+            _ => null!
+        );
+        
+        var query2 = new ListInvOperationsQuery(model.CustomerId);
+        var getInvOperationsResult = await _mediator.Send(query2);
+        
+        var invOperations = getInvOperationsResult.Match<List<InvOperation>>(
+            invOperations => invOperations,
+            _ => null!
+        );
+
+        var query3 = new ListInvPlansQuery();
+        var getInvPlansResult = await _mediator.Send(query3);
+        
+        var invPlans = getInvPlansResult.Match<List<InvPlan>>(
+            invPlans => invPlans,
+            _ => null!
+        );
+        
+        model.InvActions = invActions;
+        model.InvOperations = invOperations;
+        model.InvPlans = invPlans;
+        
+        return View(model);
     }
 
     public async Task<IActionResult> Referral()

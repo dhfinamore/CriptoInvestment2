@@ -1,10 +1,9 @@
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.InvPlans;
-
 using ErrorOr;
 using MediatR;
 
-namespace CryptoInvestment.Application.InvPlans.Queries;
+namespace CryptoInvestment.Application.InvPlans.Queries.GetInvPlansByIdQuery;
 
 public class GetInvPlanByIdQueryHandler : IRequestHandler<GetInvPlanByIdQuery, ErrorOr<InvPlan>>
 {

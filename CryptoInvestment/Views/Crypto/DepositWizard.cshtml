@@ -318,7 +318,7 @@
                 $('#selectedPlan').text(name);
                 $('#selected-minAmountDisplay').text(minAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minAmount) : '');
                 $('#selected-maxAmountDisplay').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(maxAmount) : '');
-                $('#selected-percentProfit').text(maxAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(percentProfit) : '');
+                $('#selected-percentProfit').text(percentProfit + '%');
             }
             updateAmounts();
             $('#InvPlanId').change(updateAmounts);
@@ -420,12 +420,16 @@
                 $("#step4Message1").text(message1);
                 $("#step4Message2").text(message2);
                 
-                if (deposit > 0)
+                if (deposit > 0) {
                     $("#step4Message3").text(message3);
+                    $('#wallet-address').show();
+                    $('#copytext').show();
+                    $('#copytext-button').show();
+                }
                 else {
-                    $('#wallet-address').css('display', 'none');
-                    $('#copytext').css('display', 'none');
-                    $('#copytext-button').css('display', 'none');
+                    $('#wallet-address').hide();
+                    $('#copytext').hide();
+                    $('#copytext-button').hide();
                 }
 
                 $("#MonthProfit").val(adjustedProfit.toFixed(2));

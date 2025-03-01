@@ -32,7 +32,11 @@ public class InvOperationConfiguration : IEntityTypeConfiguration<InvOperation>
 
         builder.Property(io => io.IdInvPlans)
             .HasColumnName("id_inv_plans")
-            .IsRequired();
+            .IsRequired(false);
+        
+        builder.Property(io => io.IdInvAssets)
+            .HasColumnName("id_inv_assets")
+            .IsRequired(false);
 
         builder.Property(io => io.Date)
             .HasColumnName("date")
@@ -42,6 +46,11 @@ public class InvOperationConfiguration : IEntityTypeConfiguration<InvOperation>
         builder.Property(io => io.IdInvAction)
             .HasColumnName("id_inv_actions")
             .IsRequired();
+        
+        builder.Property(io => io.IdTransaction)
+            .HasColumnName("id_transaction")
+            .IsRequired(false)
+            .HasColumnType("varchar(45)");
         
         builder.Property(io => io.Status)
             .HasColumnName("status")

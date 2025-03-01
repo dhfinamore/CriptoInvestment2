@@ -15,8 +15,13 @@ public class InvPlanRepository : IInvPlanRepository
         _context = context;
     }
 
-    public async Task<List<InvPlan>> GetInvPlansAsync(int customerId)
+    public async Task<List<InvPlan>> GetInvPlansAsync(int? customerId)
     {
+        if (customerId is null)
+        {
+            return await _context.InvPlans.ToListAsync();
+        }
+        
         var invPlans = await _context.InvPlans
             .Where(plan => !_context.InvAssets
                         .Where(asset => asset.IdCustomer == customerId && !asset.Finalized)

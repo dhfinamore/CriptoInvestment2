@@ -1,4 +1,5 @@
 using CryptoInvestment.Application.Common.Interface;
+using CryptoInvestment.Domain.Customers;
 using CryptoInvestment.Domain.InvAssets;
 using CryptoInvestment.Domain.InvOperations;
 using ErrorOr;
@@ -27,12 +28,13 @@ public class CreateInvAssetsCommandHandler : IRequestHandler<CreateInvAssetsComm
 
     public async Task<ErrorOr<Success>> Handle(CreateInvAssetsCommand command, CancellationToken cancellationToken)
     {
-        var customer = await _customerRepository.GetCustomerByIdAsync(command.CustomerId);
-
+        Customer? customer = await _customerRepository.GetCustomerByIdAsync(command.CustomerId);
         if (customer is null)
-            return Error.NotFound(description: "Customer not found");
+        {
+            return Error.NotFound("Customer not found");
+        }
 
-        var invAssets = new InvAsset()
+        InvAsset invAsset = new InvAsset()
         {
             IdCustomer = command.CustomerId,
             IdInvPlans = command.InvPlanId,
@@ -42,10 +44,12 @@ public class CreateInvAssetsCommandHandler : IRequestHandler<CreateInvAssetsComm
             EndType = command.EndType,
             ReinvestPercent = command.ReinvestPercent
         };
+        
+        List<InvOperation> operationsNeedingAssetId = [];
 
         if (command.ReinvestAmount < command.Amount)
         {
-            var invOperation = new InvOperation()
+            InvOperation opDiff = new InvOperation()
             {
                 IdCustomer = command.CustomerId,
                 IdCurrency = command.CurrencyId,
@@ -54,13 +58,12 @@ public class CreateInvAssetsCommandHandler : IRequestHandler<CreateInvAssetsComm
                 IdInvAction = 1,
                 Status = 1
             };
-
-            await _invOperationRepository.CreateInvOperationAsync(invOperation);
+            operationsNeedingAssetId.Add(opDiff);
         }
 
         if (command.ReinvestAmount > 0)
         {
-            var invOperation = new InvOperation()
+            InvOperation opReinvest = new InvOperation()
             {
                 IdCustomer = command.CustomerId,
                 IdCurrency = command.CurrencyId,
@@ -69,26 +72,34 @@ public class CreateInvAssetsCommandHandler : IRequestHandler<CreateInvAssetsComm
                 IdInvAction = 3,
                 Status = 0
             };
-            
-            var invBalances = await _invAssetsRepository.GetInvBalances(command.CustomerId);
-            var balance = invBalances.FirstOrDefault(b => b.IdCurrency == command.CurrencyId);
-            
+            operationsNeedingAssetId.Add(opReinvest);
+
+            List<InvBalance> invBalances = await _invAssetsRepository.GetInvBalances(command.CustomerId);
+            InvBalance? balance = invBalances.FirstOrDefault(b => b.IdCurrency == command.CurrencyId);
             if (balance is null)
-                return Error.NotFound(description: "Balance not found");
-            
+            {
+                return Error.NotFound("Balance not found");
+            }
+
             balance.Balance -= command.ReinvestAmount;
-            
             await _invAssetsRepository.UpdateInvBalance(balance);
-            await _invOperationRepository.CreateInvOperationAsync(invOperation);
         }
 
         if (command.ReinvestAmount == command.Amount)
         {
-            invAssets.DateStart = DateTime.Now;
-            invAssets.ExpectedProfit = command.ExpectedProfit;
+            invAsset.DateStart = DateTime.Now;
+            invAsset.ExpectedProfit = command.ExpectedProfit;
         }
 
-        await _invAssetsRepository.CreateInvAssetsAsync(invAssets);
+        await _invAssetsRepository.CreateInvAssetsAsync(invAsset);
+        await _unitOfWork.CommitChangesAsync();
+        
+        foreach (InvOperation op in operationsNeedingAssetId)
+        {
+            op.IdInvAssets = invAsset.IdInvAssets;
+            await _invOperationRepository.CreateInvOperationAsync(op);
+        }
+
         await _unitOfWork.CommitChangesAsync();
 
         return Result.Success;
