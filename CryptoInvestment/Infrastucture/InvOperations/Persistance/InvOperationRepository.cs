@@ -1,7 +1,6 @@
 using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Domain.InvOperations;
 using CryptoInvestment.Infrastucture.Common;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptoInvestment.Infrastucture.InvOperations.Persistance;

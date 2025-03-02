@@ -7,7 +7,7 @@
     var activeTab = Context.Request.Query["activeTab"].ToString();
     if (string.IsNullOrEmpty(activeTab))
     {
-        activeTab = "ben";
+        activeTab = "general";
     }
 }
 
@@ -26,6 +26,7 @@
             <link rel="stylesheet" href="~/lib/sweetalert/dist/sweetalert.css" />
             <link rel="stylesheet" href="~/lib/iCheck/custom.css" />
             <link rel="stylesheet" href="~/lib/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" />
+            <link rel="stylesheet" href="~/lib/bootstrap-datepicker/datepicker3.css" />
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css">
         </environment>
     }
@@ -36,6 +37,11 @@
 
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "general" ? "active" : "")" id="general-tab" data-bs-toggle="tab" href="#general" role="tab">
+                General
+            </a>
+        </li>
         <li class="nav-item">
             <a class="nav-link @(activeTab == "ben" ? "active" : "")" id="ben-tab" data-bs-toggle="tab" href="#ben" role="tab">
                 Beneficiarios
@@ -65,6 +71,65 @@
 
     <!-- Tab content -->
     <div class="tab-content">
+        <div class="tab-pane fade @(activeTab == "general" ? "show active" : "")" id="general" role="tabpanel">
+            <h2>Configuraciones de Usuario</h2>
+            <div class="d-flex align-items-center justify-content-center flex-column" style="margin-bottom: 30px">
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-content">
+                            <form class="m-t" asp-action="SaveUserConfigurations" asp-controller="CustomerConfiguration" method="post" id="generalConfigurationForm">
+                                <input type="hidden" asp-for="CustomerId"/>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.Name" value="@Model.CustomerInformation.Name" class="form-control" id="" placeholder="Nombre">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.Name)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.ApellidoPaterno" value="@Model.CustomerInformation.ApellidoPaterno" class="form-control example1" id="" placeholder="Apellido Paterno">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.ApellidoPaterno)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.ApellidoMaterno"  value="@Model.CustomerInformation.ApellidoMaterno" class="form-control example1" id="" placeholder="Apellido Materno">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.ApellidoMaterno)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="tel" asp-for="CustomerInformation.Phone" value="@Model.CustomerInformation.Phone" id="phone-2" class="form-control"/>
+                                            <span id="phone-error-2" class="validation-error" style="display: none; color: red;">
+                                                Ingrese un número de teléfono válido.
+                                            </span>
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.PhoneNumber)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.Coutry" value="@Model.CustomerInformation.Coutry" class="form-control example1" id="" placeholder="País">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.Coutry)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.State" value="@Model.CustomerInformation.State" class="form-control example1" id="" placeholder="Estado">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.State)</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input asp-for="CustomerInformation.City" value="@Model.CustomerInformation.City" class="form-control example1" id="" placeholder="City">
+                                            <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.City)</span>
+                                        </div>
+                                        <div class="form-group" id="data_1">
+                                            <div class="input-group date">
+                                                <span class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </span>
+                                                <input type="text" asp-for="CustomerInformation.BirthDate" class="form-control" value="@Model.CustomerInformation.BirthDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary block full-width m-b">Actualizar Datos de Usuario</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Beneficiarios -->
         <div class="tab-pane fade @(activeTab == "ben" ? "show active" : "")" id="ben" role="tabpanel">
             <div class="wrapper wrapper-content animated fadeInRight">
@@ -654,12 +719,21 @@
         <script src="~/lib/peity/jquery.peity.min.js"></script>
         <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
         <script src="~/lib/iCheck/icheck.min.js"></script>
+        <script src="~/lib/bootstrap-datepicker/bootstrap-datepicker.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"></script>
     </environment>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            
             var options1 = {
                 ui: {
                     container: "#pwd-container1",
@@ -793,6 +867,42 @@
                 } else {
                     $("#phone-error").hide();
                     input.value = phoneInput.getNumber();
+                }
+            });
+
+            const input_2 = document.querySelector("#phone-2");
+
+            const phoneInput_2 = window.intlTelInput(input_2, {
+                separateDialCode: true,
+                initialCountry: "auto",
+                geoIpLookup: function (callback) {
+                    fetch("https://ipapi.co/json/")
+                        .then((res) => res.json())
+                        .then((data) => {
+                            callback(data.country_code.toLowerCase());
+                        })
+                        .catch(() => {
+                            callback("mx");
+                        });
+                },
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"
+            });
+
+            input.addEventListener("blur", function () {
+                if (!phoneInput_2.isValidNumber()) {
+                    $("#phone-error-2").show();
+                } else {
+                    $("#phone-error-2").hide();
+                }
+            });
+
+            $("#generalConfigurationForm").submit(function (event) {
+                if (!phoneInput_2.isValidNumber()) {
+                    $("#phone-error-2").show();
+                    event.preventDefault();
+                } else {
+                    $("#phone-error-2").hide();
+                    input_2.value = phoneInput_2.getNumber();
                 }
             });
 

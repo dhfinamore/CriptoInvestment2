@@ -65,6 +65,27 @@ public class CryptoController : Controller
         var query1 = new GetCustomerByEmailQuery(email!);
 
         var customer = await _mediator.Send(query1);
+        var customerResult = customer.Match(
+            c => c,
+            _ => null!
+        );
+        
+        if (customerResult is null)
+            return RedirectToAction("Login", "Authentication");
+
+        var customerInformation = new CustomerInformationViewModel()
+        {
+            Name = customerResult.Nombre!,
+            ApellidoPaterno = customerResult.ApellidoPaterno!,
+            ApellidoMaterno = customerResult.ApellidoMaterno,
+            Phone = customerResult.Phone!,
+            Coutry = customerResult.ClPais,
+            State = customerResult.IdEstado,
+            City = customerResult.City,
+            BirthDate = customerResult.FechaNacimiento?.ToString("MM/dd/yyyy")
+        };
+        
+        model.CustomerInformation = customerInformation;
         
         model.DocsValidated = customer.Match(
             c => c.DocsValidated,

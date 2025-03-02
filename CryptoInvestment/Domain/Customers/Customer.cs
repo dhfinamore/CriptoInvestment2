@@ -13,8 +13,8 @@ public class Customer
     public string Email { get; set; }
     public string? PasswdLogin { get; set; }
     public bool? EmailValidated { get; set; }
-    public int? ClPais { get; set; }
-    public int? IdEstado { get; set; }
+    public string? ClPais { get; set; }
+    public string? IdEstado { get; set; }
     public string? City { get; set; }
     public string? PasswdWithdrawal { get; set; }
     public DateTime? LockedUp { get; set; }

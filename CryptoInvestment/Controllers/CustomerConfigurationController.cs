@@ -1,6 +1,7 @@
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetWithdrawalsPasswordCommand;
+using CryptoInvestment.Application.Authentication.Commands.UpdateCustomerCommand;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerByEmailQuery;
 using CryptoInvestment.Application.Authentication.Queries.GetCustomerSecurityQuestions;
 using CryptoInvestment.Application.Common.Interface;
@@ -47,7 +48,10 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> ResetPassword(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForResetPassword(ModelState);
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -87,7 +91,10 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> ChangeSecurityQuestions(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForChangeSecurityQuestions(ModelState);
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -121,7 +128,10 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateBeneficiary(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -134,7 +144,7 @@ public class CustomerConfigurationController : Controller
             customerConfigurationViewModel.CustomerBeneficiary.Name,
             customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
             customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
-            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
+            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber!,
             customerConfigurationViewModel.CustomerBeneficiary.RelationshipId
         );
         
@@ -153,7 +163,10 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateBeneficiary(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -186,7 +199,11 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> AssignBeneficiaryPercent(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForAssignBeneficiaryPercent(ModelState);
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -315,7 +332,10 @@ public class CustomerConfigurationController : Controller
     [HttpPost]
     public async Task<IActionResult> SetWithdrawalsPassword(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        RemoveValidationForAssignBeneficiaryPercent(ModelState);
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
         
         if (!ModelState.IsValid)
         {
@@ -347,6 +367,34 @@ public class CustomerConfigurationController : Controller
     
     private async Task LoadCustomerConfigurationViewModel(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
+        if (HttpContext.User.Identity!.IsAuthenticated)
+        {
+            customerConfigurationViewModel.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+        }
+        
+        var email = HttpContext.Session.GetString("UserEmail");
+        var query1 = new GetCustomerByEmailQuery(email!);
+
+        var customer = await _mediator.Send(query1);
+        var customerResult = customer.Match(
+            c => c,
+            _ => null!
+        );
+
+        var customerInformation = new CustomerInformationViewModel()
+        {
+            Name = customerResult.Nombre!,
+            ApellidoPaterno = customerResult.ApellidoPaterno!,
+            ApellidoMaterno = customerResult.ApellidoMaterno,
+            Phone = customerResult.Phone!,
+            Coutry = customerResult.ClPais,
+            State = customerResult.IdEstado,
+            City = customerResult.City,
+            BirthDate = customerResult.FechaNacimiento?.ToString("MM/dd/yyyy")
+        };
+        
+        customerConfigurationViewModel.CustomerInformation = customerInformation;
+        
         var query = new ListSecurityQuestionsQuery();
         var listSecurityQuestionsResult = await _mediator.Send(query);
         
@@ -399,70 +447,97 @@ public class CustomerConfigurationController : Controller
         customerConfigurationViewModel.CustomerPic = customerPic;
     }
     
-    private void RemoveValidationForResetPassword(ModelStateDictionary modelState)
+    [HttpPost]
+    public async Task<IActionResult> SaveUserConfigurations(CustomerConfigurationViewModel customerConfigurationViewModel)
     {
-        modelState.Remove("SetSecurityQuestion.FirstQuestionId");
-        modelState.Remove("SetSecurityQuestion.FirstQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionId");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecurityQuestions");
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
         
-        modelState.Remove("CustomerBeneficiary.Name");
-        modelState.Remove("CustomerBeneficiary.ApePaternal");
-        modelState.Remove("CustomerBeneficiary.PhoneNumber");
-        modelState.Remove("CustomerBeneficiary.Percentage");
-        modelState.Remove("CustomerBeneficiary.Relationship");
+        if (!ModelState.IsValid)
+        {
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+        
+        var command = new UpdateCustomerCommand(
+            customerConfigurationViewModel.CustomerId,
+            customerConfigurationViewModel.CustomerInformation.Name,
+            customerConfigurationViewModel.CustomerInformation.ApellidoPaterno,
+            customerConfigurationViewModel.CustomerInformation.ApellidoMaterno,
+            customerConfigurationViewModel.CustomerInformation.Phone,
+            customerConfigurationViewModel.CustomerInformation.Coutry,
+            customerConfigurationViewModel.CustomerInformation.State,
+            customerConfigurationViewModel.CustomerInformation.City,
+            customerConfigurationViewModel.CustomerInformation.BirthDate
+        );
+        
+        var updateCustomerResult = await _mediator.Send(command);
+        
+        return updateCustomerResult.Match<IActionResult>(
+            success => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "general" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+            }
+        );
+    }
+
+    private void IgnoreValidationForResetPassword(ModelStateDictionary modelStateDictionary)
+    {
+        modelStateDictionary.Remove("ResetPassword.CurrentPassword");
+        modelStateDictionary.Remove("ResetPassword.Password");
+        modelStateDictionary.Remove("ResetPassword.ConfirmPassword");
     }
     
-    private void RemoveValidationForChangeSecurityQuestions(ModelStateDictionary modelState)
+    private void IgnoreValidationForSecurityQuestions(ModelStateDictionary modelStateDictionary)
     {
-        modelState.Remove("ResetPassword.CurrentPassword");
-        modelState.Remove("ResetPassword.Password");
-        modelState.Remove("ResetPassword.ConfirmPassword");
-        
-        modelState.Remove("CustomerBeneficiary.Name");
-        modelState.Remove("CustomerBeneficiary.ApePaternal");
-        modelState.Remove("CustomerBeneficiary.PhoneNumber");
-        modelState.Remove("CustomerBeneficiary.Percentage");
-        modelState.Remove("CustomerBeneficiary.Relationship");
+        modelStateDictionary.Remove("SetSecurityQuestion.FirstQuestionId");
+        modelStateDictionary.Remove("SetSecurityQuestion.FirstQuestionAnswer");
+        modelStateDictionary.Remove("SetSecurityQuestion.SecondQuestionId");
+        modelStateDictionary.Remove("SetSecurityQuestion.SecondQuestionAnswer");
+        modelStateDictionary.Remove("SetSecurityQuestion.ThirdQuestionId");
+        modelStateDictionary.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
+        modelStateDictionary.Remove("SetSecurityQuestion.SecurityQuestions");
     }
     
-    private void RemoveValidationForCreateBeneficiary(ModelStateDictionary modelState)
+    private void IgnoreValidationForCreateBeneficiary(ModelStateDictionary modelStateDictionary)
     {
-        modelState.Remove("ResetPassword.CurrentPassword");
-        modelState.Remove("ResetPassword.Password");
-        modelState.Remove("ResetPassword.ConfirmPassword");
-        
-        modelState.Remove("SetSecurityQuestion.FirstQuestionId");
-        modelState.Remove("SetSecurityQuestion.FirstQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionId");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecurityQuestions");
+        modelStateDictionary.Remove("CustomerBeneficiary.Name");
+        modelStateDictionary.Remove("CustomerBeneficiary.ApePaternal");
+        modelStateDictionary.Remove("CustomerBeneficiary.PhoneNumber");
+        modelStateDictionary.Remove("CustomerBeneficiary.Percentage");
+        modelStateDictionary.Remove("CustomerBeneficiary.Relationship");
     }
     
-    private void RemoveValidationForAssignBeneficiaryPercent(ModelStateDictionary modelState)
+    private void IgnoreValidationForWithdrawalPassword(ModelStateDictionary modelStateDictionary)
     {
-        modelState.Remove("ResetPassword.CurrentPassword");
-        modelState.Remove("ResetPassword.Password");
-        modelState.Remove("ResetPassword.ConfirmPassword");
-        
-        modelState.Remove("SetSecurityQuestion.FirstQuestionId");
-        modelState.Remove("SetSecurityQuestion.FirstQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionId");
-        modelState.Remove("SetSecurityQuestion.SecondQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionId");
-        modelState.Remove("SetSecurityQuestion.ThirdQuestionAnswer");
-        modelState.Remove("SetSecurityQuestion.SecurityQuestions");
-        
-        modelState.Remove("CustomerBeneficiary.Name");
-        modelState.Remove("CustomerBeneficiary.ApePaternal");
-        modelState.Remove("CustomerBeneficiary.PhoneNumber");
-        modelState.Remove("CustomerBeneficiary.Percentage");
-        modelState.Remove("CustomerBeneficiary.Relationship");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character1");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character2");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character3");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character4");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character5");
+        modelStateDictionary.Remove("WithdrawalsPassword.Character6");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter1");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter2");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter3");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter4");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter5");
+        modelStateDictionary.Remove("WithdrawalsPassword.ConfirmCharacter6");
+    }
+    
+    private void IgnoreValidationForUserConfiguration(ModelStateDictionary modelStateDictionary)
+    {
+        modelStateDictionary.Remove("CustomerInformation.Name");
+        modelStateDictionary.Remove("CustomerInformation.ApellidoPaterno");
+        modelStateDictionary.Remove("CustomerInformation.Phone");
+        modelStateDictionary.Remove("CustomerInformation.Coutry");
+        modelStateDictionary.Remove("CustomerInformation.State");
+        modelStateDictionary.Remove("CustomerInformation.City");
+        modelStateDictionary.Remove("CustomerInformation.BirthDate");
     }
     
     private async Task<string> CreateDocumentsValidationEmail(string email)
