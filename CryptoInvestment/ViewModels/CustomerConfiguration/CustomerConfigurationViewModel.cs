@@ -21,5 +21,6 @@ public class CustomerConfigurationViewModel
         SetSecurityQuestion = new SecurityQuestionsViewModel();
         CustomerBeneficiary = new CustomerBeneficiaryViewModel();
         WithdrawalsPassword = new WithdrawalsPasswordViewModel();
+        CustomerInformation = new CustomerInformationViewModel();
     }
 }

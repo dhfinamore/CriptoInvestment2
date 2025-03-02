@@ -243,7 +243,7 @@
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled,:hidden";
                     updateAmounts();
-                    if (currentIndex === 1) {
+                    if (currentIndex === 1 || (currentIndex === 0 && newIndex !== 1)) {
                         var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
                         var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
                         var totalInvest = deposit + reinversion;

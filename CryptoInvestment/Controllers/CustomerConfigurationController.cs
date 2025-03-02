@@ -381,7 +381,7 @@ public class CustomerConfigurationController : Controller
             _ => null!
         );
 
-        var customerInformation = new CustomerInformationViewModel()
+        customerConfigurationViewModel.CustomerInformation = new CustomerInformationViewModel()
         {
             Name = customerResult.Nombre!,
             ApellidoPaterno = customerResult.ApellidoPaterno!,
@@ -392,8 +392,6 @@ public class CustomerConfigurationController : Controller
             City = customerResult.City,
             BirthDate = customerResult.FechaNacimiento?.ToString("MM/dd/yyyy")
         };
-        
-        customerConfigurationViewModel.CustomerInformation = customerInformation;
         
         var query = new ListSecurityQuestionsQuery();
         var listSecurityQuestionsResult = await _mediator.Send(query);

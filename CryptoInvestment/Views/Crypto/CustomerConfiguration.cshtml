@@ -7,7 +7,7 @@
     var activeTab = Context.Request.Query["activeTab"].ToString();
     if (string.IsNullOrEmpty(activeTab))
     {
-        activeTab = "general";
+        activeTab = "ben";
     }
 }
 
@@ -38,23 +38,23 @@
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
-            <a class="nav-link @(activeTab == "general" ? "active" : "")" id="general-tab" data-bs-toggle="tab" href="#general" role="tab">
-                General
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link @(activeTab == "ben" ? "active" : "")" id="ben-tab" data-bs-toggle="tab" href="#ben" role="tab">
                 Beneficiarios
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(activeTab == "subir-documentos" ? "active" : "")" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">
-                Documento
+            <a class="nav-link @(activeTab == "withdrawals" ? "active" : "")" id="withdrawals-tab" data-bs-toggle="tab" href="#withdrawals" role="tab">
+                Cuentas de Retiros
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(activeTab == "withdrawals" ? "active" : "")" id="withdrawals-tab" data-bs-toggle="tab" href="#withdrawals" role="tab">
-                Cuentas de Retiros
+            <a class="nav-link @(activeTab == "general" ? "active" : "")" id="general-tab" data-bs-toggle="tab" href="#general" role="tab">
+                General
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(activeTab == "subir-documentos" ? "active" : "")" id="subir-documentos-tab" data-bs-toggle="tab" href="#subir-documentos" role="tab">
+                Documento
             </a>
         </li>
         <li class="nav-item">
@@ -86,11 +86,11 @@
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.Name)</span>
                                         </div>
                                         <div class="form-group">
-                                            <input asp-for="CustomerInformation.ApellidoPaterno" value="@Model.CustomerInformation.ApellidoPaterno" class="form-control example1" id="" placeholder="Apellido Paterno">
+                                            <input asp-for="CustomerInformation.ApellidoPaterno" value="@Model.CustomerInformation.ApellidoPaterno" class="form-control" id="" placeholder="Apellido Paterno">
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.ApellidoPaterno)</span>
                                         </div>
                                         <div class="form-group">
-                                            <input asp-for="CustomerInformation.ApellidoMaterno"  value="@Model.CustomerInformation.ApellidoMaterno" class="form-control example1" id="" placeholder="Apellido Materno">
+                                            <input asp-for="CustomerInformation.ApellidoMaterno"  value="@Model.CustomerInformation.ApellidoMaterno" class="form-control" id="" placeholder="Apellido Materno">
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.ApellidoMaterno)</span>
                                         </div>
                                         <div class="form-group">
@@ -101,15 +101,15 @@
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerBeneficiary.PhoneNumber)</span>
                                         </div>
                                         <div class="form-group">
-                                            <input asp-for="CustomerInformation.Coutry" value="@Model.CustomerInformation.Coutry" class="form-control example1" id="" placeholder="País">
+                                            <input asp-for="CustomerInformation.Coutry" value="@Model.CustomerInformation.Coutry" class="form-control" id="" placeholder="País">
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.Coutry)</span>
                                         </div>
                                         <div class="form-group">
-                                            <input asp-for="CustomerInformation.State" value="@Model.CustomerInformation.State" class="form-control example1" id="" placeholder="Estado">
+                                            <input asp-for="CustomerInformation.State" value="@Model.CustomerInformation.State" class="form-control" id="" placeholder="Estado">
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.State)</span>
                                         </div>
                                         <div class="form-group">
-                                            <input asp-for="CustomerInformation.City" value="@Model.CustomerInformation.City" class="form-control example1" id="" placeholder="City">
+                                            <input asp-for="CustomerInformation.City" value="@Model.CustomerInformation.City" class="form-control" id="" placeholder="City">
                                             <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerInformation.City)</span>
                                         </div>
                                         <div class="form-group" id="data_1">
@@ -524,7 +524,7 @@
                 </div>
             </div>
         </div>
-        <!-- Document Tab -->
+        <!-- Withdrawals Tab -->
         <div class="tab-pane fade @(activeTab == "withdrawals" ? "show active" : "")" id="withdrawals" role="tabpanel">
             @if (Model.IsWithdrawalsPasswordSet)
             {
@@ -586,6 +586,96 @@
                     </div>
                 </div>
             </div>
+        
+            <div class="m-t-xl">
+                <div class="wrapper wrapper-content animated fadeInRight">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>Lista de Cuentas Retiros</h5>
+                                    <div class="ibox-tools">
+                                        <button type="button" id="" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal4">Agregar Cuenta de Retiro</button>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="ibox-content">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover issue-tracker">
+                                                <tbody>
+                                                @*@foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
+                            {*@
+                                                <tr>
+                                                    <td>USDT Trc20 QvaPay</td>
+                                                    <td>
+                                                        <div>
+                                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 20px">
+                                                            USDT ERC20
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>BTC Payeer</td>
+                                                    <td>
+                                                        <div>
+                                                            <img alt="image" class="m-l" src="~/images/4.svg" style="width: 20px">
+                                                            Bitcoin
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>USDT Trc20 TrustWaller</td>
+                                                    <td>
+                                                        <div>
+                                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 20px">
+                                                            USDT ERC20
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @*}*@
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>   
+                </div>
+            </div>    
         </div>
         <!-- Change Password Tab: Se marca activo y visible -->
         <div class="tab-pane fade @(activeTab == "change-password" ? "show active" : "")" id="change-password" role="tabpanel">

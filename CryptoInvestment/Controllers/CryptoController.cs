@@ -73,7 +73,7 @@ public class CryptoController : Controller
         if (customerResult is null)
             return RedirectToAction("Login", "Authentication");
 
-        var customerInformation = new CustomerInformationViewModel()
+        model.CustomerInformation = new CustomerInformationViewModel()
         {
             Name = customerResult.Nombre!,
             ApellidoPaterno = customerResult.ApellidoPaterno!,
@@ -84,8 +84,6 @@ public class CryptoController : Controller
             City = customerResult.City,
             BirthDate = customerResult.FechaNacimiento?.ToString("MM/dd/yyyy")
         };
-        
-        model.CustomerInformation = customerInformation;
         
         model.DocsValidated = customer.Match(
             c => c.DocsValidated,
