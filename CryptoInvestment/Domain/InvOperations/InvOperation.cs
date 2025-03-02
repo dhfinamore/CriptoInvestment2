@@ -8,6 +8,7 @@ public class InvOperation
     public decimal Amount { get; set; }
     public int? IdInvPlans { get; set; }
     public int? IdInvAssets { get; set; }
+    public int? CustomerWalletId { get; set; }
     public DateTime Date { get; set; }
     public int IdInvAction { get; set; }
     public string? IdTransaction { get; set; }

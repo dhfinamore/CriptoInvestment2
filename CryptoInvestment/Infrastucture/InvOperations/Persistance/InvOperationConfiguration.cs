@@ -37,6 +37,10 @@ public class InvOperationConfiguration : IEntityTypeConfiguration<InvOperation>
         builder.Property(io => io.IdInvAssets)
             .HasColumnName("id_inv_assets")
             .IsRequired(false);
+        
+        builder.Property(io => io.CustomerWalletId)
+            .HasColumnName("id_customer_withdrawals_wallet")
+            .IsRequired(false);
 
         builder.Property(io => io.Date)
             .HasColumnName("date")
