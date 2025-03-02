@@ -94,7 +94,8 @@
                                 </div>
 
                                 <div id="reinversionSection" style="display: none;">
-                                    <label id="reinversionLabel"></label>
+                                    <label id="reinversionLabel"></label><br>
+                                    <strong><label id="reinversionLabelOnly"></label></strong>
                                     <div class="form-group" style="width: auto">
                                         <input asp-for="ReinversionAmount" id="ReinversionAmount" type="text" class="form-control money-input" placeholder="Monto a reinvertir" required style="width: auto"/>
                                         <span class="text-danger">@Html.ValidationMessageFor(model => model.ReinversionAmount)</span>
@@ -241,7 +242,7 @@
                     }
                     var form = $(this);
                     form.validate().settings.ignore = ":disabled,:hidden";
-
+                    updateAmounts();
                     if (currentIndex === 1) {
                         var deposit = parseFloat($("input[name='DepositAmount']").val()) || 0;
                         var reinversion = parseFloat($("input[name='ReinversionAmount']").val()) || 0;
@@ -375,12 +376,12 @@
                     var formattedBalance = formatter.format(balanceObj.Balance);
                     var description = $('input[name="SelectedCurrencyId"]:checked').data('description');
                     var message = "Tienes dividendos disponibles por: " + formattedBalance + " " + description +
-                        ", podrá reinvertir la cantidad que usted desee." +
-                        " Podrá iniciar la inversión con los dividendos disponibles sin necesidad de hacer un depósito adicional."
-                        
-                        ;
+                        ", podrá reinvertir la cantidad que usted desee." ;
+                    var message2 = "Podrá iniciar la inversión con los dividendos disponibles sin necesidad de hacer un depósito adicional."
                     $("#reinversionLabel").text(message);
+                    $("#reinversionLabelOnly").text(message2);
                     $("#reinversionSection").show();
+                    $("#reinversionSectionOnly").show();
                 } else {
                     $("#reinversionSection").hide();
                 }
