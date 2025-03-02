@@ -4,6 +4,7 @@ using CryptoInvestment.Application.Common.Interface;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerBeneficiariesQuery;
 using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelationshipsQuery;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
+using CryptoInvestment.Application.CustomerWithdrawalWallets.Queries;
 using CryptoInvestment.Application.InvAssets.Commands;
 using CryptoInvestment.Application.InvAssets.Queries;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvActionsQuery;
@@ -145,6 +146,15 @@ public class CryptoController : Controller
         );
         
         model.CustomerPic = customerPic;
+
+        var query6 = new ListCustomerWithdrawalWalletsQuery(model.CustomerId);
+        var listCustomerWalletResult = await _mediator.Send(query6);
+
+        var wallets = listCustomerWalletResult.Match<List<CustomerWithdrawalWallet>>(
+            wallets => wallets,
+            _ => null! );
+
+        model.CustomerWithdrawalWallets = wallets;
         
         return View(model);
     }

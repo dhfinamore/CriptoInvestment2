@@ -112,4 +112,10 @@ public class CustomerRepository : ICustomerRepository
         return await _context.Customers.
             Where(c => c.IdParent == customerId).ToListAsync();
     }
+
+    public async Task<List<CustomerWithdrawalWallet>> GetCustomerWithdrawalWallets(int customerId)
+    {
+        return await _context.CustomerWithdrawalWallets
+            .Where(cw => cw.CustomerId == customerId).ToListAsync();
+    }
 }

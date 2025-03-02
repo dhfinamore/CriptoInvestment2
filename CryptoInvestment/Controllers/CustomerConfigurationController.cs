@@ -13,8 +13,11 @@ using CryptoInvestment.Application.CustomersBeneficiary.Queries.GetCustomerRelat
 using CryptoInvestment.Application.CustomersPic.DeleteCustomerPicCommand;
 using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.CustomersPic.SaveCustomerPicCommand;
+using CryptoInvestment.Application.CustomerWithdrawalWallets.Queries;
+using CryptoInvestment.Application.InvOperations.Queries.ListInvCurrenciesQuery;
 using CryptoInvestment.Application.SecurityQuestions.Queries.ListSecurityQuestions;
 using CryptoInvestment.Domain.Customers;
+using CryptoInvestment.Domain.InvOperations;
 using CryptoInvestment.Domain.SecurityQuestions;
 using CryptoInvestment.Infrastucture.Common;
 using CryptoInvestment.Services.ConfigurationModels;
@@ -56,6 +59,7 @@ public class CustomerConfigurationController : Controller
         if (!ModelState.IsValid)
         {
             await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
+            TempData["activeTab"] = "change-password";
             return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
         }
 
@@ -83,7 +87,8 @@ public class CustomerConfigurationController : Controller
                 {
                     ModelState.AddModelError("", "Ha ocurrido un error inesperado.");
                 }
-
+                
+                TempData["ActiveTab"] = "change-password";
                 return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
             });
     }
@@ -179,7 +184,7 @@ public class CustomerConfigurationController : Controller
             customerConfigurationViewModel.CustomerBeneficiary.Name,
             customerConfigurationViewModel.CustomerBeneficiary.ApePaternal,
             customerConfigurationViewModel.CustomerBeneficiary.ApeMaternal,
-            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber,
+            customerConfigurationViewModel.CustomerBeneficiary.PhoneNumber!,
             customerConfigurationViewModel.CustomerBeneficiary.RelationshipId,
             customerConfigurationViewModel.CustomerBeneficiary.Id
         );
@@ -441,8 +446,18 @@ public class CustomerConfigurationController : Controller
             customerPic => customerPic,
             _ => null
         );
-        
+
         customerConfigurationViewModel.CustomerPic = customerPic;
+
+        ListCustomerWithdrawalWalletsQuery query6 =
+            new ListCustomerWithdrawalWalletsQuery(customerConfigurationViewModel.CustomerId);
+        ErrorOr<List<CustomerWithdrawalWallet>> listCustomerWalletResult = await _mediator.Send(query6);
+
+        List<CustomerWithdrawalWallet> wallets = listCustomerWalletResult.Match<List<CustomerWithdrawalWallet>>(
+            wallets => wallets,
+            _ => null!);
+
+        customerConfigurationViewModel.CustomerWithdrawalWallets = wallets;
     }
     
     [HttpPost]

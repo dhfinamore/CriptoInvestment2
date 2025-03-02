@@ -20,4 +20,5 @@ public interface ICustomerRepository
     public Task DeleteCustomerPic(CustomerPic customerPic);
     public Task<List<CustomerRelationship>> GetCustomerRelationships();
     public Task<List<Customer>> GetCustomerReferrals(int customerId);
+    public Task<List<CustomerWithdrawalWallet>> GetCustomerWithdrawalWallets(int customerId);
 }

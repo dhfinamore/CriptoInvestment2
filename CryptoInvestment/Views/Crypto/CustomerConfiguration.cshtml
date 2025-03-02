@@ -7,7 +7,7 @@
     var activeTab = Context.Request.Query["activeTab"].ToString();
     if (string.IsNullOrEmpty(activeTab))
     {
-        activeTab = "ben";
+        activeTab = TempData["ActiveTab"] != null ? (string)TempData["ActiveTab"] : "ben";
     }
 }
 
@@ -595,7 +595,7 @@
                                 <div class="ibox-title">
                                     <h5>Lista de Cuentas Retiros</h5>
                                     <div class="ibox-tools">
-                                        <button type="button" id="" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal4">Agregar Cuenta de Retiro</button>
+                                        <button type="button" class="btn btn-primary btn-xs">Agregar Cuenta de Retiro</button>
                                     </div>
                                 </div>
                                 <div class="ibox-content">
@@ -603,69 +603,54 @@
                                         <div class="table-responsive">
                                             <table class="table table-hover issue-tracker">
                                                 <tbody>
-                                                @*@foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
-                            {*@
-                                                <tr>
-                                                    <td>USDT Trc20 QvaPay</td>
-                                                    <td>
-                                                        <div>
-                                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 20px">
-                                                            USDT ERC20
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>BTC Payeer</td>
-                                                    <td>
-                                                        <div>
-                                                            <img alt="image" class="m-l" src="~/images/4.svg" style="width: 20px">
-                                                            Bitcoin
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>USDT Trc20 TrustWaller</td>
-                                                    <td>
-                                                        <div>
-                                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 20px">
-                                                            USDT ERC20
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        TPAgKfYzRdK83Qocc4gXvEVu4jPKfeuer5
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <button type="button" class="btn btn-sm btn-white edit-btn">
-                                                            <i class="fa fa-pencil"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                @*}*@
+                                                @foreach (var wallet in Model.CustomerWithdrawalWallets)
+                                                {
+                                                    <tr>
+                                                        <td>@wallet.WalletName</td>
+                                                        <td>
+                                                            @{
+                                                                switch (wallet.InvCurrency)
+                                                                {
+                                                                    case 1:
+                                                                        <div>
+                                                                            <img alt="image" class="m-l" src="~/images/1.svg" style="width: 20px">
+                                                                            USDT TRC20
+                                                                        </div>
+                                                                        break;
+                                                                    case 2:
+                                                                        <div>
+                                                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 20px">
+                                                                            USDT ERC20
+                                                                        </div>
+                                                                        break;
+                                                                    case 3:
+                                                                        <div>
+                                                                            <img alt="image" class="m-l" src="~/images/3.svg" style="width: 20px">
+                                                                            Ethereum
+                                                                        </div>
+                                                                        break;
+                                                                    case 4:
+                                                                        <div>
+                                                                            <img alt="image" class="m-l" src="~/images/4.svg" style="width: 20px">
+                                                                            Bitcoin
+                                                                        </div>
+                                                                        break;
+                                                                }
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @wallet.WalletAccount
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <button type="button" class="btn btn-sm btn-white edit-btn">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
                                                 </tbody>
                                             </table>
                                         </div>
