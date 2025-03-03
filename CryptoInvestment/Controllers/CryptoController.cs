@@ -156,6 +156,16 @@ public class CryptoController : Controller
 
         model.CustomerWithdrawalWallets = wallets;
         
+        var query7 = new ListInvCurrenciesQuery();
+        var getInvCurrenciesResult = await _mediator.Send(query7);
+        
+        var currencies = getInvCurrenciesResult.Match<List<InvCurrency>>(
+            currencies => currencies,
+            _ => null!
+        );
+        
+        model.CustomerWithdrawalWallet.InvCurrencies = currencies;
+        
         return View(model);
     }
     

@@ -1,3 +1,5 @@
+using CryptoInvestment.Application.Authentication.Commands.CreateCustomerWalletsCommand;
+using CryptoInvestment.Application.Authentication.Commands.DeleteCustomersWallet;
 using CryptoInvestment.Application.Authentication.Commands.SetPasswordCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetSecurityQuestionsCommand;
 using CryptoInvestment.Application.Authentication.Commands.SetWithdrawalsPasswordCommand;
@@ -233,6 +235,42 @@ public class CustomerConfigurationController : Controller
             }
         );
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateWithdrawalWallet(CustomerConfigurationViewModel customerConfigurationViewModel)
+    {
+        IgnoreValidationForCreateBeneficiary(ModelState);
+        IgnoreValidationForSecurityQuestions(ModelState);
+        IgnoreValidationForWithdrawalPassword(ModelState);
+        IgnoreValidationForUserConfiguration(ModelState);
+        IgnoreValidationForResetPassword(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            await LoadCustomerConfigurationViewModel(customerConfigurationViewModel);
+
+            return View("~/Views/Crypto/CustomerConfiguration.cshtml", customerConfigurationViewModel);
+        }
+        
+        var command = new CreateCustomerWalletCommand(
+            customerConfigurationViewModel.CustomerId, 
+            customerConfigurationViewModel.CustomerWithdrawalWallet.WalletName,
+            customerConfigurationViewModel.CustomerWithdrawalWallet.InvCurrency,
+            customerConfigurationViewModel.CustomerWithdrawalWallet.WalletAccount,
+            customerConfigurationViewModel.CustomerWithdrawalWallet.Used,
+            customerConfigurationViewModel.CustomerWithdrawalWallet.WalletId);
+
+        var upsertWalletResult = await _mediator.Send(command);
+        
+        return upsertWalletResult.Match<IActionResult>(
+            success => RedirectToAction("CustomerConfiguration", "Crypto", new { activeTab = "withdrawals" }),
+            errors =>
+            {
+                ModelState.AddModelError("", errors.First().Description);
+                return View("~/Views/Crypto/CustomerConfiguration.cshtml",customerConfigurationViewModel);
+            }
+        );
+    }
 
     [HttpPost]
     public async Task<IActionResult> DeleteBeneficiary(int customerId, int beneficiaryId)
@@ -449,15 +487,36 @@ public class CustomerConfigurationController : Controller
 
         customerConfigurationViewModel.CustomerPic = customerPic;
 
-        ListCustomerWithdrawalWalletsQuery query6 =
-            new ListCustomerWithdrawalWalletsQuery(customerConfigurationViewModel.CustomerId);
-        ErrorOr<List<CustomerWithdrawalWallet>> listCustomerWalletResult = await _mediator.Send(query6);
+        var query6 = new ListCustomerWithdrawalWalletsQuery(customerConfigurationViewModel.CustomerId);
+        var listCustomerWalletResult = await _mediator.Send(query6);
 
-        List<CustomerWithdrawalWallet> wallets = listCustomerWalletResult.Match<List<CustomerWithdrawalWallet>>(
+        var wallets = listCustomerWalletResult.Match<List<CustomerWithdrawalWallet>>(
             wallets => wallets,
-            _ => null!);
+            _ => null! );
 
         customerConfigurationViewModel.CustomerWithdrawalWallets = wallets;
+        
+        var query7 = new ListInvCurrenciesQuery();
+        var getInvCurrenciesResult = await _mediator.Send(query7);
+        
+        var currencies = getInvCurrenciesResult.Match<List<InvCurrency>>(
+            currencies => currencies,
+            _ => null!
+        );
+        
+        customerConfigurationViewModel.CustomerWithdrawalWallet.InvCurrencies = currencies;
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> DeleteCustomerWallet(int customerId, int walletId)
+    {
+        var command = new DeleteCustomerWalletCommand(customerId, walletId);
+        var deleteWalletResult = await _mediator.Send(command);
+        
+        return deleteWalletResult.Match<IActionResult>(
+            success => Json(new { success = true }),
+            errors => Json(new { success = false, message = errors.First().Description })
+        );
     }
     
     [HttpPost]

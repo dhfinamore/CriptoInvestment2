@@ -595,7 +595,51 @@
                                 <div class="ibox-title">
                                     <h5>Lista de Cuentas Retiros</h5>
                                     <div class="ibox-tools">
-                                        <button type="button" class="btn btn-primary btn-xs">Agregar Cuenta de Retiro</button>
+                                        <button type="button" id="addWallet" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal6">Agregar Cuenta de Retiro</button>
+                                        <div class="modal inmodal" id="myModal6" tabindex="-1" role="dialog" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content animated fadeIn">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal">
+                                                            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                                        </button>
+                                                        <h4 class="modal-title" id="modalTitleWallet">Nuevo Cuenta de Retiro</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form id="walletForm" class="m-t" asp-action="CreateWithdrawalWallet" asp-controller="CustomerConfiguration" method="post">
+                                                            <input type="hidden" asp-for="CustomerId"/>
+                                                            <input type="hidden" id="walletId" asp-for="CustomerWithdrawalWallet.WalletId"/>
+                                                            <input type="checkbox" id="walletUsed" asp-for="CustomerWithdrawalWallet.Used" style="display: none"/>
+
+                                                            <div class="form-group">
+                                                                <input asp-for="CustomerWithdrawalWallet.WalletName" id="nameWallet" class="form-control" placeholder="Nombre de Cuenta" required/>
+                                                                <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerWithdrawalWallet.WalletName)</span>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                @Html.DropDownListFor(model => model.CustomerWithdrawalWallet.InvCurrency,
+                                                                new SelectList(Model.CustomerWithdrawalWallet.InvCurrencies, "CurrencyId", "Description"),
+                                                                "Seleccione una moneda",
+                                                                new { @class = "form-control", required = "required", id = "currencyId" })
+                                                                <span class="text-danger">
+                                                                    @Html.ValidationMessageFor(model => model.CustomerWithdrawalWallet.InvCurrency)
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <input asp-for="CustomerWithdrawalWallet.WalletAccount" id="walletAccount" class="form-control" placeholder="Cuenta" required/>
+                                                                <span class="text-danger">@Html.ValidationMessageFor(model => model.CustomerWithdrawalWallet.WalletAccount)</span>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                                                                <button type="submit" class="btn btn-primary" id="saveChangesButtonWallet">Guardar</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="ibox-content">
@@ -642,10 +686,18 @@
                                                             @wallet.WalletAccount
                                                         </td>
                                                         <td class="text-right">
-                                                            <button type="button" class="btn btn-sm btn-white edit-btn">
+                                                            <button type="button" class="btn btn-sm btn-white edit-btn"
+                                                                    data-id="@wallet.Id"
+                                                                    data-name="@wallet.WalletName"
+                                                                    data-currency="@wallet.InvCurrency"
+                                                                    data-account="@wallet.WalletAccount"
+                                                                    data-used="@wallet.Used"
+                                                                    data-toggle="modal" data-target="#myModal6">
                                                                 <i class="fa fa-pencil"></i>
                                                             </button>
-                                                            <button type="button" class="btn btn-sm btn-danger delete-btn demo4">
+                                                            <button type="button" class="btn btn-sm btn-danger delete-btn wallet-del"
+                                                                    data-customer-id="@Model.CustomerId"
+                                                                    data-wallet-id="@wallet.Id">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
                                                         </td>
@@ -1046,6 +1098,48 @@
                     });
             });
 
+            $('.wallet-del').click(function () {
+                var button = $(this);
+                // Obtener los datos del botón
+                var customerId = button.data('customer-id');
+                var walletId = button.data('wallet-id');
+
+                // Mostrar SweetAlert para confirmación
+                swal({
+                        title: "¿Está seguro?",
+                        text: "No será posible recuperar esta cuenta de retiro!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Eliminar",
+                        cancelButtonText: "Cancelar",
+                        closeOnConfirm: false,
+                        closeOnCancel: true
+                    },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            $.ajax({
+                                url: "/CustomerConfiguration/DeleteCustomerWallet/",
+                                type: "POST",
+                                data: {
+                                    customerId: customerId,
+                                    walletId: walletId
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        window.location.href = "/Crypto/CustomerConfiguration?activeTab=withdrawals";
+                                    } else {
+                                        swal("Error", response.message || "No se pudo eliminar la cuenta de retiro.", "error");
+                                    }
+                                },
+                                error: function () {
+                                    swal("Error", "No se pudo eliminar la cuenta de retiro.", "error");
+                                }
+                            });
+                        }
+                    });
+            });
+
             $("#addBeneficiary").click(function () {
                 $("#modalTitle").text("Nuevo Beneficiario");
                 $("#beneficiaryForm").attr("action", "/CustomerConfiguration/CreateBeneficiary");
@@ -1057,7 +1151,7 @@
                 $("#phone").val("");
                 $("#saveChangesButton").text("Guardar");
             });
-
+            
             // Capturar el botón de editar beneficiario
             $(document).on("click", ".edit-btn", function () {
                 var beneficiaryId = $(this).data("id");
@@ -1076,6 +1170,34 @@
                 $("#relationship").val(relationship);
                 $("#phone").val(phone);
                 $("#saveChangesButton").text("Actualizar");
+            });
+
+            $(document).on("click", ".edit-btn", function () {
+                var walletId = $(this).data("id");
+                var walletName = $(this).data("name");
+                var currencyId = $(this).data("currency");
+                var walletAccount = $(this).data("account");
+                var used = $(this).data("used");
+
+                $("#modalTitleWallet").text("Actualizar Cuenta de Retiro");
+                $("#walletForm").attr("action", "/CustomerConfiguration/CreateWithdrawalWallet");
+                $("#walletId").val(walletId);
+                $("#nameWallet").val(walletName);
+                $("#currencyId").val(currencyId);
+                $("#walletAccount").val(walletAccount);
+                $("#walletUsed").val(used);
+                $("#saveChangesButtonWallet").text("Actualizar");
+            });
+
+            $("#addWallet").click(function () {
+                $("#modalTitleWallet").text("Nueva Cuenta de Retiro");
+                $("#walletForm").attr("action", "/CustomerConfiguration/CreateWithdrawalWallet");
+                $("#walletId").val("");
+                $("#nameWallet").val("");
+                $("#currencyId").val("");
+                $("#walletAccount").val("");
+                $("#walletUsed").val("");
+                $("#saveChangesButtonWallet").text("Guardar");
             });
 
             $('.i-checks').iCheck({

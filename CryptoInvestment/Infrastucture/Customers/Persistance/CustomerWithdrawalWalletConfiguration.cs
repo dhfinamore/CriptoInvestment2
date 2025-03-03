@@ -38,6 +38,11 @@ public class CustomerWithdrawalsWalletConfiguration : IEntityTypeConfiguration<C
             .HasMaxLength(200)
             .IsUnicode(false)
             .IsRequired(false);
+        
+        builder.Property(e => e.Used)
+            .HasColumnName("used")
+            .HasColumnType("tinyint(1)")
+            .HasDefaultValue(false);
 
         builder.HasIndex(e => e.CustomerId)
             .HasDatabaseName("id_customer");

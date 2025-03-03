@@ -7,4 +7,5 @@ public class CustomerWithdrawalWallet
     public string WalletName { get; set; } = null!;
     public int? InvCurrency { get; set; }
     public string WalletAccount { get; set; } = null!;
+    public bool Used { get; set; }
 }

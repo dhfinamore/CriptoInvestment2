@@ -118,4 +118,21 @@ public class CustomerRepository : ICustomerRepository
         return await _context.CustomerWithdrawalWallets
             .Where(cw => cw.CustomerId == customerId).ToListAsync();
     }
+
+    public Task DeleteCustomerWithdrawalWallet(CustomerWithdrawalWallet wallet)
+    {
+        _context.CustomerWithdrawalWallets.Remove(wallet);
+        return Task.CompletedTask;
+    }
+
+    public async Task AddCustomerWithdrawalWalletAsync(CustomerWithdrawalWallet wallet)
+    {
+        await _context.CustomerWithdrawalWallets.AddAsync(wallet);
+    }
+
+    public Task UpdateCustomerWithdrawalWalletAsync(CustomerWithdrawalWallet wallet)
+    {
+        _context.CustomerWithdrawalWallets.Update(wallet);
+        return Task.CompletedTask;
+    }
 }

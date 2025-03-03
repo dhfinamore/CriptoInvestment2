@@ -21,4 +21,7 @@ public interface ICustomerRepository
     public Task<List<CustomerRelationship>> GetCustomerRelationships();
     public Task<List<Customer>> GetCustomerReferrals(int customerId);
     public Task<List<CustomerWithdrawalWallet>> GetCustomerWithdrawalWallets(int customerId);
+    public Task DeleteCustomerWithdrawalWallet(CustomerWithdrawalWallet wallet);
+    public Task AddCustomerWithdrawalWalletAsync(CustomerWithdrawalWallet wallet);
+    public Task UpdateCustomerWithdrawalWalletAsync(CustomerWithdrawalWallet wallet);
 }
