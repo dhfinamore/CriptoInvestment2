@@ -279,6 +279,17 @@
 
                                 <div class="table-responsive">
                                     <table class="table table-hover issue-tracker">
+                                        <thead>
+                                        <tr>
+
+                                            <th>Nombre y Apellidos</th>
+                                            <th>Teléfono</th>
+                                            <th>Relación</th>
+                                            <th>Porcentaje</th>
+                                            <th class="text-right">Acción</th>
+
+                                        </tr>
+                                        </thead>
                                         <tbody>
                                         @foreach (var beneficiary in Model.CustomerBeneficiary.CustomerBeneficiaries)
                                         {
@@ -646,6 +657,16 @@
                                     <div class="ibox-content">
                                         <div class="table-responsive">
                                             <table class="table table-hover issue-tracker">
+                                                <thead>
+                                                <tr>
+
+                                                    <th>Nombre de Cuenta de Retiro</th>
+                                                    <th>Moneda</th>
+                                                    <th>Cuenta</th>
+                                                    <th class="text-right">Acción</th>
+
+                                                </tr>
+                                                </thead>
                                                 <tbody>
                                                 @foreach (var wallet in Model.CustomerWithdrawalWallets)
                                                 {

@@ -1,17 +1,262 @@
+@model CryptoInvestment.ViewModels.Withdraw.WithdrawViewModel
+
 @{
     Layout = "~/Views/Shared/_Dashboard.cshtml";
     ViewBag.Title = "GHR I & T";
 }
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>Retiros</title>
-</head>
-<body>
 <div>
-      <h1>Retiros</h1>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <h1>Solicitar Retiros</h1>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            @foreach (var balance in Model.InvBalances)
+            {
+                <div class="col-lg-4">
+                    <div class="widget navy-bg no-padding">
+                        <div class="p-m">
+                            @{
+                                var formattedBalance = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C2}", @balance.Balance);
+                            }
+                            <h1 class="m-xs">@formattedBalance</h1>
+                            
+                            @{
+                                switch (balance.IdCurrency)
+                                {
+                                    case 1:
+                                        <div class="d-flex">
+                                            <h3>USDT TRC20</h3>
+                                            <img alt="image" class="m-l" src="~/images/1.svg" style="width: 30px">
+                                        </div>
+                                        break;
+                                    case 2:
+                                        <div class="d-flex">
+                                            <h3>USDT ERC20</h3>
+                                            <img alt="image" class="m-l" src="~/images/2.svg" style="width: 30px">
+                                        </div>
+                                        break;
+                                    case 3:
+                                        <div class="d-flex">
+                                            <h3>Ethereum</h3>
+                                            <img alt="image" class="m-l" src="~/images/3.svg" style="width: 30px">
+                                        </div>
+                                        break;
+                                    case 4:
+                                        <div class="d-flex">
+                                            <h3>Bitcoin</h3>
+                                            <img alt="image" class="m-l" src="~/images/4.svg" style="width: 30px">
+                                        </div>
+                                        break;
+                                }
+                            }
+                            <button class="btn btn-retirar float-right" 
+                                    data-balanceid="@balance.IdInvBalance" 
+                                    data-balance="@balance.Balance"
+                                    style="background-color: #18a689; color:black; font-size: 16px;">Retirar</button>
+                        </div>
+                        <div class="flot-chart">
+                            <div class="flot-chart-content flot-chart1"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <!-- Modal para retirar fondos -->
+            <div class="modal fade" id="withdrawModal" tabindex="-1" role="dialog" aria-labelledby="withdrawModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="withdrawModalLabel">Retirar Fondos</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="withdrawForm">
+                                <div class="form-group">
+                                    <label for="withdrawAmount">Cantidad a retirar</label>
+                                    <input type="number" step="0.01" class="form-control" id="withdrawAmount" name="withdrawAmount" placeholder="Ingresa la cantidad" required>
+                                </div>
+                                <!-- Select dinámico para escoger la wallet -->
+                                <div class="form-group">
+                                    <label for="walletSelect">Selecciona tu wallet</label>
+                                    <select class="form-control" id="walletSelect" name="walletSelect" required>
+                                        <option value="">-- Selecciona una wallet --</option>
+                                        @foreach (var wallet in Model.CustomerWithdrawalWallets)
+                                        {
+                                            <option value="@wallet.Id">@wallet.WalletName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <!-- Campos ocultos para el id del balance y saldo disponible -->
+                                <input type="hidden" id="balanceId" name="balanceId" />
+                                <input type="hidden" id="availableBalance" name="availableBalance" />
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary btn-sm" id="submitWithdraw">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
-</body>
-</html>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/sweetalert/dist/sweetalert.css" />
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/lib/iCheck/icheck.min.js"></script>
+        <script src="~/lib/flot/jquery.flot.js"></script>
+        <script src="~/lib/flot/jquery.flot.tooltip.min.js"></script>
+        <script src="~/lib/flot/jquery.flot.resize.js"></script>
+        <script src="~/lib/flot/jquery.flot.pie.js"></script>
+        <script src="~/lib/flot/jquery.flot.time.js"></script>
+        <script src="~/lib/flot/jquery.flot.spline.js"></script>
+        <script src="~/lib/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+        <script src="~/lib/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+        <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/iCheck/icheck.min.js"></script>
+        <script src="~/lib/flot/jquery.flot.js"></script>
+        <script src="~/lib/flot/jquery.flot.tooltip.min.js"></script>
+        <script src="~/lib/flot/jquery.flot.resize.js"></script>
+        <script src="~/lib/flot/jquery.flot.pie.js"></script>
+        <script src="~/lib/flot/jquery.flot.time.js"></script>
+        <script src="~/lib/flot/jquery.flot.spline.js"></script>
+        <script src="~/lib/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+        <script src="~/lib/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+        <script src="~/lib/sweetalert/dist/sweetalert.min.js"></script>
+    </environment>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        var d1 = [[1262304000000, 6], [1264982400000, 3057], [1267401600000, 20434], [1270080000000, 31982], [1272672000000, 26602], [1275350400000, 27826], [1277942400000, 24302], [1280620800000, 24237], [1283299200000, 21004], [1285891200000, 12144], [1288569600000, 10577], [1291161600000, 10295]];
+        var d2 = [[1262304000000, 5], [1264982400000, 200], [1267401600000, 1605], [1270080000000, 6129], [1272672000000, 11643], [1275350400000, 19055], [1277942400000, 30062], [1280620800000, 39197], [1283299200000, 37000], [1285891200000, 27000], [1288569600000, 21000], [1291161600000, 17000]];
+
+        var data1 = [
+            { label: "Data 1", data: d1, color: '#17a084' },
+            { label: "Data 2", data: d2, color: '#127e68' }
+        ];
+
+        $(".flot-chart1").each(function () {
+            $.plot($(this), data1, {
+                xaxis: {
+                    tickDecimals: 0
+                },
+                series: {
+                    lines: {
+                        show: true,
+                        fill: true,
+                        fillColor: {
+                            colors: [{
+                                opacity: 1
+                            }, {
+                                opacity: 1
+                            }]
+                        },
+                    },
+                    points: {
+                        width: 0.1,
+                        show: false
+                    },
+                },
+                grid: {
+                    show: false,
+                    borderWidth: 0
+                },
+                legend: {
+                    show: false,
+                }
+            });
+        });
+        
+            // Al hacer clic en el botón "Retirar"
+            $(".btn-retirar").on("click", function () {
+                var balanceId = $(this).data("balanceid");
+                var balance = $(this).data("balance");
+                $("#balanceId").val(balanceId);
+                $("#withdrawAmount").val("");
+                $("#availableBalance").val(balance);
+                $("#withdrawModal").modal("show");
+            });
+
+        $("#submitWithdraw").click(function (e) {
+            e.preventDefault(); // Evita el envío tradicional del formulario
+
+            var withdrawAmount = $("#withdrawAmount").val();
+            var balanceId = $("#balanceId").val();
+            var availableBalance = parseFloat($("#availableBalance").val());
+            var walletId = $("#walletSelect").val();
+
+            // Validar que se ingrese una cantidad válida
+            if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+                swal("Cantidad no válida", "Por favor, ingresa una cantidad válida.", "error");
+                return;
+            }
+
+            // Validar que se haya seleccionado una wallet
+            if (!walletId) {
+                swal("Wallet no seleccionada", "Por favor, selecciona la wallet a la que deseas retirar.", "error");
+                return;
+            }
+
+            // Validar saldo insuficiente
+            if (parseFloat(withdrawAmount) > availableBalance) {
+                swal("Saldo insuficiente", "No tienes fondos suficientes para retirar esa cantidad.", "error");
+                return;
+            }
+
+            // Confirmar la acción con SweetAlert
+            swal({
+                    title: "¿Estás seguro?",
+                    text: "Vas a retirar: " + withdrawAmount,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Retirar",
+                    cancelButtonText: "Cancelar",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        // Ocultar el modal (opcional, puede hacerse tras la respuesta)
+                        $("#withdrawModal").modal("hide");
+
+                        $.ajax({
+                            url: '/Crypto/Withdraw',  // Ajusta la URL según tu controlador
+                            type: 'POST',
+                            data: {
+                                balanceId: balanceId,
+                                amount: withdrawAmount,
+                                walletId: walletId  // Enviamos también el ID de la wallet seleccionada
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    window.location.href = "/Crypto/Withdraw";
+                                } else {
+                                    swal("Error", response.message || "No se pudo procesar el retiro.", "error");
+                                }
+                            },
+                            error: function () {
+                                swal("Error", "No se pudo procesar el retiro. Por favor, intenta de nuevo.", "error");
+                            }
+                        });
+                    }
+                }
+            );
+        });
+
+    });
+</script>
+
+}

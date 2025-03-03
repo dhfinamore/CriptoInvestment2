@@ -30,4 +30,9 @@ public class InvAssetsRepository : IInvAssetsRepository
         _context.InvBalances.Update(invBalance);
         return Task.CompletedTask;
     }
+
+    public async Task<InvBalance?> GetBalanceByIdAsync(int balanceId)
+    {
+        return await _context.InvBalances.FirstOrDefaultAsync(b => b.IdInvBalance == balanceId);
+    }
 }

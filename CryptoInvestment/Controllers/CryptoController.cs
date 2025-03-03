@@ -7,6 +7,7 @@ using CryptoInvestment.Application.CustomersPic.GetCustomerPicQuery;
 using CryptoInvestment.Application.CustomerWithdrawalWallets.Queries;
 using CryptoInvestment.Application.InvAssets.Commands;
 using CryptoInvestment.Application.InvAssets.Queries;
+using CryptoInvestment.Application.InvOperations.Command;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvActionsQuery;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvCurrenciesQuery;
 using CryptoInvestment.Application.InvOperations.Queries.ListInvOperationsQuery;
@@ -24,9 +25,12 @@ using CryptoInvestment.ViewModels.CustomerConfiguration;
 using CryptoInvestment.ViewModels.Deposit;
 using CryptoInvestment.ViewModels.Movements;
 using CryptoInvestment.ViewModels.Referrals;
+using CryptoInvestment.ViewModels.Withdraw;
+
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptoInvestment.Controllers;
 
@@ -283,9 +287,51 @@ public class CryptoController : Controller
         return RedirectToAction(createInvAssetsResult.IsError ? "Deposit" : "Dashboard", "Crypto");
     }
     
-    public IActionResult Withdraw()
+    public async Task<IActionResult> Withdraw()
     {
-        return View();
+        var model = new WithdrawViewModel();
+        
+        if (HttpContext.User.Identity!.IsAuthenticated)
+        {
+            model.CustomerId = int.Parse(HttpContext.Session.GetString("UserId")!);
+        }
+        else
+        {
+            return RedirectToAction("Login", "Authentication");
+        }
+        
+        //TODO MOVE this
+        var balance = await _context.InvBalances
+            .Where(b => b.IdCustomer == model.CustomerId)
+            .ToListAsync();
+        
+        model.InvBalances = balance;
+        
+        var query = new ListCustomerWithdrawalWalletsQuery(model.CustomerId);
+        var listCustomerWalletResult = await _mediator.Send(query);
+        
+        var wallets = listCustomerWalletResult.Match<List<CustomerWithdrawalWallet>>(
+            wallets => wallets,
+            _ => null! );
+        
+        model.CustomerWithdrawalWallets = wallets;
+        
+        return View(model);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Withdraw(int balanceId, decimal amount, int walletId)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("Dashboard", "Crypto");
+
+        var command = new CreateWithdrawCommand(balanceId, amount, walletId);
+        var createWithdrawResult = await _mediator.Send(command);
+        
+        return createWithdrawResult.Match<IActionResult>(
+            success => Json(new { success = true }),
+            errors => Json(new { success = false, message = errors.First().Description })
+        );
     }
     
     public async Task<IActionResult> Movement()

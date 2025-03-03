@@ -10,14 +10,19 @@ public class InvBalanceConfiguration: IEntityTypeConfiguration<InvBalance>
     {
         builder.ToTable("inv_balance");
 
-        builder.HasKey(e => e.IdCustomer)
+        builder.HasKey(e => e.IdInvBalance)
             .HasName("PRIMARY");
+
+        builder.Property(e => e.IdInvBalance)
+            .HasColumnName("id_inv_balance")
+            .HasColumnType("int")
+            .IsRequired()
+            .UseMySqlIdentityColumn();
 
         builder.Property(e => e.IdCustomer)
             .HasColumnName("id_customer")
             .HasColumnType("int")
-            .IsRequired()
-            .UseMySqlIdentityColumn();
+            .IsRequired();
 
         builder.Property(e => e.IdCurrency)
             .HasColumnName("id_currency")
@@ -28,7 +33,7 @@ public class InvBalanceConfiguration: IEntityTypeConfiguration<InvBalance>
             .HasColumnName("balance")
             .HasColumnType("decimal(12,2)")
             .IsRequired(false);
-            
+        
         builder.HasAnnotation("Relational:Collation", "utf8mb4_0900_ai_ci");
     }
 }

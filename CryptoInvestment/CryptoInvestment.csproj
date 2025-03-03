@@ -22,7 +22,6 @@
     
     <ItemGroup>
       <Folder Include="Application\CustomerWithdrawalWallets\Command\" />
-      <Folder Include="Application\InvOperations\Command\" />
     </ItemGroup>
 
 </Project>
